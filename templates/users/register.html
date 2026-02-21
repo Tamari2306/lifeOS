@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register — LifeOS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:#0a0a0f;color:#f1f5f9;min-height:100vh;
+         display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden;}
+    .bg-orbs{position:fixed;inset:0;pointer-events:none;}
+    .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.22;animation:drift 12s ease-in-out infinite alternate;}
+    .o1{width:450px;height:450px;background:#065f46;top:-100px;right:-80px;animation-delay:0s;}
+    .o2{width:350px;height:350px;background:#1d4ed8;bottom:0;left:-80px;animation-delay:-5s;}
+    .o3{width:300px;height:300px;background:#7c3aed;top:40%;left:30%;animation-delay:-9s;}
+    @keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-15px) scale(1.06)}100%{transform:translate(-15px,20px) scale(.95)}}
+
+    .card{position:relative;z-index:1;width:100%;max-width:380px;
+          background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+          border-radius:24px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);padding:36px 32px;}
+    .logo{text-align:center;margin-bottom:24px;}
+    .logo-icon{font-size:36px;margin-bottom:10px;}
+    .logo-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;
+                background:linear-gradient(120deg,#34d399,#38bdf8);-webkit-background-clip:text;
+                -webkit-text-fill-color:transparent;background-clip:text;}
+    .logo-sub{font-size:12px;color:#64748b;margin-top:4px;}
+    .field{margin-bottom:13px;}
+    .field label{display:block;font-size:10px;color:#64748b;font-weight:600;letter-spacing:.08em;
+                 text-transform:uppercase;margin-bottom:7px;}
+    .field input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+                 border-radius:13px;padding:13px 16px;color:#fff;font-family:'DM Sans',sans-serif;
+                 font-size:15px;outline:none;transition:border-color .2s;}
+    .field input:focus{border-color:rgba(52,211,153,.5);}
+    .field input::placeholder{color:#475569;}
+    .btn{width:100%;padding:14px;border:none;border-radius:14px;
+         background:linear-gradient(135deg,#34d399,#38bdf8);color:#0a0a12;
+         font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer;
+         transition:all .2s;box-shadow:0 4px 20px rgba(52,211,153,.25);margin-top:6px;}
+    .btn:hover{opacity:.9;transform:translateY(-1px);}
+    .error{background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.25);
+           border-radius:12px;padding:11px 14px;font-size:13px;color:#fb7185;
+           font-weight:500;margin-bottom:14px;}
+    .switch{text-align:center;margin-top:20px;font-size:13px;color:#64748b;}
+    .switch a{color:#34d399;font-weight:600;text-decoration:none;}
+    .hint{font-size:11px;color:#475569;margin-top:5px;}
+  </style>
+</head>
+<body>
+  <div class="bg-orbs">
+    <div class="orb o1"></div>
+    <div class="orb o2"></div>
+    <div class="orb o3"></div>
+  </div>
+
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon">&#x1F331;</div>
+      <div class="logo-title">Join LifeOS</div>
+      <div class="logo-sub">Start your wellness journey today</div>
+    </div>
+
+    {% if error %}
+    <div class="error">&#x26A0;&#xFE0F; {{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/accounts/register/">
+      {% csrf_token %}
+      <div class="field">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Choose a username" required autofocus>
+      </div>
+      <div class="field">
+        <label>Email (optional)</label>
+        <input type="email" name="email" placeholder="your@email.com">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" name="password1" placeholder="Create a password" required>
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <input type="password" name="password2" placeholder="Repeat password" required>
+        <div class="hint">At least 8 characters recommended</div>
+      </div>
+      <button type="submit" class="btn">&#x1F680; Create Account</button>
+    </form>
+
+    <div class="switch" style="margin-top:16px">
+      Already have an account? <a href="/accounts/login/">Sign in</a>
+    </div>
+  </div>
+</body>
+</html>

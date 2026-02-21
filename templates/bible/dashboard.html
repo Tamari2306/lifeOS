@@ -1,0 +1,463 @@
+{% extends 'base.html' %}
+{% block title %}Bible — LifeOS{% endblock %}
+{% block nav_bible %}active{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --go:#fbbf24; --go2:#f59e0b;
+    --vi:#818cf8; --te:#2dd4bf;
+    --ro:#fb7185; --gr:#34d399;
+    --surf:rgba(255,255,255,0.045);
+    --rim:rgba(255,255,255,0.09);
+    --muted:#64748b; --soft:#94a3b8; --text:#f1f5f9;
+  }
+
+  .gc { background:var(--surf); border:1px solid var(--rim); border-radius:20px;
+        backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); margin-bottom:14px; overflow:hidden; }
+  .gcp { padding:16px 18px; }
+  .sec-lbl { font-family:'Syne',sans-serif; font-size:11px; font-weight:700; color:var(--muted);
+             letter-spacing:.1em; text-transform:uppercase; margin-bottom:12px; }
+
+  /* verse card */
+  .verse-card { background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(245,158,11,.06));
+                border:1px solid rgba(251,191,36,.25); border-radius:20px; padding:20px 18px; margin-bottom:14px; }
+  .verse-text { font-size:clamp(14px,3vw,16px); color:#f1f5f9; line-height:1.7; font-style:italic; margin-bottom:8px; }
+  .verse-ref  { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--go); }
+
+  /* stats row */
+  .stats-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+  .stat-box { background:var(--surf); border:1px solid var(--rim); border-radius:14px; padding:12px 8px; text-align:center; }
+  .stat-val { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; line-height:1; }
+  .stat-key { font-size:10px; color:var(--muted); margin-top:4px; }
+
+  /* progress */
+  .prog-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+  .prog-bar { height:7px; background:rgba(255,255,255,.07); border-radius:7px; overflow:hidden; margin-bottom:12px; }
+  .prog-fill { height:100%; border-radius:7px; background:linear-gradient(90deg,var(--go),var(--go2)); transition:width .7s ease; }
+
+  /* daily target pill */
+  .target-pill { background:rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.22);
+                 border-radius:12px; padding:10px 14px; display:flex;
+                 justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .target-lbl { font-size:13px; color:var(--text); }
+  .target-val { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:var(--go); }
+
+  /* forms */
+  .fi { width:100%; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:12px;
+        padding:10px 12px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px;
+        outline:none; transition:border-color .2s; box-sizing:border-box; }
+  .fi:focus { border-color:rgba(251,191,36,.45); }
+  .fi::placeholder { color:var(--muted); }
+  .fi-sel { appearance:none; -webkit-appearance:none; background-color:#0f0f1a; }
+  .field-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.06em;
+               text-transform:uppercase; display:block; margin-bottom:5px; }
+  .fg { margin-bottom:10px; }
+  .form-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+  .form-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px; }
+  @media(max-width:380px){ .form-3 { grid-template-columns:1fr 1fr; } }
+
+  .btn { width:100%; padding:12px; border:none; border-radius:13px;
+         font-family:'Syne',sans-serif; font-size:13px; font-weight:800; cursor:pointer; transition:all .2s; }
+  .btn:hover { opacity:.9; transform:translateY(-1px); }
+  .btn-go { background:linear-gradient(135deg,var(--go),var(--go2)); color:#0a0a12; box-shadow:0 4px 16px rgba(251,191,36,.25); }
+  .btn-vi { background:linear-gradient(135deg,var(--vi),#a78bfa); color:#0a0a12; }
+  .btn-sm { padding:5px 11px; border-radius:9px; font-family:'Syne',sans-serif; font-size:11px; font-weight:700; cursor:pointer; border:none; transition:all .2s; }
+  .btn-del { background:rgba(251,113,133,.1); border:1px solid rgba(251,113,133,.2); color:var(--ro); }
+  .btn-edit { background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.2); color:var(--vi); }
+  .btn-done { background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.2); color:var(--gr); }
+
+  /* toggle add */
+  .toggle-add { display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+                padding:11px; background:rgba(251,191,36,.06); border:1px dashed rgba(251,191,36,.3);
+                border-radius:14px; color:var(--go); font-family:'Syne',sans-serif;
+                font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
+  .toggle-add:hover { background:rgba(251,191,36,.12); }
+
+  /* log rows */
+  .log-row { display:flex; align-items:center; gap:8px; padding:8px 0;
+             border-bottom:1px solid rgba(255,255,255,.05); flex-wrap:wrap; }
+  .log-row:last-child { border-bottom:none; }
+  .log-info { flex:1; min-width:120px; }
+  .log-book { font-size:13px; color:var(--text); font-weight:600; }
+  .log-note { font-size:11px; color:var(--muted); margin-top:2px; }
+  .log-date { font-size:10px; color:var(--muted); }
+
+  /* prayer */
+  .prayer-item { display:flex; align-items:flex-start; gap:8px; padding:10px 0;
+                 border-bottom:1px solid rgba(255,255,255,.05); }
+  .prayer-item:last-child { border-bottom:none; }
+  .prayer-text { flex:1; font-size:13px; color:var(--text); line-height:1.5; }
+  .prayer-date { font-size:10px; color:var(--muted); margin-top:2px; }
+
+  /* memorization */
+  .mem-item { background:rgba(255,255,255,.03); border:1px solid var(--rim); border-radius:14px;
+              padding:12px 14px; margin-bottom:8px; }
+  .mem-ref  { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--go); margin-bottom:4px; }
+  .mem-text { font-size:12px; color:var(--soft); line-height:1.6; }
+  .mem-item.mastered { border-color:rgba(52,211,153,.25); background:rgba(52,211,153,.04); }
+
+  /* plan card */
+  .plan-card { background:rgba(255,255,255,.04); border:1px solid rgba(251,191,36,.2);
+               border-radius:18px; padding:16px 18px; margin-bottom:14px; }
+
+  /* edit inline form */
+  .edit-inline { display:none; background:rgba(255,255,255,.03); border:1px solid var(--rim);
+                 border-radius:12px; padding:10px; margin-top:6px; }
+  .edit-inline.open { display:block; }
+
+  @keyframes sup { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .a1{animation:sup .38s ease both .04s} .a2{animation:sup .38s ease both .10s}
+  .a3{animation:sup .38s ease both .16s} .a4{animation:sup .38s ease both .22s}
+  .a5{animation:sup .38s ease both .28s} .a6{animation:sup .38s ease both .34s}
+  .a7{animation:sup .38s ease both .40s}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HEADER -->
+<div style="padding:8px 0 16px" class="a1">
+  <p style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px">
+    {{ today|date:"l, F j, Y" }}
+  </p>
+  <h1 style="font-family:'Syne',sans-serif;font-size:clamp(24px,6vw,30px);font-weight:800;line-height:1;
+             background:linear-gradient(115deg,var(--go),#fb923c);-webkit-background-clip:text;
+             -webkit-text-fill-color:transparent;background-clip:text">
+    Bible ✝️
+  </h1>
+</div>
+
+<!-- DAILY VERSE -->
+<div class="verse-card a1">
+  <div style="font-size:11px;font-weight:700;color:var(--go);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">
+    ✨ Verse of the Day
+  </div>
+  <div class="verse-text">"{{ verse.text }}"</div>
+  <div class="verse-ref">— {{ verse.reference }}</div>
+</div>
+
+<!-- STATS -->
+<div class="stats-3 a2">
+  <div class="stat-box">
+    <div class="stat-val" style="color:var(--go)">{{ streak }}</div>
+    <div class="stat-key">Day Streak 🔥</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-val" style="color:var(--te)">{{ chapters_this_month }}</div>
+    <div class="stat-key">Chapters This Month</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-val" style="color:var(--vi)">{{ active_prayers.count }}</div>
+    <div class="stat-key">Active Prayers 🙏</div>
+  </div>
+</div>
+
+
+<!-- ══ READING PLAN ══════════════════════════════════════════ -->
+<div class="a3">
+
+{% if plan %}
+<!-- Active plan card -->
+<div class="plan-card">
+
+  <!-- Plan header with DELETE -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px">
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text)">
+        📖 {{ plan.book_name }}
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">
+        {{ plan.total_chapters }} total chapters &bull;
+        {{ plan_chapters_read }} read &bull;
+        {{ days_remaining }} day{{ days_remaining|pluralize }} remaining
+      </div>
+    </div>
+    <form method="POST" action="/bible/delete-plan/{{ plan.id }}/"
+          onsubmit="return confirm('Delete this reading plan? Your reading logs will be kept.')">
+      {% csrf_token %}
+      <button type="submit" class="btn-sm btn-del" style="white-space:nowrap">🗑 Delete Plan</button>
+    </form>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="prog-row">
+    <span style="font-size:11px;color:var(--muted)">Progress</span>
+    <span style="font-size:12px;color:var(--go);font-weight:700">{{ plan_chapters_read }}/{{ plan.total_chapters }} ({{ plan_progress_pct }}%)</span>
+  </div>
+  <div class="prog-bar">
+    <div class="prog-fill" style="width:{{ plan_progress_pct }}%"></div>
+  </div>
+
+  <!-- Daily target -->
+  <div class="target-pill">
+    <span class="target-lbl">📅 Daily target to finish on time</span>
+    <span class="target-val">{{ chapters_per_day }} ch/day</span>
+  </div>
+
+  <!-- Log reading form -->
+  <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">
+    📝 Log Today's Reading
+  </div>
+  <form method="POST" action="/bible/log-reading/">
+    {% csrf_token %}
+    <input type="hidden" name="plan_id" value="{{ plan.id }}">
+    <div class="form-3">
+      <div>
+        <label class="field-lbl">Book</label>
+        <input class="fi" type="text" name="book" value="{{ plan.book_name }}" required>
+      </div>
+      <div>
+        <label class="field-lbl">From Chapter</label>
+        <input class="fi" type="number" name="start_chapter" value="{{ plan_chapters_read|add:1 }}" min="1">
+      </div>
+      <div>
+        <label class="field-lbl">How Many Chapters</label>
+        <input class="fi" type="number" name="chapter_count" value="{{ chapters_per_day|floatformat:0 }}" min="1" placeholder="e.g. 3">
+      </div>
+    </div>
+    <div class="fg">
+      <label class="field-lbl">Reflection Note (optional)</label>
+      <input class="fi" type="text" name="note" placeholder="What stood out to you?">
+    </div>
+    <button type="submit" class="btn btn-go">📖 Log Reading</button>
+  </form>
+
+  <!-- Today's log entries -->
+  {% if today_logs %}
+  <div style="margin-top:16px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
+    <div class="sec-lbl" style="margin-bottom:10px">✅ Today's Log — {{ today|date:"M j" }}</div>
+    {% for log in today_logs %}
+    <div class="log-row">
+      <div class="log-info">
+        <div class="log-book">{{ log.book }} &mdash; Ch. {{ log.chapter }}</div>
+        {% if log.note %}<div class="log-note">{{ log.note }}</div>{% endif %}
+      </div>
+      <!-- Edit button (toggles inline form) -->
+      <button type="button" class="btn-sm btn-edit" onclick="togEdit('edit-{{ log.id }}')">✏ Edit</button>
+      <!-- Delete -->
+      <form method="POST" action="/bible/delete-log/{{ log.id }}/" style="display:contents">
+        {% csrf_token %}
+        <button type="submit" class="btn-sm btn-del">✕</button>
+      </form>
+      <!-- Inline edit form -->
+      <div class="edit-inline" id="edit-{{ log.id }}" style="width:100%;margin-top:6px">
+        <form method="POST" action="/bible/edit-log/{{ log.id }}/" style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+          {% csrf_token %}
+          <div style="flex:0 0 90px">
+            <label class="field-lbl">Chapter</label>
+            <input class="fi" type="number" name="chapter" value="{{ log.chapter }}" min="1" style="padding:8px 10px">
+          </div>
+          <div style="flex:1;min-width:140px">
+            <label class="field-lbl">Note</label>
+            <input class="fi" type="text" name="note" value="{{ log.note }}" placeholder="Update note..." style="padding:8px 10px">
+          </div>
+          <button type="submit" class="btn-sm btn-done" style="padding:8px 14px;margin-bottom:1px">Save</button>
+          <button type="button" class="btn-sm" onclick="togEdit('edit-{{ log.id }}')"
+                  style="padding:8px 12px;margin-bottom:1px;background:rgba(255,255,255,.06);border:1px solid var(--rim);color:var(--soft)">Cancel</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Change plan link -->
+<div style="text-align:center;margin-bottom:14px">
+  <button class="toggle-add" type="button" onclick="tog('change-plan-form')" style="margin:0">
+    ✏️ Change Reading Plan
+  </button>
+  <div id="change-plan-form" style="display:none;margin-top:12px">
+    <form method="POST" action="/bible/set-plan/">
+      {% csrf_token %}
+      <div class="form-2">
+        <div>
+          <label class="field-lbl">Book Name</label>
+          <input class="fi" type="text" name="book_name" value="{{ plan.book_name }}" required>
+        </div>
+        <div>
+          <label class="field-lbl">Total Chapters</label>
+          <input class="fi" type="number" name="total_chapters" value="{{ plan.total_chapters }}" min="1" required>
+        </div>
+      </div>
+      <input type="hidden" name="month" value="{{ today.month }}">
+      <input type="hidden" name="year" value="{{ today.year }}">
+      <button type="submit" class="btn btn-go">💾 Update Plan</button>
+    </form>
+  </div>
+</div>
+
+{% else %}
+<!-- No plan — set one -->
+<div class="gc">
+  <div class="gcp">
+    <div class="sec-lbl">📖 Set Monthly Reading Plan</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">
+      Enter a book and total chapters — we'll calculate how many chapters per day you need to finish by end of month.
+    </p>
+    <form method="POST" action="/bible/set-plan/">
+      {% csrf_token %}
+      <div class="form-2">
+        <div>
+          <label class="field-lbl">Book Name</label>
+          <input class="fi" type="text" name="book_name" placeholder="e.g. John" required>
+        </div>
+        <div>
+          <label class="field-lbl">Total Chapters</label>
+          <input class="fi" type="number" name="total_chapters" placeholder="e.g. 21" min="1" required>
+        </div>
+      </div>
+      <input type="hidden" name="month" value="{{ today.month }}">
+      <input type="hidden" name="year" value="{{ today.year }}">
+      <button type="submit" class="btn btn-go">🎯 Start Reading Plan</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+</div>
+
+
+<!-- ══ RECENT READING HISTORY ══════════════════════════════ -->
+{% if recent_logs %}
+<div class="gc a4">
+  <div class="gcp">
+    <div class="sec-lbl">📚 Recent Reading</div>
+    {% for log in recent_logs %}
+    <div class="log-row">
+      <div style="width:7px;height:7px;border-radius:50%;background:var(--go);flex-shrink:0;margin-top:5px"></div>
+      <div class="log-info">
+        <div class="log-book">{{ log.book }} — Ch. {{ log.chapter }}</div>
+        {% if log.note %}<div class="log-note">{{ log.note }}</div>{% endif %}
+        <div class="log-date">{{ log.date|date:"M j, Y" }}</div>
+      </div>
+      <form method="POST" action="/bible/delete-log/{{ log.id }}/" style="display:contents">
+        {% csrf_token %}
+        <button type="submit" class="btn-sm btn-del">✕</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+
+<!-- ══ PRAYER REQUESTS ══════════════════════════════════════ -->
+<div class="gc a5">
+  <div class="gcp">
+    <div class="sec-lbl">🙏 Prayer Requests</div>
+
+    {% if active_prayers %}
+    {% for prayer in active_prayers %}
+    <div class="prayer-item">
+      <div style="width:7px;height:7px;border-radius:50%;background:var(--vi);flex-shrink:0;margin-top:5px"></div>
+      <div class="prayer-text">
+        {{ prayer.text }}
+        <div class="prayer-date">Added {{ prayer.created_at|date:"M j" }}</div>
+      </div>
+      <form method="POST" action="/bible/answer-prayer/{{ prayer.id }}/" style="display:contents">
+        {% csrf_token %}
+        <button type="submit" class="btn-sm btn-done">✔ Answered</button>
+      </form>
+      <form method="POST" action="/bible/delete-prayer/{{ prayer.id }}/" style="display:contents">
+        {% csrf_token %}
+        <button type="submit" class="btn-sm btn-del">✕</button>
+      </form>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">No active prayer requests.</div>
+    {% endif %}
+
+    {% if answered_prayers %}
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.06)">
+      <div style="font-size:10px;color:var(--gr);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">🏆 Answered</div>
+      {% for prayer in answered_prayers %}
+      <div style="font-size:12px;color:#64748b;padding:4px 0;display:flex;gap:8px;align-items:center">
+        <span style="color:var(--gr)">✔</span>{{ prayer.text|truncatechars:60 }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Add prayer -->
+    <div style="margin-top:14px">
+      <button class="toggle-add" type="button" onclick="tog('prayer-form')">➕ Add Prayer Request</button>
+      <div id="prayer-form" style="display:none;margin-top:10px">
+        <form method="POST" action="/bible/add-prayer/">
+          {% csrf_token %}
+          <div class="fg">
+            <textarea class="fi" name="text" rows="2" placeholder="Write your prayer request..." required
+                      style="resize:vertical"></textarea>
+          </div>
+          <button type="submit" class="btn btn-vi">🙏 Add Prayer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ VERSE MEMORIZATION ══════════════════════════════════ -->
+<div class="gc a6">
+  <div class="gcp">
+    <div class="sec-lbl">✝️ Verse Memorization</div>
+
+    {% if memorizations %}
+    {% for mem in memorizations %}
+    <div class="mem-item {% if mem.mastered %}mastered{% endif %}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="flex:1">
+          <div class="mem-ref">{{ mem.reference }}</div>
+          <div class="mem-text">{{ mem.text }}</div>
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0">
+          <form method="POST" action="/bible/toggle-mastered/{{ mem.id }}/" style="display:contents">
+            {% csrf_token %}
+            <button type="submit" class="btn-sm {% if mem.mastered %}btn-done{% else %}btn-edit{% endif %}">
+              {% if mem.mastered %}⭐ Mastered{% else %}📝 Practice{% endif %}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">No verses being memorized yet.</div>
+    {% endif %}
+
+    <button class="toggle-add" type="button" onclick="tog('mem-form')" style="margin-top:8px">➕ Add Verse to Memorize</button>
+    <div id="mem-form" style="display:none;margin-top:10px">
+      <form method="POST" action="/bible/add-memorization/">
+        {% csrf_token %}
+        <div class="fg">
+          <label class="field-lbl">Reference (e.g. John 3:16)</label>
+          <input class="fi" type="text" name="reference" placeholder="John 3:16" required>
+        </div>
+        <div class="fg">
+          <label class="field-lbl">Verse Text</label>
+          <textarea class="fi" name="text" rows="3" placeholder="Type the verse here..." required
+                    style="resize:vertical"></textarea>
+        </div>
+        <button type="submit" class="btn btn-go">💾 Save Verse</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function tog(id) {
+    var el = document.getElementById(id);
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  }
+  function togEdit(id) {
+    var el = document.getElementById(id);
+    el.classList.toggle('open');
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% block title %}Hydration — LifeOS{% endblock %}
+{% block nav_hydration %}active{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --blue:#38bdf8; --cyan:#22d3ee; --teal:#2dd4bf;
+    --surf:rgba(255,255,255,0.045); --rim:rgba(255,255,255,0.09);
+    --muted:#64748b; --soft:#94a3b8;
+  }
+  .hdr { display:flex; justify-content:space-between; align-items:flex-start; padding:8px 0 20px; }
+  .hdr-date { font-size:11px; color:var(--muted); font-weight:600; letter-spacing:.08em; text-transform:uppercase; margin-bottom:5px; }
+  .hdr-title { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; line-height:1;
+               background:linear-gradient(115deg,#38bdf8,#2dd4bf); -webkit-background-clip:text;
+               -webkit-text-fill-color:transparent; background-clip:text; }
+  .streak-pill { display:flex; flex-direction:column; align-items:center;
+                 background:linear-gradient(135deg,rgba(56,189,248,.13),rgba(45,212,191,.13));
+                 border:1px solid rgba(56,189,248,.28); border-radius:16px; padding:10px 18px; }
+  .sp-ico { font-size:20px; } .sp-num { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:var(--blue); }
+  .sp-lbl { font-size:9px; color:var(--soft); font-weight:600; letter-spacing:.06em; text-transform:uppercase; }
+
+  .gc { background:var(--surf); border:1px solid var(--rim); border-radius:22px;
+        backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); overflow:hidden; margin-bottom:14px; }
+  .gcp { padding:18px 20px; }
+  .sec-lbl { font-family:'Syne',sans-serif; font-size:11px; font-weight:700; color:var(--muted);
+             letter-spacing:.1em; text-transform:uppercase; margin-bottom:14px; }
+
+  /* RING */
+  .ring-section { display:flex; flex-direction:column; align-items:center; padding:24px 20px 20px; }
+  .ring-outer { position:relative; width:180px; height:180px; margin-bottom:20px; }
+  .ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .ring-ml { font-family:'Syne',sans-serif; font-size:36px; font-weight:800; line-height:1;
+             background:linear-gradient(135deg,#38bdf8,#2dd4bf); -webkit-background-clip:text;
+             -webkit-text-fill-color:transparent; background-clip:text; }
+  .ring-goal { font-size:11px; color:var(--muted); margin-top:4px; }
+  .ring-pct { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--blue); margin-top:2px; }
+  .rtrk { stroke:rgba(255,255,255,.07); }
+  .rprg { stroke:url(#wGrad); stroke-linecap:round;
+          transition:stroke-dashoffset .8s cubic-bezier(.34,1.56,.64,1);
+          transform:rotate(-90deg); transform-origin:50% 50%; }
+  .ring-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; width:100%; }
+  .rst { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:14px; padding:10px 8px; text-align:center; }
+  .rst-val { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:var(--blue); }
+  .rst-key { font-size:10px; color:var(--muted); margin-top:3px; }
+
+  /* GOAL SETTER */
+  .goal-setter { display:flex; gap:10px; align-items:center; }
+  .fi { flex:1; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:14px;
+        padding:11px 14px; color:#fff; font-family:'DM Sans',sans-serif; font-size:14px; outline:none;
+        transition:border-color .2s; }
+  .fi:focus { border-color:rgba(56,189,248,.5); }
+  .fi::placeholder { color:var(--muted); }
+
+  /* QUICK ADD */
+  .quick-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .q-btn { display:flex; flex-direction:column; align-items:center; gap:4px; padding:14px 6px;
+           background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.2); border-radius:16px;
+           color:var(--blue); font-family:'Syne',sans-serif; font-size:12px; font-weight:700;
+           cursor:pointer; transition:all .2s; -webkit-tap-highlight-color:transparent; }
+  .q-btn:hover { background:rgba(56,189,248,.18); transform:translateY(-2px); }
+  .q-btn:active { transform:scale(.93); }
+  .q-ico { font-size:20px; }
+  .custom-row { display:flex; gap:10px; align-items:center; margin-top:12px; }
+  .water-input { flex:1; background:rgba(255,255,255,.05); border:1px solid var(--rim);
+                 border-radius:14px; padding:12px 16px; color:#fff; font-family:'DM Sans',sans-serif;
+                 font-size:15px; outline:none; transition:border-color .2s; }
+  .water-input:focus { border-color:rgba(56,189,248,.5); }
+  .water-input::placeholder { color:var(--muted); }
+  .add-btn { padding:12px 20px; border:none; border-radius:14px;
+             background:linear-gradient(135deg,#38bdf8,#2dd4bf); color:#0a0a12;
+             font-family:'Syne',sans-serif; font-size:13px; font-weight:800;
+             cursor:pointer; transition:all .2s; white-space:nowrap;
+             box-shadow:0 4px 16px rgba(56,189,248,.25); }
+  .add-btn:hover { opacity:.9; transform:translateY(-1px); }
+
+  /* LOG LIST */
+  .log-item { display:flex; justify-content:space-between; align-items:center;
+              padding:10px 0; border-bottom:1px solid rgba(255,255,255,.05); }
+  .log-item:last-child { border-bottom:none; }
+  .log-left { display:flex; align-items:center; gap:10px; }
+  .log-dot { width:8px; height:8px; border-radius:50%; background:linear-gradient(135deg,#38bdf8,#2dd4bf); flex-shrink:0; }
+  .log-ml { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; color:#e2e8f0; }
+  .log-time { font-size:11px; color:var(--muted); }
+  .log-del { background:rgba(251,113,133,.1); border:1px solid rgba(251,113,133,.2); border-radius:8px;
+             padding:4px 10px; font-size:11px; color:#fb7185; cursor:pointer; transition:all .2s;
+             font-family:'Syne',sans-serif; font-weight:600; }
+  .log-del:hover { background:rgba(251,113,133,.2); }
+
+  /* TOGGLES */
+  .toggle-switch { position:relative; width:44px; height:24px; }
+  .toggle-switch input { opacity:0; width:0; height:0; }
+  .slider { position:absolute; inset:0; background:rgba(255,255,255,.12); border-radius:24px; cursor:pointer; transition:.3s; }
+  .slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; top:3px;
+                   background:#fff; border-radius:50%; transition:.3s; }
+  input:checked + .slider { background:linear-gradient(135deg,#38bdf8,#2dd4bf); }
+  input:checked + .slider:before { transform:translateX(20px); }
+
+  .chart-h { max-height:150px; }
+  @keyframes sup { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  .a1{animation:sup .4s ease both .04s} .a2{animation:sup .4s ease both .10s}
+  .a3{animation:sup .4s ease both .16s} .a4{animation:sup .4s ease both .22s}
+  .a5{animation:sup .4s ease both .28s} .a6{animation:sup .4s ease both .34s}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HEADER -->
+<div class="hdr a1">
+  <div>
+    <p class="hdr-date">{{ today|date:"l, M j" }}</p>
+    <h1 class="hdr-title">Stay Hydrated &#x1F4A7;</h1>
+    <p style="font-size:12px;color:var(--muted);margin-top:4px">Goal: {{ daily_goal }}ml per day</p>
+  </div>
+  <div class="streak-pill">
+    <span class="sp-ico">&#x1F30A;</span>
+    <span class="sp-num">{{ streak }}</span>
+    <span class="sp-lbl">streak</span>
+  </div>
+</div>
+
+<!-- PROGRESS RING -->
+<div class="gc a2">
+  <div class="ring-section">
+    <div class="ring-outer">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <defs>
+          <linearGradient id="wGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#38bdf8"/>
+            <stop offset="100%" style="stop-color:#2dd4bf"/>
+          </linearGradient>
+        </defs>
+        <circle class="rtrk" cx="90" cy="90" r="78" fill="none" stroke-width="10"/>
+        <circle class="rprg" cx="90" cy="90" r="78" fill="none" stroke-width="10"
+                stroke-dasharray="490.09" stroke-dashoffset="{{ ring_offset }}"/>
+      </svg>
+      <div class="ring-center">
+        <div class="ring-ml">{{ consumed }}ml</div>
+        <div class="ring-goal">of {{ daily_goal }}ml</div>
+        <div class="ring-pct">{{ pct }}%</div>
+      </div>
+    </div>
+    <div class="ring-stats">
+      <div class="rst"><div class="rst-val">{{ consumed }}</div><div class="rst-key">Consumed</div></div>
+      <div class="rst"><div class="rst-val" style="color:#34d399">{{ remaining }}</div><div class="rst-key">Remaining</div></div>
+      <div class="rst"><div class="rst-val" style="color:#fbbf24">{{ log_count }}</div><div class="rst-key">Entries</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SET DAILY GOAL -->
+<div class="gc a2">
+  <div class="gcp">
+    <div class="sec-lbl">&#x1F3AF; Set Daily Water Goal</div>
+    <form method="POST" action="/hydration/set-goal/" class="goal-setter">
+      {% csrf_token %}
+      <input class="fi" type="number" name="daily_goal" placeholder="e.g. 2500 ml"
+             value="{{ daily_goal }}" min="500" max="6000" step="100">
+      <button type="submit" class="add-btn" style="padding:11px 18px">Save Goal</button>
+    </form>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px">Recommended: 2000–3000ml daily</p>
+  </div>
+</div>
+
+<!-- QUICK ADD -->
+<div class="gc a3">
+  <div class="gcp">
+    <div class="sec-lbl">Quick Add</div>
+    <div class="quick-grid">
+      <form method="POST" action="/hydration/add/" style="display:contents">
+        {% csrf_token %}<input type="hidden" name="amount" value="150">
+        <button type="submit" class="q-btn"><span class="q-ico">&#x2615;</span>150ml</button>
+      </form>
+      <form method="POST" action="/hydration/add/" style="display:contents">
+        {% csrf_token %}<input type="hidden" name="amount" value="250">
+        <button type="submit" class="q-btn"><span class="q-ico">&#x1F964;</span>250ml</button>
+      </form>
+      <form method="POST" action="/hydration/add/" style="display:contents">
+        {% csrf_token %}<input type="hidden" name="amount" value="500">
+        <button type="submit" class="q-btn"><span class="q-ico">&#x1F9CA;</span>500ml</button>
+      </form>
+      <form method="POST" action="/hydration/add/" style="display:contents">
+        {% csrf_token %}<input type="hidden" name="amount" value="1000">
+        <button type="submit" class="q-btn"><span class="q-ico">&#x1F4A7;</span>1L</button>
+      </form>
+    </div>
+    <form method="POST" action="/hydration/add/" class="custom-row">
+      {% csrf_token %}
+      <input class="water-input" type="number" name="amount" placeholder="Custom ml..." min="1" max="3000">
+      <button type="submit" class="add-btn">+ Add</button>
+    </form>
+  </div>
+</div>
+
+<!-- TODAY'S LOG -->
+<div class="gc a4">
+  <div class="gcp">
+    <div class="sec-lbl">Today's Log</div>
+    {% for log in today_logs %}
+    <div class="log-item">
+      <div class="log-left">
+        <div class="log-dot"></div>
+        <div>
+          <div class="log-ml">+{{ log.amount }}ml</div>
+          <div class="log-time">{{ log.logged_at|time:"H:i" }}</div>
+        </div>
+      </div>
+      <form method="POST" action="/hydration/delete/{{ log.id }}/">
+        {% csrf_token %}
+        <button type="submit" class="log-del">Remove</button>
+      </form>
+    </div>
+    {% empty %}
+    <div style="text-align:center;padding:20px 0;color:var(--muted);font-size:13px">
+      No entries yet today. Start drinking! &#x1F4A7;
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- WEEKLY CHART -->
+<div class="gc a5">
+  <div class="gcp">
+    <div class="sec-lbl">7-Day Trend</div>
+    <div class="chart-h"><canvas id="hChart"></canvas></div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var canvas = document.getElementById('hChart');
+    if (!canvas) { return; }
+    new Chart(canvas, {
+      type:'bar',
+      data:{
+        labels:{{ chart_labels|safe }},
+        datasets:[
+          { label:'Consumed (ml)', data:{{ chart_data|safe }},
+            backgroundColor:function(ctx){
+              var chart=ctx.chart,area=chart.chartArea,c=chart.ctx;
+              if(!area){return 'rgba(56,189,248,0.5)';}
+              var g=c.createLinearGradient(0,area.bottom,0,area.top);
+              g.addColorStop(0,'rgba(45,212,191,0.5)');g.addColorStop(1,'rgba(56,189,248,0.9)');return g;
+            }, borderRadius:8, borderSkipped:false },
+          { label:'Goal', data:Array(7).fill({{ daily_goal }}),
+            type:'line', borderColor:'rgba(56,189,248,0.35)', borderWidth:2,
+            borderDash:[6,4], pointRadius:0, fill:false }
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(10,10,18,0.92)',
+          borderColor:'rgba(56,189,248,0.3)',borderWidth:1,titleColor:'#38bdf8',bodyColor:'#94a3b8',
+          titleFont:{family:'Syne',weight:'700'},bodyFont:{family:'DM Sans'},padding:10}},
+        scales:{
+          x:{grid:{display:false},border:{display:false},ticks:{color:'#64748b',font:{family:'Syne',weight:'700',size:11}}},
+          y:{grid:{color:'rgba(255,255,255,0.05)'},border:{display:false},ticks:{color:'#64748b',font:{family:'DM Sans',size:10},maxTicksLimit:5}}
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

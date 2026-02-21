@@ -1,0 +1,553 @@
+{% extends 'base.html' %}
+{% block title %}Fitness — LifeOS{% endblock %}
+{% block nav_fitness %}active{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* === TOKENS === */
+  .fp { --teal:#2dd4bf; --violet:#818cf8; --rose:#fb7185; --amber:#fbbf24; --emerald:#34d399;
+        --surf:rgba(255,255,255,0.045); --rim:rgba(255,255,255,0.09); --rim2:rgba(255,255,255,0.16);
+        --muted:#64748b; --soft:#94a3b8; }
+
+  /* === HEADER === */
+  .hdr { display:flex; justify-content:space-between; align-items:flex-start; padding:8px 0 20px; }
+  .hdr-left-date { font-size:11px; color:var(--muted); font-weight:600; letter-spacing:.08em; text-transform:uppercase; margin-bottom:5px; }
+  .hdr-title { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; line-height:1;
+               background:linear-gradient(115deg,#2dd4bf,#818cf8); -webkit-background-clip:text;
+               -webkit-text-fill-color:transparent; background-clip:text; }
+  .hdr-sub { font-size:12px; color:var(--muted); margin-top:4px; }
+  .streak-pill { display:flex; flex-direction:column; align-items:center; background:linear-gradient(135deg,rgba(251,191,36,.13),rgba(251,113,133,.13));
+                 border:1px solid rgba(251,191,36,.28); border-radius:16px; padding:10px 18px; }
+  .str-fire { font-size:20px; line-height:1; }
+  .str-num { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:var(--amber); line-height:1.1; }
+  .str-lbl { font-size:9px; color:var(--soft); font-weight:600; letter-spacing:.06em; text-transform:uppercase; }
+
+  /* === GLASS CARD === */
+  .gc { background:var(--surf); border:1px solid var(--rim); border-radius:22px;
+        backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); overflow:hidden; margin-bottom:14px; }
+  .gcp { padding:18px 20px; }
+  .sec-lbl { font-family:'Syne',sans-serif; font-size:11px; font-weight:700; color:var(--muted);
+             letter-spacing:.1em; text-transform:uppercase; margin-bottom:14px; }
+
+  /* === MOTIVATIONAL QUOTE === */
+  .quote-card { padding:16px 20px; border-left:3px solid var(--teal); }
+  .quote-text { font-family:'Syne',sans-serif; font-size:14px; font-weight:600; color:#e2e8f0; line-height:1.5; }
+  .quote-author { font-size:11px; color:var(--muted); margin-top:6px; }
+
+  /* === PROGRESS === */
+  .prog-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .prog-frac { font-size:12px; color:var(--muted); }
+  .prog-track { height:7px; background:rgba(255,255,255,.07); border-radius:7px; overflow:hidden; margin-bottom:16px; }
+  .prog-fill { height:100%; border-radius:7px; background:linear-gradient(90deg,#2dd4bf,#818cf8);
+               box-shadow:0 0 14px rgba(45,212,191,.4); transition:width .9s cubic-bezier(.34,1.56,.64,1); }
+  .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .sbox { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:14px; padding:12px 8px; text-align:center; }
+  .sval { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; line-height:1; }
+  .skey { font-size:10px; color:var(--muted); margin-top:4px; font-weight:500; }
+  .ct { color:var(--teal); } .cv { color:var(--violet); } .ca { color:var(--amber); }
+
+  /* === WORKOUT TIMER === */
+  .timer-wrap { display:flex; justify-content:center; align-items:center; gap:28px; margin-bottom:20px; }
+  .ring-wrap { position:relative; width:120px; height:120px; flex-shrink:0; }
+  .ring-lbl { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .timer-dig { font-family:'Syne',sans-serif; font-size:30px; font-weight:800; line-height:1;
+               background:linear-gradient(135deg,#2dd4bf,#818cf8); -webkit-background-clip:text;
+               -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-1px; }
+  .timer-sub { font-size:9px; color:var(--muted); font-weight:600; letter-spacing:.07em; text-transform:uppercase; margin-top:3px; }
+  .ring-track { stroke:rgba(255,255,255,.08); }
+  .ring-prog { stroke:url(#tGrad); stroke-linecap:round; transition:stroke-dashoffset 1s linear;
+               transform:rotate(-90deg); transform-origin:50% 50%; }
+  .rest-panel { text-align:center; flex:1; }
+  .rest-ttl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.08em; text-transform:uppercase; margin-bottom:6px; }
+  .rest-dig { font-family:'Syne',sans-serif; font-size:32px; font-weight:800; color:var(--amber); line-height:1; }
+  .rest-hint { font-size:10px; color:var(--muted); margin-top:4px; min-height:14px; }
+  .rest-btns { display:flex; gap:5px; margin-top:8px; justify-content:center; }
+  .rb { padding:5px 11px; font-size:11px; }
+  .t-ctrls { display:flex; gap:10px; }
+  .t-main { flex:2; } .t-rst { flex:1; }
+
+  /* === EXERCISE TABS === */
+  .tab-row { display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:14px; scrollbar-width:none; }
+  .tab-row::-webkit-scrollbar { display:none; }
+  .tab-btn { flex-shrink:0; padding:7px 14px; border-radius:20px; border:1px solid var(--rim);
+             background:rgba(255,255,255,.04); color:var(--muted); font-family:'Syne',sans-serif;
+             font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; white-space:nowrap; }
+  .tab-btn.on { background:linear-gradient(135deg,rgba(45,212,191,.2),rgba(129,140,248,.2));
+                border-color:rgba(45,212,191,.4); color:var(--teal); }
+
+  /* === EXERCISE CARD === */
+  .ex-card { background:var(--surf); border:1px solid var(--rim); border-radius:20px;
+             backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); overflow:hidden;
+             margin-bottom:12px; transition:border-color .25s,box-shadow .25s; }
+  .ex-card:hover { border-color:var(--rim2); }
+  .ex-card.ex-done { border-color:rgba(45,212,191,.38); box-shadow:0 0 22px rgba(45,212,191,.08); }
+  .ex-top { display:flex; justify-content:space-between; align-items:flex-start; padding:14px 14px 8px; }
+  .ex-left { flex:1; }
+  .ex-name-row { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+  .ex-name { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; }
+  .ex-meta { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+  .ex-info { font-size:11px; color:var(--muted); }
+  .chip { display:inline-block; padding:2px 9px; border-radius:20px; font-size:10px; font-weight:700;
+          font-family:'Syne',sans-serif; letter-spacing:.05em; text-transform:uppercase; }
+  .ch-core   { background:rgba(45,212,191,.13);  color:var(--teal);   border:1px solid rgba(45,212,191,.22); }
+  .ch-lower  { background:rgba(251,113,133,.13); color:var(--rose);   border:1px solid rgba(251,113,133,.22); }
+  .ch-upper  { background:rgba(129,140,248,.13); color:var(--violet); border:1px solid rgba(129,140,248,.22); }
+  .ch-cardio { background:rgba(251,191,36,.13);  color:var(--amber);  border:1px solid rgba(251,191,36,.22); }
+  .ch-recov  { background:rgba(52,211,153,.13);  color:var(--emerald);border:1px solid rgba(52,211,153,.22); }
+
+  .dots-row { display:flex; gap:5px; align-items:center; padding:0 14px 12px; }
+  .dlbl { font-size:10px; color:var(--muted); font-weight:600; margin-right:2px; }
+  .sdot { width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,.12);
+          border:1px solid rgba(255,255,255,.18); transition:all .3s; }
+  .sdot.lit { background:linear-gradient(135deg,#2dd4bf,#818cf8); border-color:transparent; box-shadow:0 0 7px rgba(45,212,191,.5); }
+
+  .ex-tog { background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:10px;
+            padding:5px 12px; font-size:11px; font-weight:700; font-family:'Syne',sans-serif;
+            color:var(--soft); cursor:pointer; transition:all .2s; flex-shrink:0; margin-left:8px; }
+  .ex-tog:hover { background:rgba(255,255,255,.1); color:#fff; }
+
+  .rep-panel { border-top:1px solid var(--rim); padding:14px 16px; }
+  .rep-row { display:flex; align-items:center; justify-content:center; gap:22px; margin-bottom:14px; }
+  .rbtn { width:50px; height:50px; border-radius:50%; border:none; cursor:pointer; font-size:22px;
+          font-weight:800; display:flex; align-items:center; justify-content:center;
+          transition:transform .12s; -webkit-tap-highlight-color:transparent; }
+  .rbtn:active { transform:scale(.82); }
+  .rm { background:rgba(251,113,133,.13); color:var(--rose); border:1px solid rgba(251,113,133,.22); }
+  .rp { background:linear-gradient(135deg,#2dd4bf,#818cf8); color:#0a0a12; box-shadow:0 4px 16px rgba(45,212,191,.28); }
+  .rnum { font-family:'Syne',sans-serif; font-size:38px; font-weight:800; color:#fff; min-width:54px; text-align:center; line-height:1; }
+  .rlbl { font-size:10px; color:var(--muted); text-align:center; margin-top:3px; }
+
+  .btn-main { display:block; width:100%; padding:13px; border:none; border-radius:14px;
+              background:linear-gradient(135deg,#2dd4bf,#818cf8); color:#0a0a12;
+              font-family:'Syne',sans-serif; font-size:13px; font-weight:800; cursor:pointer;
+              transition:opacity .2s,transform .15s; box-shadow:0 4px 18px rgba(45,212,191,.25); text-align:center; }
+  .btn-main:hover { opacity:.9; transform:translateY(-1px); }
+  .btn-main:active { transform:translateY(0); }
+  .btn-main:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+  .btn-sec { display:block; width:100%; padding:12px; border:1px solid var(--rim2); border-radius:14px;
+             background:rgba(255,255,255,.04); color:var(--soft); font-family:'Syne',sans-serif;
+             font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; text-align:center; margin-top:9px; }
+  .btn-sec:hover { background:rgba(255,255,255,.09); color:#fff; }
+  .tally { margin-top:11px; text-align:center; font-size:12px; color:var(--muted); }
+  .tally-n { color:var(--teal); font-weight:700; }
+
+  /* === MEAL PLAN === */
+  .meal-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .meal-item { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+               border-radius:14px; padding:12px; }
+  .meal-icon { font-size:20px; margin-bottom:6px; }
+  .meal-name { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; margin-bottom:3px; }
+  .meal-cal { font-size:10px; color:var(--teal); font-weight:600; }
+  .meal-note { font-size:10px; color:var(--muted); margin-top:2px; line-height:1.4; }
+
+  /* === EMPTY === */
+  .empty-box { padding:32px; text-align:center; }
+  .empty-ico { font-size:38px; margin-bottom:10px; }
+  .empty-ttl { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:5px; }
+  .empty-sub { font-size:12px; color:var(--muted); }
+
+  /* === CHART === */
+  .chart-h { max-height:150px; position:relative; }
+
+  /* === QA === */
+  .qa-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+            padding:14px; background:rgba(255,255,255,.03); border:1px dashed rgba(255,255,255,.13);
+            border-radius:18px; color:var(--muted); font-family:'Syne',sans-serif;
+            font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
+  .qa-btn:hover { background:rgba(45,212,191,.06); border-color:var(--teal); color:var(--teal); }
+  .qa-area { margin-top:10px; }
+
+  /* === ANIMS === */
+  @keyframes sup { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  .a1{animation:sup .4s ease both .04s} .a2{animation:sup .4s ease both .10s}
+  .a3{animation:sup .4s ease both .16s} .a4{animation:sup .4s ease both .22s}
+  .a5{animation:sup .4s ease both .28s} .a6{animation:sup .4s ease both .34s}
+  .a7{animation:sup .4s ease both .40s}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fp">
+
+  <!-- HEADER -->
+  <div class="hdr a1">
+    <div>
+      <p class="hdr-left-date">{{ today|date:"l, M j" }}</p>
+      <h1 class="hdr-title">Let's Train &#x1F4AA;</h1>
+      <p class="hdr-sub">{{ workout_name }} &mdash; {{ total_exercises }} exercises</p>
+    </div>
+    <div class="streak-pill">
+      <span class="str-fire">&#x1F525;</span>
+      <span class="str-num">{{ streak }}</span>
+      <span class="str-lbl">streak</span>
+    </div>
+  </div>
+
+  <!-- MOTIVATIONAL QUOTE -->
+  <div class="gc quote-card a1">
+    <div class="quote-text">&#8220;{{ quote }}&#8221;</div>
+    <div class="quote-author">&#8212; Daily Motivation</div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="gc a2">
+    <div class="gcp">
+      <div class="prog-top">
+        <span class="sec-lbl" style="margin-bottom:0">Today's Progress</span>
+        <span class="prog-frac">{{ completed_count }}/{{ total_exercises }}</span>
+      </div>
+      <div class="prog-track" style="margin-bottom:16px">
+        <div class="prog-fill" style="width:{{ progress_pct }}%"></div>
+      </div>
+      <div class="stats-row">
+        <div class="sbox"><div class="sval ct">{{ total_reps }}</div><div class="skey">Reps</div></div>
+        <div class="sbox"><div class="sval cv">{{ total_sets }}</div><div class="skey">Sets</div></div>
+        <div class="sbox"><div class="sval ca">{{ workout_minutes }}m</div><div class="skey">Est. Time</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKOUT TIMER -->
+  <div class="gc a3" x-data="wTimer()">
+    <div class="gcp">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <span class="sec-lbl" style="margin-bottom:0">Workout Timer</span>
+        <span style="font-size:11px;color:var(--muted);font-family:'Syne',sans-serif;font-weight:600"
+              x-text="isRunning ? '&#x23F3; Running' : '&#x23F8; Paused'"></span>
+      </div>
+
+      <div class="timer-wrap">
+        <!-- SVG Ring -->
+        <div class="ring-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <defs>
+              <linearGradient id="tGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#2dd4bf"/>
+                <stop offset="100%" style="stop-color:#818cf8"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-track" cx="60" cy="60" r="50" fill="none" stroke-width="7"/>
+            <circle class="ring-prog" cx="60" cy="60" r="50" fill="none" stroke-width="7"
+                    :stroke-dasharray="314.16" :stroke-dashoffset="ringOff"/>
+          </svg>
+          <div class="ring-lbl">
+            <div class="timer-dig" x-text="dispTime"></div>
+            <div class="timer-sub">elapsed</div>
+          </div>
+        </div>
+
+        <!-- Rest Timer -->
+        <div class="rest-panel">
+          <div class="rest-ttl">Rest Timer</div>
+          <div class="rest-dig" x-text="restDisp"></div>
+          <div class="rest-hint" x-text="restOn ? '&#x1F525; Resting...' : ''"></div>
+          <div class="rest-btns">
+            <button class="ex-tog rb" x-on:click="doRest(30)">30s</button>
+            <button class="ex-tog rb" x-on:click="doRest(60)">60s</button>
+            <button class="ex-tog rb" x-on:click="doRest(90)">90s</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="t-ctrls">
+        <button class="btn-main t-main" x-on:click="toggle">
+          <span x-text="isRunning ? '&#x23F8; Pause' : '&#x25B6; Start Workout'"></span>
+        </button>
+        <button class="btn-sec t-rst" style="margin-top:0" x-on:click="reset">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXERCISE LIST -->
+  <div class="a4">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span class="sec-lbl" style="margin-bottom:0">Exercises</span>
+      <span style="font-size:11px;color:var(--muted)">{{ completed_count }} done</span>
+    </div>
+
+    <!-- Category filter tabs -->
+    <div class="tab-row" x-data="tabFilter()" id="tab-filter">
+      <button class="tab-btn on" x-on:click="filter('all')" id="tab-all">All</button>
+      <button class="tab-btn" x-on:click="filter('core')" id="tab-core">&#x1F4A2; Core</button>
+      <button class="tab-btn" x-on:click="filter('lower')" id="tab-lower">&#x1F351; Lower</button>
+      <button class="tab-btn" x-on:click="filter('upper')" id="tab-upper">&#x1F4AA; Upper</button>
+      <button class="tab-btn" x-on:click="filter('cardio')" id="tab-cardio">&#x1F3C3; Cardio</button>
+      <button class="tab-btn" x-on:click="filter('recovery')" id="tab-recovery">&#x1F9D8; Recovery</button>
+    </div>
+
+    {% for ex in exercises %}
+    <div class="ex-card {% if ex.is_done %}ex-done{% endif %}"
+         id="exercise-{{ ex.id }}"
+         data-cat="{{ ex.category|lower }}"
+         x-data="rCtr({{ ex.default_reps }}, {{ ex.sets }}, {{ ex.id }})">
+
+      <div class="ex-top">
+        <div class="ex-left">
+          <div class="ex-name-row">
+            <span class="ex-name">{{ ex.name }}</span>
+            {% if ex.is_done %}<span style="color:var(--teal);font-size:14px">&#10003;</span>{% endif %}
+          </div>
+          <div class="ex-meta">
+            <span class="chip ch-{{ ex.category|lower }}">{{ ex.category }}</span>
+            <span class="ex-info">{{ ex.sets }}&#x2715;{{ ex.default_reps }} reps</span>
+            {% if ex.description %}<span class="ex-info">&#x2022; {{ ex.description }}</span>{% endif %}
+          </div>
+        </div>
+        <button class="ex-tog" x-on:click="expanded = !expanded">
+          <span x-show="!expanded">&#9660; Track</span>
+          <span x-show="expanded">&#9650; Hide</span>
+        </button>
+      </div>
+
+      <!-- Set dots -->
+      <div class="dots-row">
+        <span class="dlbl">Sets:</span>
+        <template x-for="i in totalSets" :key="i">
+          <div class="sdot" x-bind:class="i <= doneSets ? 'lit' : ''"></div>
+        </template>
+      </div>
+
+      <!-- Rep panel -->
+      <div class="rep-panel"
+           x-show="expanded"
+           x-transition:enter="transition ease-out duration-150"
+           x-transition:enter-start="opacity-0"
+           x-transition:enter-end="opacity-100">
+
+        <div class="rep-row">
+          <button class="rbtn rm" x-on:click="dec">&#8722;</button>
+          <div>
+            <div class="rnum" x-text="reps"></div>
+            <div class="rlbl">reps</div>
+          </div>
+          <button class="rbtn rp" x-on:click="inc">&#43;</button>
+        </div>
+
+        <!-- Log Set -->
+        <button class="btn-main" x-on:click="logSet" x-bind:disabled="doneSets >= totalSets">
+          <span x-show="doneSets < totalSets">
+            Log Set &#160;<span x-text="doneSets + 1"></span>&#160;/&#160;<span x-text="totalSets"></span>
+          </span>
+          <span x-show="doneSets >= totalSets">&#10003; All Sets Done!</span>
+        </button>
+
+        <!-- Save via HTMX -->
+        <div x-show="doneSets >= totalSets && !saved">
+          <button class="btn-sec"
+                  hx-post="/fitness/log-exercise/"
+                  hx-target="#exercise-{{ ex.id }}"
+                  hx-swap="outerHTML"
+                  hx-vals='{"exercise_id":"{{ ex.id }}","reps":"{{ ex.default_reps }}","sets":"{{ ex.sets }}"}'
+                  x-on:click="saved = true">
+            &#10003; Save &amp; Mark Complete
+          </button>
+        </div>
+
+        <!-- Tally -->
+        <div class="tally" x-show="doneSets > 0">
+          <span class="tally-n" x-text="doneSets * reps"></span> total reps done this session
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="gc">
+      <div class="empty-box">
+        <div class="empty-ico">&#127947;</div>
+        <h3 class="empty-ttl">No exercises found</h3>
+        <p class="empty-sub">Run <code>python manage.py seed_exercises</code> to load your workout plan.</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- WEEKLY CHART -->
+  <div class="gc a5">
+    <div class="gcp">
+      <div class="sec-lbl">Weekly Volume</div>
+      <div class="chart-h"><canvas id="wChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- MEAL PLAN -->
+  <div class="gc a6">
+    <div class="gcp">
+      <div class="sec-lbl">&#x1F957; Work Lunch Ideas</div>
+      <div class="meal-grid">
+        <div class="meal-item">
+          <div class="meal-icon">&#x1F357;</div>
+          <div class="meal-name">Chicken &amp; Avo Salad</div>
+          <div class="meal-cal">~420 kcal &bull; 38g protein</div>
+          <div class="meal-note">Grilled chicken, avocado, cucumber, olive oil</div>
+        </div>
+        <div class="meal-item">
+          <div class="meal-icon">&#x1F95A;</div>
+          <div class="meal-name">Eggs &amp; Sweet Potato</div>
+          <div class="meal-cal">~380 kcal &bull; 24g protein</div>
+          <div class="meal-note">3 boiled eggs, roasted sweet potato, greens</div>
+        </div>
+        <div class="meal-item">
+          <div class="meal-icon">&#x1F960;</div>
+          <div class="meal-name">Tuna Wrap</div>
+          <div class="meal-cal">~360 kcal &bull; 30g protein</div>
+          <div class="meal-note">Whole-wheat wrap, tuna, lettuce, tomato</div>
+        </div>
+        <div class="meal-item">
+          <div class="meal-icon">&#x1F963;</div>
+          <div class="meal-name">Yogurt &amp; Nuts</div>
+          <div class="meal-cal">~280 kcal &bull; 18g protein</div>
+          <div class="meal-note">Greek yogurt, mixed nuts, berries</div>
+        </div>
+        <div class="meal-item">
+          <div class="meal-icon">&#x1F372;</div>
+          <div class="meal-name">Lentil Bowl</div>
+          <div class="meal-cal">~340 kcal &bull; 20g protein</div>
+          <div class="meal-note">Lentils, spinach, tomatoes, lemon dressing</div>
+        </div>
+        <div class="meal-item">
+          <div class="meal-icon">&#x1F965;</div>
+          <div class="meal-name">Coconut Smoothie</div>
+          <div class="meal-cal">~290 kcal &bull; 15g protein</div>
+          <div class="meal-note">Banana, protein powder, coconut milk, oats</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK ADD -->
+  <div class="a7" style="margin-bottom:14px">
+    <button class="qa-btn"
+            hx-get="/fitness/add-exercise-form/"
+            hx-target="#qa-area"
+            hx-swap="innerHTML">
+      &#43; Add Custom Exercise
+    </button>
+    <div id="qa-area" class="qa-area"></div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  /* ── Workout Timer ── */
+  function wTimer() {
+    return {
+      secs:0, isRunning:false, iv:null,
+      rSecs:0, restOn:false, rIv:null,
+      get dispTime() {
+        var m = String(Math.floor(this.secs/60)).padStart(2,'0');
+        var s = String(this.secs%60).padStart(2,'0');
+        return m+':'+s;
+      },
+      get ringOff() { return 314.16*(1-(this.secs%300)/300); },
+      get restDisp() {
+        if(!this.restOn && this.rSecs===0) { return '--:--'; }
+        var m = String(Math.floor(this.rSecs/60)).padStart(2,'0');
+        var s = String(this.rSecs%60).padStart(2,'0');
+        return m+':'+s;
+      },
+      toggle: function() { this.isRunning ? this.pause() : this.start(); },
+      start: function() {
+        var self=this; self.isRunning=true;
+        self.iv=setInterval(function(){ self.secs++; },1000);
+      },
+      pause: function() { this.isRunning=false; clearInterval(this.iv); },
+      reset: function() { this.pause(); this.secs=0; },
+      doRest: function(s) {
+        var self=this; clearInterval(self.rIv);
+        self.rSecs=s; self.restOn=true;
+        self.rIv=setInterval(function(){
+          if(self.rSecs<=0){ clearInterval(self.rIv); self.restOn=false; showToast('Rest done! Back to it &#x1F4AA;'); }
+          else { self.rSecs--; }
+        },1000);
+      }
+    };
+  }
+
+  /* ── Rep Counter ── */
+  function rCtr(defReps, totSets, exId) {
+    return {
+      reps:defReps, totalSets:totSets, doneSets:0,
+      expanded:false, saved:false, exId:exId,
+      inc: function(){ this.reps++; },
+      dec: function(){ if(this.reps>1){ this.reps--; } },
+      logSet: function(){
+        if(this.doneSets<this.totalSets){
+          this.doneSets++;
+          showToast('Set '+this.doneSets+' done &#8212; '+this.reps+' reps! &#x1F525;');
+          if(this.doneSets>=this.totalSets){
+            showToast('All sets done! Tap Save to record it &#x2705;');
+          }
+        }
+      }
+    };
+  }
+
+  /* ── Category tabs ── */
+  function tabFilter() {
+    return {
+      current: 'all',
+      filter: function(cat) {
+        this.current = cat;
+        var allTabs = document.querySelectorAll('.tab-btn');
+        for(var i=0;i<allTabs.length;i++){ allTabs[i].classList.remove('on'); }
+        var activeTab = document.getElementById('tab-'+cat);
+        if(activeTab){ activeTab.classList.add('on'); }
+        var cards = document.querySelectorAll('.ex-card');
+        for(var j=0;j<cards.length;j++){
+          var c = cards[j];
+          if(cat==='all' || c.getAttribute('data-cat')===cat){
+            c.style.display='block';
+          } else {
+            c.style.display='none';
+          }
+        }
+      }
+    };
+  }
+
+  /* ── Chart.js ── */
+  document.addEventListener('DOMContentLoaded', function() {
+    var canvas = document.getElementById('wChart');
+    if(!canvas){ return; }
+    var labels = {{ chart_labels|safe }};
+    var vals   = {{ chart_data|safe }};
+    new Chart(canvas, {
+      type:'bar',
+      data:{
+        labels:labels,
+        datasets:[{
+          label:'Reps',
+          data:vals,
+          backgroundColor: function(ctx){
+            var chart=ctx.chart; var area=chart.chartArea; var c=chart.ctx;
+            if(!area){ return 'rgba(45,212,191,0.5)'; }
+            var g=c.createLinearGradient(0,area.bottom,0,area.top);
+            g.addColorStop(0,'rgba(129,140,248,0.5)');
+            g.addColorStop(1,'rgba(45,212,191,0.9)');
+            return g;
+          },
+          borderRadius:8,
+          borderSkipped:false
+        }]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            backgroundColor:'rgba(10,10,18,0.92)', borderColor:'rgba(45,212,191,0.3)', borderWidth:1,
+            titleColor:'#2dd4bf', bodyColor:'#94a3b8',
+            titleFont:{family:'Syne',weight:'700'}, bodyFont:{family:'DM Sans'}, padding:10,
+            callbacks:{ label:function(c){ return c.parsed.y+' reps'; } }
+          }
+        },
+        scales:{
+          x:{ grid:{display:false}, border:{display:false}, ticks:{color:'#64748b',font:{family:'Syne',weight:'700',size:11}} },
+          y:{ grid:{color:'rgba(255,255,255,0.05)'}, border:{display:false}, ticks:{color:'#64748b',font:{family:'DM Sans',size:10},maxTicksLimit:5} }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

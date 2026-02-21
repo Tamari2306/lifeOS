@@ -1,0 +1,1021 @@
+{% extends 'base.html' %}
+{% block title %}Planner — LifeOS{% endblock %}
+{% block nav_checklist %}active{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --vi:#818cf8; --pu:#a78bfa; --te:#2dd4bf; --ro:#fb7185;
+    --am:#fbbf24; --gr:#34d399; --bl:#38bdf8; --or:#f97316;
+    --surf:rgba(255,255,255,0.045); --rim:rgba(255,255,255,0.09);
+    --muted:#64748b; --soft:#94a3b8;
+  }
+
+  /* ── PAGE TABS ─────────────────────────────────── */
+  .page-tabs { display:flex; gap:6px; margin-bottom:18px; background:rgba(255,255,255,.03);
+               border:1px solid var(--rim); border-radius:18px; padding:5px; }
+  .ptab { flex:1; padding:9px 4px; border-radius:13px; border:none; background:transparent;
+          color:var(--muted); font-family:'Syne',sans-serif; font-size:11px; font-weight:700;
+          letter-spacing:.04em; text-transform:uppercase; cursor:pointer; transition:all .2s;
+          display:flex; flex-direction:column; align-items:center; gap:2px; }
+  .ptab-icon { font-size:16px; line-height:1; }
+  .ptab.on { background:rgba(255,255,255,.08); color:#f1f5f9;
+             box-shadow:0 2px 12px rgba(0,0,0,.3); }
+  .ptab-daily.on  { color:var(--vi); }
+  .ptab-work.on   { color:var(--bl); }
+  .ptab-week.on   { color:var(--am); }
+  .ptab-month.on  { color:var(--gr); }
+
+  /* ── PANELS ────────────────────────────────────── */
+  .panel { display:none; }
+  .panel.active { display:block; }
+
+  /* ── COMMON GLASS ──────────────────────────────── */
+  .gc { background:var(--surf); border:1px solid var(--rim); border-radius:20px;
+        backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); margin-bottom:14px; overflow:hidden; }
+  .gcp { padding:18px 20px; }
+  .sec-lbl { font-family:'Syne',sans-serif; font-size:11px; font-weight:700; color:var(--muted);
+             letter-spacing:.1em; text-transform:uppercase; margin-bottom:14px; }
+  .hdr-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+
+  /* ── FORMS ─────────────────────────────────────── */
+  .fi { width:100%; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:13px;
+        padding:11px 14px; color:#fff; font-family:'DM Sans',sans-serif; font-size:14px;
+        outline:none; transition:border-color .2s; box-sizing:border-box; }
+  .fi::placeholder { color:var(--muted); }
+  .fi-sel { appearance:none; -webkit-appearance:none; background-color:#111118; }
+  .fi.focus-vi:focus  { border-color:rgba(129,140,248,.5); }
+  .fi.focus-bl:focus  { border-color:rgba(56,189,248,.5); }
+  .fi.focus-am:focus  { border-color:rgba(251,191,36,.5); }
+  .fi.focus-gr:focus  { border-color:rgba(52,211,153,.5); }
+  .field-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.06em;
+               text-transform:uppercase; display:block; margin-bottom:6px; }
+  .fg { margin-bottom:10px; }
+  .form-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+  .form-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
+
+  .btn { width:100%; padding:13px; border:none; border-radius:14px;
+         font-family:'Syne',sans-serif; font-size:13px; font-weight:800; cursor:pointer; transition:all .2s; }
+  .btn:hover { opacity:.9; transform:translateY(-1px); }
+  .btn-vi { background:linear-gradient(135deg,#818cf8,#a78bfa); color:#0a0a12; box-shadow:0 4px 18px rgba(129,140,248,.25); }
+  .btn-bl { background:linear-gradient(135deg,#38bdf8,#2dd4bf); color:#0a0a12; box-shadow:0 4px 18px rgba(56,189,248,.25); }
+  .btn-am { background:linear-gradient(135deg,#fbbf24,#f97316); color:#0a0a12; box-shadow:0 4px 18px rgba(251,191,36,.25); }
+  .btn-gr { background:linear-gradient(135deg,#34d399,#2dd4bf); color:#0a0a12; box-shadow:0 4px 18px rgba(52,211,153,.25); }
+  .btn-sm { padding:5px 12px; border-radius:9px; font-family:'Syne',sans-serif;
+            font-size:11px; font-weight:700; cursor:pointer; border:none; transition:all .2s; }
+  .btn-del  { background:rgba(251,113,133,.1); border:1px solid rgba(251,113,133,.2); color:var(--ro); }
+  .btn-done { background:rgba(52,211,153,.1);  border:1px solid rgba(52,211,153,.2);  color:var(--gr); }
+  .btn-prog { background:rgba(251,191,36,.1);  border:1px solid rgba(251,191,36,.2);  color:var(--am); }
+  .btn-drop { background:rgba(148,163,184,.1); border:1px solid rgba(148,163,184,.2); color:var(--soft); }
+  .btn-rev  { background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.2); color:var(--vi); }
+
+  /* ── WEEK STRIP ────────────────────────────────── */
+  .week-strip { display:flex; gap:6px; margin-bottom:14px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
+  .week-strip::-webkit-scrollbar { display:none; }
+  .wday { display:flex; flex-direction:column; align-items:center; gap:3px; min-width:44px;
+          padding:8px 4px; border-radius:14px; background:var(--surf); border:1px solid var(--rim);
+          text-decoration:none; transition:all .2s; }
+  .wday.on { border-color:rgba(129,140,248,.4); background:rgba(129,140,248,.1); }
+  .wday-l { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; color:var(--muted); }
+  .wday-n { font-family:'Syne',sans-serif; font-size:14px; font-weight:800; color:#e2e8f0; }
+  .wday-b { width:28px; height:4px; border-radius:4px; background:rgba(255,255,255,.08); overflow:hidden; }
+  .wday-f { height:100%; border-radius:4px; background:linear-gradient(90deg,#818cf8,#2dd4bf); }
+
+  /* ── PROGRESS ──────────────────────────────────── */
+  .prog-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .prog-bar { height:7px; background:rgba(255,255,255,.07); border-radius:7px; overflow:hidden; }
+  .prog-fill { height:100%; border-radius:7px; transition:width .7s ease; }
+  .pf-vi { background:linear-gradient(90deg,#818cf8,#a78bfa); box-shadow:0 0 10px rgba(129,140,248,.4); }
+  .pf-bl { background:linear-gradient(90deg,#38bdf8,#2dd4bf); box-shadow:0 0 10px rgba(56,189,248,.35); }
+  .pf-gr { background:linear-gradient(90deg,#34d399,#2dd4bf); box-shadow:0 0 10px rgba(52,211,153,.35); }
+  .pf-am { background:linear-gradient(90deg,#fbbf24,#f97316); box-shadow:0 0 10px rgba(251,191,36,.35); }
+
+  /* ── CHECKLIST ITEMS ───────────────────────────── */
+  .item-row { display:flex; align-items:flex-start; gap:10px; padding:11px 0;
+              border-bottom:1px solid rgba(255,255,255,.05); }
+  .item-row:last-child { border-bottom:none; }
+  .item-row.done .item-title { text-decoration:line-through; color:var(--muted); }
+  .chk { width:24px; height:24px; border-radius:50%; flex-shrink:0; cursor:pointer;
+         display:flex; align-items:center; justify-content:center;
+         transition:all .2s; border:none; -webkit-tap-highlight-color:transparent; margin-top:1px; }
+  .chk-off { background:rgba(255,255,255,.06); border:2px solid rgba(255,255,255,.2); }
+  .chk-on  { background:linear-gradient(135deg,#818cf8,#2dd4bf); }
+  .chk-on-bl { background:linear-gradient(135deg,#38bdf8,#2dd4bf); }
+  .item-body { flex:1; min-width:0; }
+  .item-title { font-size:14px; color:#e2e8f0; line-height:1.4; }
+  .item-sub   { font-size:11px; color:var(--muted); margin-top:3px; }
+  .item-chips { display:flex; gap:5px; flex-wrap:wrap; margin-top:4px; }
+  .chip { padding:2px 9px; border-radius:20px; font-size:10px; font-weight:700;
+          font-family:'Syne',sans-serif; }
+  .chip-vi { background:rgba(129,140,248,.13); color:#818cf8; }
+  .chip-bl { background:rgba(56,189,248,.13);  color:#38bdf8; }
+  .chip-gr { background:rgba(52,211,153,.13);  color:#34d399; }
+  .chip-am { background:rgba(251,191,36,.13);  color:#fbbf24; }
+  .chip-ro { background:rgba(251,113,133,.13); color:#fb7185; }
+  .chip-soft { background:rgba(148,163,184,.13); color:#94a3b8; }
+
+  /* priority dots */
+  .pri-hi { color:var(--ro); } .pri-md { color:var(--am); } .pri-lo { color:var(--soft); }
+  .pri-dot { font-size:10px; }
+
+  /* empty */
+  .empty { padding:24px; text-align:center; }
+  .empty-ico { font-size:32px; margin-bottom:8px; }
+  .empty-ttl { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:#e2e8f0; margin-bottom:4px; }
+  .empty-sub { font-size:12px; color:var(--muted); }
+
+  /* ── MONTH NAV ─────────────────────────────────── */
+  .nav-strip { display:flex; align-items:center; justify-content:space-between;
+               background:var(--surf); border:1px solid var(--rim); border-radius:16px;
+               padding:10px 16px; margin-bottom:14px; }
+  .nav-lbl { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:#e2e8f0; }
+  .nav-sub { font-size:11px; color:var(--muted); text-align:center; margin-top:1px; }
+  .nav-btn { background:rgba(255,255,255,.06); border:1px solid var(--rim); border-radius:10px;
+             padding:6px 14px; color:var(--soft); font-family:'Syne',sans-serif;
+             font-size:13px; font-weight:700; cursor:pointer; text-decoration:none; transition:all .2s; }
+  .nav-btn:hover { background:rgba(255,255,255,.12); color:#fff; }
+
+  /* ── MONTH GOAL CARD ───────────────────────────── */
+  .goal-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+               border-radius:16px; padding:14px 16px; margin-bottom:10px; }
+  .goal-card.done    { border-color:rgba(52,211,153,.2); background:rgba(52,211,153,.04); }
+  .goal-card.dropped { border-color:rgba(148,163,184,.15); opacity:.6; }
+  .goal-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; color:#e2e8f0; margin-bottom:4px; }
+  .goal-desc  { font-size:12px; color:var(--muted); margin-bottom:8px; line-height:1.5; }
+  .goal-actions { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .goal-linked { font-size:11px; color:var(--am); margin-top:6px; }
+
+  /* ── WEEK BOARD ────────────────────────────────── */
+  .week-board { display:flex; flex-direction:column; gap:10px; }
+  .day-col { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
+             border-radius:16px; overflow:hidden; }
+  .day-col-hdr { display:flex; align-items:center; justify-content:space-between;
+                 padding:10px 14px; background:rgba(255,255,255,.03);
+                 border-bottom:1px solid rgba(255,255,255,.06); }
+  .day-col-name { font-family:'Syne',sans-serif; font-size:12px; font-weight:800; color:#e2e8f0; }
+  .day-col-date { font-size:10px; color:var(--muted); }
+  .day-col-body { padding:8px 12px; }
+  .week-task-item { display:flex; align-items:flex-start; gap:8px; padding:8px 0;
+                    border-bottom:1px solid rgba(255,255,255,.04); }
+  .week-task-item:last-child { border-bottom:none; }
+  .wt-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+  .wt-todo     { background:var(--muted); }
+  .wt-inprogress { background:var(--am); }
+  .wt-done     { background:var(--gr); }
+  .wt-body { flex:1; }
+  .wt-title { font-size:13px; color:#e2e8f0; line-height:1.4; }
+  .wt-title.done-txt { text-decoration:line-through; color:var(--muted); }
+  .wt-meta { display:flex; gap:6px; margin-top:3px; flex-wrap:wrap; }
+  .wt-actions { display:flex; gap:4px; flex-direction:column; flex-shrink:0; }
+
+  /* ── MOOD ──────────────────────────────────────── */
+  .mood-row { display:flex; gap:8px; margin-bottom:12px; }
+  .mood-btn { flex:1; padding:10px 4px; border-radius:12px; border:1px solid var(--rim);
+              background:rgba(255,255,255,.04); font-size:18px; cursor:pointer;
+              transition:all .2s; text-align:center; }
+  .mood-btn.sel { border-color:rgba(129,140,248,.5); background:rgba(129,140,248,.15); }
+  .refl-ta { width:100%; background:rgba(255,255,255,.05); border:1px solid var(--rim);
+             border-radius:13px; padding:11px 14px; color:#fff; font-family:'DM Sans',sans-serif;
+             font-size:13px; outline:none; resize:vertical; box-sizing:border-box; transition:border-color .2s; }
+  .refl-ta:focus { border-color:rgba(129,140,248,.4); }
+  .refl-ta::placeholder { color:var(--muted); }
+
+  /* ── TOGGLE FORM ───────────────────────────────── */
+  .toggle-add { display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+                padding:12px; border-radius:16px; font-family:'Syne',sans-serif;
+                font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
+  .ta-vi { background:rgba(129,140,248,.07); border:1px dashed rgba(129,140,248,.3); color:var(--vi); }
+  .ta-bl { background:rgba(56,189,248,.07);  border:1px dashed rgba(56,189,248,.3);  color:var(--bl); }
+  .ta-am { background:rgba(251,191,36,.07);  border:1px dashed rgba(251,191,36,.3);  color:var(--am); }
+  .ta-gr { background:rgba(52,211,153,.07);  border:1px dashed rgba(52,211,153,.3);  color:var(--gr); }
+  .toggle-add:hover { filter:brightness(1.15); }
+
+  /* ── STATS ROW ─────────────────────────────────── */
+  .stats-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+  .stat-box { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+              border-radius:14px; padding:12px 8px; text-align:center; }
+  .stat-val { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; line-height:1; }
+  .stat-key { font-size:10px; color:var(--muted); margin-top:4px; }
+
+  /* ── ANIMS ─────────────────────────────────────── */
+  @keyframes sup { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  .a1{animation:sup .38s ease both .03s} .a2{animation:sup .38s ease both .09s}
+  .a3{animation:sup .38s ease both .15s} .a4{animation:sup .38s ease both .21s}
+  .a5{animation:sup .38s ease both .27s} .a6{animation:sup .38s ease both .33s}
+
+  /* today highlight on week board */
+  .day-col.is-today { border-color:rgba(251,191,36,.3); }
+  .day-col.is-today .day-col-hdr { background:rgba(251,191,36,.06); }
+  .day-col.is-today .day-col-name { color:var(--am); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ══ HEADER ════════════════════════════════════════════════ -->
+<div style="padding:8px 0 16px" class="a1">
+  <p style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px">
+    {{ today|date:"l, F j, Y" }}
+  </p>
+  <h1 style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;line-height:1;
+             background:linear-gradient(115deg,#818cf8,#2dd4bf);-webkit-background-clip:text;
+             -webkit-text-fill-color:transparent;background-clip:text">
+    My Planner &#x1F4CB;
+  </h1>
+</div>
+
+<!-- ══ TOP-LEVEL TABS ═════════════════════════════════════════ -->
+<div class="page-tabs a1" id="page-tabs">
+  <button class="ptab ptab-daily {% if active_tab == 'daily' %}on{% endif %}"
+          onclick="switchTab('daily')">
+    <span class="ptab-icon">&#x2705;</span>Daily
+  </button>
+  <button class="ptab ptab-work {% if active_tab == 'work' %}on{% endif %}"
+          onclick="switchTab('work')">
+    <span class="ptab-icon">&#x1F4BC;</span>Work
+  </button>
+  <button class="ptab ptab-week {% if active_tab == 'week' %}on{% endif %}"
+          onclick="switchTab('week')">
+    <span class="ptab-icon">&#x1F5D3;</span>Week
+  </button>
+  <button class="ptab ptab-month {% if active_tab == 'month' %}on{% endif %}"
+          onclick="switchTab('month')">
+    <span class="ptab-icon">&#x1F3AF;</span>Month
+  </button>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- ── TAB 1: DAILY PERSONAL ──────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="panel {% if active_tab == 'daily' %}active{% endif %}" id="tab-daily">
+
+  <!-- Week strip date nav -->
+  <div class="week-strip a2">
+    {% for d in week_data %}
+    <a href="/checklist/?date={{ d.date|date:'Y-m-d' }}&tab=daily"
+       class="wday {% if d.date == view_date %}on{% endif %}">
+      <span class="wday-l">{{ d.label }}</span>
+      <span class="wday-n">{{ d.date.day }}</span>
+      <div class="wday-b"><div class="wday-f" style="width:{{ d.pct }}%"></div></div>
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Progress -->
+  <div class="gc a2">
+    <div class="gcp">
+      <div class="prog-row">
+        <span class="sec-lbl" style="margin-bottom:0">{{ view_date|date:"M j" }} — Personal</span>
+        <span style="font-size:12px;color:var(--muted)">{{ done }}/{{ total }}</span>
+      </div>
+      <div class="prog-bar" style="margin-top:8px">
+        <div class="prog-fill pf-vi" style="width:{{ pct }}%"></div>
+      </div>
+      {% if pct == 100 and total > 0 %}
+      <div style="text-align:center;margin-top:8px;font-size:13px;color:var(--gr);font-weight:700">
+        &#x1F389; All done! Great work today.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Add task -->
+  <div class="gc a3">
+    <div class="gcp">
+      <div class="sec-lbl">&#x2795; Add Task</div>
+      <form method="POST" action="/checklist/add/">
+        {% csrf_token %}
+        <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
+        <div class="fg">
+          <input class="fi focus-vi" type="text" name="text" placeholder="What do you need to do?" required>
+        </div>
+        <div class="form-2">
+          <div>
+            <label class="field-lbl">Category</label>
+            <select class="fi fi-sel focus-vi" name="category">
+              <option value="personal">&#x1F464; Personal</option>
+              <option value="health">&#x1F3C3; Health</option>
+              <option value="spiritual">&#x271D;&#xFE0F; Spiritual</option>
+              <option value="finance">&#x1F4B0; Finance</option>
+              <option value="other">&#x1F4E6; Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-lbl">Priority</label>
+            <select class="fi fi-sel focus-vi" name="priority">
+              <option value="high">&#x1F525; High</option>
+              <option value="medium" selected>&#x26A1; Medium</option>
+              <option value="low">&#x1F4CD; Low</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-vi">&#x2795; Add to List</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Task list -->
+  <div class="gc a4">
+    <div class="gcp">
+      <div class="sec-lbl">Tasks — {{ view_date|date:"M j" }}</div>
+      {% if items %}
+        {% for item in items %}{% if not item.completed %}
+        <div class="item-row">
+          <form method="POST" action="/checklist/toggle/{{ item.id }}/" style="display:contents">
+            {% csrf_token %}
+            <button type="submit" class="chk chk-off">
+              <span style="font-size:9px;color:rgba(255,255,255,.25)">&#10003;</span>
+            </button>
+          </form>
+          <div class="item-body">
+            <div class="item-title">{{ item.text }}</div>
+            <div class="item-chips">
+              <span class="chip chip-vi">{{ item.get_category_display }}</span>
+              <span class="pri-dot {% if item.priority == 'high' %}pri-hi{% elif item.priority == 'medium' %}pri-md{% else %}pri-lo{% endif %}">
+                {% if item.priority == 'high' %}&#x1F525;{% elif item.priority == 'medium' %}&#x26A1;{% else %}&#x1F4CD;{% endif %}
+              </span>
+            </div>
+          </div>
+          <form method="POST" action="/checklist/delete/{{ item.id }}/" style="display:contents">
+            {% csrf_token %}
+            <button type="submit" class="btn-sm btn-del">&#x2715;</button>
+          </form>
+        </div>
+        {% endif %}{% endfor %}
+
+        {% for item in items %}{% if item.completed %}
+        <div class="item-row done">
+          <form method="POST" action="/checklist/toggle/{{ item.id }}/" style="display:contents">
+            {% csrf_token %}
+            <button type="submit" class="chk chk-on">
+              <span style="font-size:11px;color:#0a0a12">&#10003;</span>
+            </button>
+          </form>
+          <div class="item-body">
+            <div class="item-title">{{ item.text }}</div>
+          </div>
+          <form method="POST" action="/checklist/delete/{{ item.id }}/" style="display:contents">
+            {% csrf_token %}
+            <button type="submit" class="btn-sm btn-del">&#x2715;</button>
+          </form>
+        </div>
+        {% endif %}{% endfor %}
+      {% else %}
+      <div class="empty">
+        <div class="empty-ico">&#x1F4DD;</div>
+        <div class="empty-ttl">No tasks yet</div>
+        <div class="empty-sub">Add a task above to plan your day.</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Day Reflection -->
+  <div class="gc a5">
+    <div class="gcp">
+      <div class="sec-lbl">&#x1F31F; Day Reflection</div>
+      <form method="POST" action="/checklist/reflect/">
+        {% csrf_token %}
+        <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
+        <div class="fg">
+          <label class="field-lbl">How was your day?</label>
+          <div class="mood-row" id="mood-row">
+            {% for i in "12345" %}
+            <button type="button" class="mood-btn {% if reflection and reflection.mood_rating == forloop.counter %}sel{% endif %}"
+                    onclick="setMood({{ forloop.counter }},this)" data-val="{{ forloop.counter }}">
+              {% if forloop.counter == 1 %}&#x1F614;{% elif forloop.counter == 2 %}&#x1F615;{% elif forloop.counter == 3 %}&#x1F610;{% elif forloop.counter == 4 %}&#x1F604;{% else %}&#x1F929;{% endif %}
+            </button>
+            {% endfor %}
+          </div>
+          <input type="hidden" name="mood_rating" id="mood-input" value="{{ reflection.mood_rating|default:'3' }}">
+        </div>
+        <div class="fg">
+          <label class="field-lbl">&#x2728; What went well?</label>
+          <textarea class="refl-ta" name="what_went_well" rows="2" placeholder="Celebrate your wins...">{{ reflection.what_went_well|default:'' }}</textarea>
+        </div>
+        <div class="fg">
+          <label class="field-lbl">&#x1F4AA; What to improve tomorrow?</label>
+          <textarea class="refl-ta" name="what_to_improve" rows="2" placeholder="One thing you'd do differently...">{{ reflection.what_to_improve|default:'' }}</textarea>
+        </div>
+        <div class="fg" style="margin-bottom:14px">
+          <label class="field-lbl">&#x1F64F; Grateful for...</label>
+          <textarea class="refl-ta" name="grateful_for" rows="2" placeholder="Gratitude shifts everything...">{{ reflection.grateful_for|default:'' }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-vi">
+          {% if reflection %}&#x270F;&#xFE0F; Update Reflection{% else %}&#x1F4BE; Save Reflection{% endif %}
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div><!-- /tab-daily -->
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- ── TAB 2: WORK DAILY ───────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="panel {% if active_tab == 'work' %}active{% endif %}" id="tab-work">
+
+  <!-- Week strip -->
+  <div class="week-strip a2">
+    {% for d in week_data %}
+    <a href="/checklist/?date={{ d.date|date:'Y-m-d' }}&tab=work"
+       class="wday {% if d.date == view_date %}on{% endif %}"
+       style="{% if d.date == view_date %}border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.1){% endif %}">
+      <span class="wday-l">{{ d.label }}</span>
+      <span class="wday-n">{{ d.date.day }}</span>
+      <div class="wday-b"><div style="height:100%;border-radius:4px;background:linear-gradient(90deg,#38bdf8,#2dd4bf);width:{{ d.pct }}%"></div></div>
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Work progress -->
+  <div class="gc a2">
+    <div class="gcp">
+      <div class="prog-row">
+        <span class="sec-lbl" style="margin-bottom:0">&#x1F4BC; Work — {{ view_date|date:"M j" }}</span>
+        <span style="font-size:12px;color:var(--muted)">{{ work_done }}/{{ work_total }} done</span>
+      </div>
+      <div class="prog-bar" style="margin-top:8px">
+        <div class="prog-fill pf-bl" style="width:{{ work_pct }}%"></div>
+      </div>
+      {% if work_pct == 100 and work_total > 0 %}
+      <div style="text-align:center;margin-top:8px;font-size:13px;color:var(--gr);font-weight:700">
+        &#x1F4AA; Productive day! All work tasks complete.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Add work task -->
+  <div class="gc a3">
+    <div class="gcp">
+      <div class="sec-lbl">&#x2795; Add Work Task</div>
+      <form method="POST" action="/checklist/work/add/">
+        {% csrf_token %}
+        <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
+        <div class="fg">
+          <input class="fi focus-bl" type="text" name="title" placeholder="What work task needs doing?" required>
+        </div>
+        <div class="form-2">
+          <div>
+            <label class="field-lbl">Priority</label>
+            <select class="fi fi-sel focus-bl" name="priority">
+              <option value="high">&#x1F525; High</option>
+              <option value="medium" selected>&#x26A1; Medium</option>
+              <option value="low">&#x1F4CD; Low</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-lbl">Link to Week Task (optional)</label>
+            <select class="fi fi-sel focus-bl" name="week_task_id">
+              <option value="">— standalone —</option>
+              {% for wt in week_tasks %}
+              <option value="{{ wt.id }}">{{ wt.title|truncatechars:30 }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="field-lbl">Notes (optional)</label>
+          <input class="fi focus-bl" type="text" name="notes" placeholder="Extra details...">
+        </div>
+        <button type="submit" class="btn btn-bl">&#x1F4BC; Add Work Task</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Work task list -->
+  <div class="gc a4">
+    <div class="gcp">
+      <div class="sec-lbl">Work Tasks — {{ view_date|date:"M j" }}</div>
+
+      <!-- Pending -->
+      {% for item in work_items %}{% if not item.completed %}
+      <div class="item-row">
+        <form method="POST" action="/checklist/work/toggle/{{ item.id }}/" style="display:contents">
+          {% csrf_token %}
+          <button type="submit" class="chk chk-off">
+            <span style="font-size:9px;color:rgba(255,255,255,.25)">&#10003;</span>
+          </button>
+        </form>
+        <div class="item-body">
+          <div class="item-title">{{ item.title }}</div>
+          {% if item.notes %}<div class="item-sub">{{ item.notes }}</div>{% endif %}
+          <div class="item-chips">
+            <span class="chip chip-bl">work</span>
+            <span class="pri-dot {% if item.priority == 'high' %}pri-hi{% elif item.priority == 'medium' %}pri-md{% else %}pri-lo{% endif %}">
+              {% if item.priority == 'high' %}&#x1F525;{% elif item.priority == 'medium' %}&#x26A1;{% else %}&#x1F4CD;{% endif %}
+            </span>
+            {% if item.week_task %}
+            <span class="chip chip-am">&#x1F517; {{ item.week_task.title|truncatechars:20 }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <form method="POST" action="/checklist/work/delete/{{ item.id }}/" style="display:contents">
+          {% csrf_token %}
+          <button type="submit" class="btn-sm btn-del">&#x2715;</button>
+        </form>
+      </div>
+      {% endif %}{% endfor %}
+
+      <!-- Done -->
+      {% for item in work_items %}{% if item.completed %}
+      <div class="item-row done">
+        <form method="POST" action="/checklist/work/toggle/{{ item.id }}/" style="display:contents">
+          {% csrf_token %}
+          <button type="submit" class="chk chk-on-bl">
+            <span style="font-size:11px;color:#0a0a12">&#10003;</span>
+          </button>
+        </form>
+        <div class="item-body">
+          <div class="item-title">{{ item.title }}</div>
+          {% if item.completed_at %}
+          <div class="item-sub">Done at {{ item.completed_at|time:"H:i" }}</div>
+          {% endif %}
+        </div>
+        <form method="POST" action="/checklist/work/delete/{{ item.id }}/" style="display:contents">
+          {% csrf_token %}
+          <button type="submit" class="btn-sm btn-del">&#x2715;</button>
+        </form>
+      </div>
+      {% endif %}{% endfor %}
+
+      {% if not work_items %}
+      <div class="empty">
+        <div class="empty-ico">&#x1F4BC;</div>
+        <div class="empty-ttl">No work tasks today</div>
+        <div class="empty-sub">Add tasks above or pull from your week plan.</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Work summary box if tasks done -->
+  {% if work_done > 0 %}
+  <div class="gc a5">
+    <div class="gcp">
+      <div class="sec-lbl">&#x1F3C6; Accomplished Today</div>
+      <div class="stats-3">
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--gr)">{{ work_done }}</div>
+          <div class="stat-key">Completed</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--am)">{{ work_total|add:"-1"|add:"1" }}</div>
+          <div class="stat-key">Total Tasks</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--bl)">{{ work_pct }}%</div>
+          <div class="stat-key">Done</div>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:12px">
+        <div style="font-size:11px;color:var(--gr);font-weight:700;margin-bottom:8px">&#x2714; COMPLETED</div>
+        {% for item in work_items %}{% if item.completed %}
+        <div style="font-size:13px;color:#94a3b8;padding:3px 0;display:flex;align-items:center;gap:8px">
+          <span style="color:var(--gr)">&#x2714;</span> {{ item.title }}
+        </div>
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div><!-- /tab-work -->
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- ── TAB 3: WEEK PLANNER ─────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="panel {% if active_tab == 'week' %}active{% endif %}" id="tab-week">
+
+  <!-- Week nav -->
+  <div class="nav-strip a2">
+    <a href="/checklist/?tab=week&week={{ prev_week }}&wyear={{ prev_wyear }}" class="nav-btn">&#x2190;</a>
+    <div style="text-align:center">
+      <div class="nav-lbl">Week {{ week_num }}</div>
+      <div class="nav-sub">{{ w_monday|date:"M j" }} &ndash; {{ w_sunday|date:"M j, Y" }}</div>
+    </div>
+    <a href="/checklist/?tab=week&week={{ next_week }}&wyear={{ next_wyear }}" class="nav-btn">&#x2192;</a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-3 a2">
+    <div class="stat-box">
+      <div class="stat-val" style="color:var(--gr)">{{ week_tasks|length }}</div>
+      <div class="stat-key">Total Tasks</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" style="color:var(--am)">
+        {% with done_count=0 %}
+        {% for t in week_tasks %}{% if t.status == 'inprogress' %}{{ forloop.counter|add:"0" }}{% endif %}{% endfor %}
+        {% endwith %}
+        {{ week_tasks|length }}
+      </div>
+      <div class="stat-key">Planned Days</div>
+    </div>
+    <div class="stat-box" style="border-color:rgba(52,211,153,.15);background:rgba(52,211,153,.04)">
+      <div class="stat-val" style="color:var(--gr)">
+        {% for t in week_tasks %}{% if t.status == 'done' %}&#x2714;{% endif %}{% endfor %}
+        {% with n=0 %}{% for t in week_tasks %}{% if t.status == 'done' %}{% with n=n|add:1 %}{% endwith %}{% endif %}{% endfor %}{% endwith %}
+        0
+      </div>
+      <div class="stat-key">Completed</div>
+    </div>
+  </div>
+
+  <!-- Add week task -->
+  <div class="gc a3">
+    <div class="gcp">
+      <button class="toggle-add ta-am" type="button"
+              onclick="tog('wk-form')">&#x2795; Plan a Task This Week</button>
+      <div id="wk-form" style="display:none;margin-top:14px">
+        <form method="POST" action="/checklist/week/add/">
+          {% csrf_token %}
+          <input type="hidden" name="week_number" value="{{ week_num }}">
+          <input type="hidden" name="week_year"   value="{{ week_year }}">
+          <div class="fg">
+            <input class="fi focus-am" type="text" name="title" placeholder="Task to accomplish this week..." required>
+          </div>
+          <div class="form-3">
+            <div>
+              <label class="field-lbl">Day</label>
+              <select class="fi fi-sel focus-am" name="planned_day">
+                <option value="">Any day</option>
+                <option value="0">Monday</option>
+                <option value="1">Tuesday</option>
+                <option value="2">Wednesday</option>
+                <option value="3">Thursday</option>
+                <option value="4">Friday</option>
+                <option value="5">Saturday</option>
+                <option value="6">Sunday</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-lbl">Priority</label>
+              <select class="fi fi-sel focus-am" name="priority">
+                <option value="high">&#x1F525; High</option>
+                <option value="medium" selected>&#x26A1; Medium</option>
+                <option value="low">&#x1F4CD; Low</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-lbl">Month Goal</label>
+              <select class="fi fi-sel focus-am" name="month_goal_id">
+                <option value="">— none —</option>
+                {% for g in all_month_goals %}
+                <option value="{{ g.id }}">{{ g.title|truncatechars:22 }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="field-lbl">Notes (optional)</label>
+            <input class="fi focus-am" type="text" name="notes" placeholder="Extra details...">
+          </div>
+          <button type="submit" class="btn btn-am">&#x1F5D3; Add to Week Plan</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Week board — tasks by day -->
+  <div class="week-board a4">
+    {% for day_i, day in tasks_by_day.items %}
+    <div class="day-col {% if day.date == today %}is-today{% endif %}">
+      <div class="day-col-hdr">
+        <div>
+          <div class="day-col-name">{{ day.name }}</div>
+          <div class="day-col-date">{{ day.date|date:"M j" }}</div>
+        </div>
+        <div style="display:flex;gap:4px;align-items:center">
+          {% if day.date == today %}
+          <span class="chip chip-am" style="padding:2px 8px;font-size:9px">TODAY</span>
+          {% endif %}
+          <span style="font-size:11px;color:var(--muted)">{{ day.tasks|length }} tasks</span>
+        </div>
+      </div>
+      <div class="day-col-body">
+        {% for task in day.tasks %}
+        <div class="week-task-item">
+          <div class="wt-dot {% if task.status == 'done' %}wt-done{% elif task.status == 'inprogress' %}wt-inprogress{% else %}wt-todo{% endif %}"></div>
+          <div class="wt-body">
+            <div class="wt-title {% if task.status == 'done' %}done-txt{% endif %}">{{ task.title }}</div>
+            {% if task.notes %}<div class="item-sub">{{ task.notes }}</div>{% endif %}
+            <div class="wt-meta">
+              <span class="chip {% if task.priority == 'high' %}chip-ro{% elif task.priority == 'medium' %}chip-am{% else %}chip-soft{% endif %}">
+                {% if task.priority == 'high' %}&#x1F525;{% elif task.priority == 'medium' %}&#x26A1;{% else %}&#x1F4CD;{% endif %} {{ task.get_priority_display }}
+              </span>
+              {% if task.month_goal %}
+              <span class="chip chip-gr">&#x1F3AF; {{ task.month_goal.title|truncatechars:16 }}</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="wt-actions">
+            {% if task.status != 'done' %}
+            <form method="POST" action="/checklist/week/status/{{ task.id }}/">
+              {% csrf_token %}
+              <input type="hidden" name="status" value="{% if task.status == 'todo' %}inprogress{% else %}done{% endif %}">
+              <button type="submit" class="btn-sm {% if task.status == 'todo' %}btn-prog{% else %}btn-done{% endif %}">
+                {% if task.status == 'todo' %}&#x25B6;{% else %}&#x2714;{% endif %}
+              </button>
+            </form>
+            {% else %}
+            <form method="POST" action="/checklist/week/status/{{ task.id }}/">
+              {% csrf_token %}
+              <input type="hidden" name="status" value="todo">
+              <button type="submit" class="btn-sm btn-rev">&#x21BA;</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="/checklist/week/delete/{{ task.id }}/">
+              {% csrf_token %}
+              <button type="submit" class="btn-sm btn-del">&#x2715;</button>
+            </form>
+          </div>
+        </div>
+        {% empty %}
+        <div style="padding:10px 0;font-size:12px;color:var(--muted);text-align:center">
+          Nothing planned
+        </div>
+        {% endfor %}
+
+        <!-- Unplanned tasks shown under "Any Day" — day_i == -1 doesn't exist,
+             so show unplanned tasks only on first card if they exist -->
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- Unplanned tasks (no planned_day set) -->
+    {% with unplanned=week_tasks %}
+    {% if unplanned %}
+    <div class="day-col">
+      <div class="day-col-hdr">
+        <div class="day-col-name">&#x1F4CB; Unscheduled</div>
+        <div class="day-col-date">Any day this week</div>
+      </div>
+      <div class="day-col-body">
+        {% for task in week_tasks %}{% if task.planned_day is None %}
+        <div class="week-task-item">
+          <div class="wt-dot {% if task.status == 'done' %}wt-done{% elif task.status == 'inprogress' %}wt-inprogress{% else %}wt-todo{% endif %}"></div>
+          <div class="wt-body">
+            <div class="wt-title {% if task.status == 'done' %}done-txt{% endif %}">{{ task.title }}</div>
+            {% if task.notes %}<div class="item-sub">{{ task.notes }}</div>{% endif %}
+            <div class="wt-meta">
+              <span class="chip chip-am">{{ task.get_priority_display }}</span>
+              {% if task.month_goal %}<span class="chip chip-gr">&#x1F3AF; {{ task.month_goal.title|truncatechars:16 }}</span>{% endif %}
+            </div>
+          </div>
+          <div class="wt-actions">
+            {% if task.status != 'done' %}
+            <form method="POST" action="/checklist/week/status/{{ task.id }}/">
+              {% csrf_token %}
+              <input type="hidden" name="status" value="{% if task.status == 'todo' %}inprogress{% else %}done{% endif %}">
+              <button type="submit" class="btn-sm {% if task.status == 'todo' %}btn-prog{% else %}btn-done{% endif %}">
+                {% if task.status == 'todo' %}&#x25B6;{% else %}&#x2714;{% endif %}
+              </button>
+            </form>
+            {% else %}
+            <form method="POST" action="/checklist/week/status/{{ task.id }}/">
+              {% csrf_token %}
+              <input type="hidden" name="status" value="todo">
+              <button type="submit" class="btn-sm btn-rev">&#x21BA;</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="/checklist/week/delete/{{ task.id }}/">
+              {% csrf_token %}
+              <button type="submit" class="btn-sm btn-del">&#x2715;</button>
+            </form>
+          </div>
+        </div>
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% if not week_tasks %}
+    <div class="gc">
+      <div class="empty">
+        <div class="empty-ico">&#x1F5D3;</div>
+        <div class="empty-ttl">Nothing planned this week</div>
+        <div class="empty-sub">Add tasks above to start planning Week {{ week_num }}.</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+</div><!-- /tab-week -->
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- ── TAB 4: MONTH GOALS ──────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="panel {% if active_tab == 'month' %}active{% endif %}" id="tab-month">
+
+  <!-- Month nav -->
+  <div class="nav-strip a2">
+    <a href="/checklist/?tab=month&month={{ prev_month }}&myear={{ prev_myear }}" class="nav-btn">&#x2190;</a>
+    <div style="text-align:center">
+      <div class="nav-lbl">{{ month_display }}</div>
+      <div class="nav-sub">Monthly Goals</div>
+    </div>
+    <a href="/checklist/?tab=month&month={{ next_month }}&myear={{ next_myear }}" class="nav-btn">&#x2192;</a>
+  </div>
+
+  <!-- Month stats -->
+  <div class="stats-3 a2">
+    <div class="stat-box">
+      <div class="stat-val" style="color:var(--bl)">{{ month_goals_active.count }}</div>
+      <div class="stat-key">Active</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" style="color:var(--gr)">{{ month_goals_done.count }}</div>
+      <div class="stat-key">Done &#x1F3C6;</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" style="color:var(--muted)">{{ month_goals_dropped.count }}</div>
+      <div class="stat-key">Dropped</div>
+    </div>
+  </div>
+
+  <!-- Add month goal -->
+  <div class="gc a3">
+    <div class="gcp">
+      <button class="toggle-add ta-gr" type="button" onclick="tog('mg-form')">
+        &#x2795; Add Monthly Goal
+      </button>
+      <div id="mg-form" style="display:none;margin-top:14px">
+        <form method="POST" action="/checklist/month/add/">
+          {% csrf_token %}
+          <input type="hidden" name="month" value="{{ cur_month }}">
+          <input type="hidden" name="year"  value="{{ cur_m_year }}">
+          <div class="fg">
+            <input class="fi focus-gr" type="text" name="title" placeholder="What do you want to achieve this month?" required>
+          </div>
+          <div class="fg">
+            <label class="field-lbl">Description / Why it matters</label>
+            <textarea class="refl-ta" name="description" rows="2" placeholder="Why is this goal important?"></textarea>
+          </div>
+          <div class="fg" style="margin-bottom:14px">
+            <label class="field-lbl">Priority</label>
+            <select class="fi fi-sel focus-gr" name="priority">
+              <option value="high">&#x1F525; High</option>
+              <option value="medium" selected>&#x26A1; Medium</option>
+              <option value="low">&#x1F4CD; Low</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-gr">&#x1F3AF; Add Goal</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active goals -->
+  {% if month_goals_active %}
+  <div class="gc a4">
+    <div class="gcp">
+      <div class="sec-lbl">&#x1F4AA; Active Goals</div>
+      {% for goal in month_goals_active %}
+      <div class="goal-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+          <div style="flex:1">
+            <div class="goal-title">
+              {% if goal.priority == 'high' %}&#x1F525;{% elif goal.priority == 'medium' %}&#x26A1;{% else %}&#x1F4CD;{% endif %}
+              {{ goal.title }}
+            </div>
+            {% if goal.description %}
+            <div class="goal-desc">{{ goal.description }}</div>
+            {% endif %}
+            {% if goal.linked_tasks.count %}
+            <div class="goal-linked">
+              &#x1F517; {{ goal.linked_tasks.count }} week task{{ goal.linked_tasks.count|pluralize }} linked
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="goal-actions" style="margin-top:10px">
+          <form method="POST" action="/checklist/month/status/{{ goal.id }}/" style="display:contents">
+            {% csrf_token %}
+            <input type="hidden" name="status" value="done">
+            <button type="submit" class="btn-sm btn-done">&#x2714; Mark Done</button>
+          </form>
+          <form method="POST" action="/checklist/month/status/{{ goal.id }}/" style="display:contents">
+            {% csrf_token %}
+            <input type="hidden" name="status" value="dropped">
+            <button type="submit" class="btn-sm btn-drop">Drop</button>
+          </form>
+          <form method="POST" action="/checklist/month/delete/{{ goal.id }}/" style="display:contents">
+            {% csrf_token %}
+            <button type="submit" class="btn-sm btn-del">&#x2715;</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Completed goals -->
+  {% if month_goals_done %}
+  <div class="gc a5">
+    <div class="gcp">
+      <div class="sec-lbl">&#x1F3C6; Completed Goals</div>
+      {% for goal in month_goals_done %}
+      <div class="goal-card done">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="goal-title" style="color:var(--gr)">&#x2714; {{ goal.title }}</div>
+          <div style="display:flex;gap:6px">
+            <form method="POST" action="/checklist/month/status/{{ goal.id }}/" style="display:contents">
+              {% csrf_token %}
+              <input type="hidden" name="status" value="active">
+              <button type="submit" class="btn-sm btn-rev">Reopen</button>
+            </form>
+            <form method="POST" action="/checklist/month/delete/{{ goal.id }}/" style="display:contents">
+              {% csrf_token %}
+              <button type="submit" class="btn-sm btn-del">&#x2715;</button>
+            </form>
+          </div>
+        </div>
+        {% if goal.description %}
+        <div class="goal-desc" style="margin-top:4px">{{ goal.description }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Dropped goals -->
+  {% if month_goals_dropped %}
+  <div class="gc a6">
+    <div class="gcp">
+      <div class="sec-lbl" style="color:var(--muted)">Dropped</div>
+      {% for goal in month_goals_dropped %}
+      <div class="goal-card dropped">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="goal-title">{{ goal.title }}</div>
+          <div style="display:flex;gap:6px">
+            <form method="POST" action="/checklist/month/status/{{ goal.id }}/" style="display:contents">
+              {% csrf_token %}
+              <input type="hidden" name="status" value="active">
+              <button type="submit" class="btn-sm btn-rev">Reopen</button>
+            </form>
+            <form method="POST" action="/checklist/month/delete/{{ goal.id }}/" style="display:contents">
+              {% csrf_token %}
+              <button type="submit" class="btn-sm btn-del">&#x2715;</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if not month_goals_active and not month_goals_done and not month_goals_dropped %}
+  <div class="gc a4">
+    <div class="empty">
+      <div class="empty-ico">&#x1F3AF;</div>
+      <div class="empty-ttl">No goals yet for {{ month_display }}</div>
+      <div class="empty-sub">Set your monthly goals above and link them to week tasks.</div>
+    </div>
+  </div>
+  {% endif %}
+
+</div><!-- /tab-month -->
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  var TABS = ['daily','work','week','month'];
+
+  function switchTab(name) {
+    TABS.forEach(function(t) {
+      document.getElementById('tab-'+t).classList.remove('active');
+    });
+    document.getElementById('tab-'+name).classList.add('active');
+
+    document.querySelectorAll('.ptab').forEach(function(b) { b.classList.remove('on'); });
+    document.querySelector('.ptab-'+name).classList.add('on');
+
+    // Update URL so refresh stays on same tab
+    var url = new URL(window.location.href);
+    url.searchParams.set('tab', name);
+    window.history.replaceState({}, '', url);
+  }
+
+  function tog(id) {
+    var el = document.getElementById(id);
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function setMood(val, el) {
+    document.getElementById('mood-input').value = val;
+    document.querySelectorAll('.mood-btn').forEach(function(b) { b.classList.remove('sel'); });
+    el.classList.add('sel');
+  }
+</script>
+{% endblock %}

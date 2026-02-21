@@ -1,0 +1,18 @@
+<div class="ex-card ex-done" id="exercise-{{ exercise.id }}" style="margin-bottom:12px">
+  <div style="display:flex;align-items:center;gap:14px;padding:16px">
+    <div style="width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,rgba(45,212,191,.2),rgba(129,140,248,.2));border:1px solid rgba(45,212,191,.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">
+      &#x2705;
+    </div>
+    <div style="flex:1">
+      <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:3px">
+        {{ exercise.name }}
+      </div>
+      <div style="font-size:12px;color:#34d399;font-weight:600">
+        {{ log.sets }} sets &#x2715; {{ log.reps_per_set }} reps &mdash; logged &#x2713;
+      </div>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#34d399">
+      Done!
+    </div>
+  </div>
+</div>

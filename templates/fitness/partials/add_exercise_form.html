@@ -1,0 +1,68 @@
+<div style="background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.09);border-radius:20px;padding:20px;margin-top:8px">
+  <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#94a3b8;letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px">
+    Add Custom Exercise
+  </div>
+
+  <form hx-post="/fitness/add-exercise/"
+        hx-target="#qa-area"
+        hx-swap="innerHTML">
+    {% csrf_token %}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div>
+        <label style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:6px">Exercise Name</label>
+        <input name="name" type="text" placeholder="e.g. Push-ups" required
+               style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:11px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;box-sizing:border-box"
+               onfocus="this.style.borderColor='rgba(45,212,191,.5)'"
+               onblur="this.style.borderColor='rgba(255,255,255,.09)'">
+      </div>
+      <div>
+        <label style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:6px">Category</label>
+        <select name="category"
+                style="width:100%;background:#111118;border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:11px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;box-sizing:border-box">
+          <option value="Core">Core</option>
+          <option value="Lower">Lower Body</option>
+          <option value="Upper">Upper Body</option>
+          <option value="Cardio">Cardio</option>
+          <option value="Recovery">Recovery</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div>
+        <label style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:6px">Default Reps</label>
+        <input name="default_reps" type="number" value="10" min="1" max="300"
+               style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:11px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;box-sizing:border-box"
+               onfocus="this.style.borderColor='rgba(45,212,191,.5)'"
+               onblur="this.style.borderColor='rgba(255,255,255,.09)'">
+      </div>
+      <div>
+        <label style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:6px">Sets</label>
+        <input name="sets" type="number" value="3" min="1" max="10"
+               style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:11px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;box-sizing:border-box"
+               onfocus="this.style.borderColor='rgba(45,212,191,.5)'"
+               onblur="this.style.borderColor='rgba(255,255,255,.09)'">
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:6px">Description (optional)</label>
+      <input name="description" type="text" placeholder="e.g. Keep core tight"
+             style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:11px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;box-sizing:border-box"
+             onfocus="this.style.borderColor='rgba(45,212,191,.5)'"
+             onblur="this.style.borderColor='rgba(255,255,255,.09)'">
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button type="submit"
+              style="flex:2;padding:13px;border:none;border-radius:14px;background:linear-gradient(135deg,#2dd4bf,#818cf8);color:#0a0a12;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;cursor:pointer">
+        &#43; Add Exercise
+      </button>
+      <button type="button" onclick="document.getElementById('qa-area').innerHTML=''"
+              style="flex:1;padding:13px;border:1px solid rgba(255,255,255,.16);border-radius:14px;background:rgba(255,255,255,.04);color:#94a3b8;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">
+        Cancel
+      </button>
+    </div>
+  </form>
+</div>
