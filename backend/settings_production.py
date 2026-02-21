@@ -77,7 +77,7 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ── Auth ──────────────────────────────────────────────────────
-AUTH_USER_MODEL     = 'users.CustomUser'
+AUTH_USER_MODEL     = 'users.User'
 LOGIN_URL           = '/accounts/login/'
 LOGIN_REDIRECT_URL  = '/fitness/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
