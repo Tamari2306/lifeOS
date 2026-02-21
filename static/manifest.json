@@ -1,8 +1,9 @@
 {
   "name": "LifeOS",
   "short_name": "LifeOS",
-  "description": "Your personal life operating system — fitness, meals, bible, finance & more",
+  "description": "Your personal life operating system",
   "start_url": "/fitness/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0a0a12",
   "theme_color": "#818cf8",
@@ -57,23 +58,21 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["health", "lifestyle", "productivity"],
-  "screenshots": [],
   "shortcuts": [
     {
-      "name": "Today's Meals",
+      "name": "Meals",
       "url": "/meals/",
       "description": "Log your meals"
     },
     {
       "name": "Bible",
       "url": "/bible/",
-      "description": "Daily verse & reading plan"
+      "description": "Daily verse and reading plan"
     },
     {
       "name": "Planner",
       "url": "/checklist/",
-      "description": "Daily & work planner"
+      "description": "Daily and work planner"
     }
   ]
 }
