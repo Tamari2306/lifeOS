@@ -7,3 +7,4 @@ class User(AbstractUser):
     weight = models.FloatField(null=True, blank=True)
     gender = models.CharField(max_length=10, blank=True)
     daily_water_goal = models.IntegerField(default=2000)
+
