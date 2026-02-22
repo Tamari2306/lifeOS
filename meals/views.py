@@ -1,16 +1,14 @@
 import json
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 
 from .models import MealEntry, NutritionGoal, RecipeIdea
 
 MEAL_ORDER = ['breakfast', 'lunch', 'snack', 'dinner']
 
-# In meals/views.py — replace MEAL_ICONS with actual emoji
 MEAL_ICONS = {
     'breakfast': '🍳',
     'lunch':     '🥗',
@@ -19,7 +17,6 @@ MEAL_ICONS = {
 }
 
 # ── Nutrition database (per common serving) ──────────────────────────────────
-# Format: { keywords: (kcal, protein_g, carbs_g, fat_g, serving_desc) }
 NUTRITION_DB = [
     # STAPLES
     (["rice", "white rice", "brown rice", "fried rice"],
@@ -114,13 +111,11 @@ NUTRITION_DB = [
      {"glass": (200, 5, 38, 3), "cup": (200, 5, 38, 3), "serving": (200, 5, 38, 3)}),
 ]
 
-# Number words
 NUM_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
              "half": 0.5, "a": 1, "an": 1}
 
 
 def _parse_quantity(text):
-    """Extract quantity from text like '2 fried plantains', '1 bowl rice'"""
     words = text.lower().split()
     qty = 1
     for w in words:
@@ -136,7 +131,6 @@ def _parse_quantity(text):
 
 
 def _get_serving_type(text):
-    """Detect serving description from text"""
     servings = ["bowl", "plate", "cup", "glass", "slice", "piece", "fillet",
                 "breast", "thigh", "leg", "half", "whole", "handful",
                 "medium", "large", "small", "serving"]
@@ -148,10 +142,6 @@ def _get_serving_type(text):
 
 
 def estimate_nutrition(meal_description):
-    """
-    Parse a plain-English meal description and return estimated nutrition.
-    Returns dict: {name, kcal, protein, carbs, fat, confidence}
-    """
     text = meal_description.lower().strip()
     qty = _parse_quantity(text)
     serving = _get_serving_type(text)
@@ -162,10 +152,9 @@ def estimate_nutrition(meal_description):
     for keywords, nutrition in NUTRITION_DB:
         for kw in keywords:
             if kw in text:
-                score = len(kw)  # longer keyword = more specific = better
+                score = len(kw)
                 if score > best_score:
                     best_score = score
-                    # get nutrition for this serving type, fall back to 'serving'
                     nums = nutrition.get(serving) or nutrition.get("serving") or list(nutrition.values())[0]
                     best_match = {
                         "kcal":    round(nums[0] * qty),
@@ -178,6 +167,22 @@ def estimate_nutrition(meal_description):
         return {**best_match, "confidence": "estimated", "found": True}
     else:
         return {"kcal": 0, "protein": 0, "carbs": 0, "fat": 0, "confidence": "unknown", "found": False}
+
+
+def _safe_int(value, default=0):
+    """Safely convert a value to int, returning default on failure."""
+    try:
+        return int(value or default)
+    except (ValueError, TypeError):
+        return default
+
+
+def _parse_date(date_str):
+    """Safely parse a date string, returning today on failure."""
+    try:
+        return datetime.strptime(date_str, '%Y-%m-%d').date()
+    except (ValueError, TypeError):
+        return date.today()
 
 
 def _totals_for_day(user, day):
@@ -195,11 +200,7 @@ def _totals_for_day(user, day):
 def dashboard(request):
     today = date.today()
     view_date_str = request.GET.get('date', str(today))
-    try:
-        from datetime import datetime
-        view_date = datetime.strptime(view_date_str, '%Y-%m-%d').date()
-    except (ValueError, TypeError):
-        view_date = today
+    view_date = _parse_date(view_date_str)
 
     goal = NutritionGoal.objects.filter(user=request.user).first()
     if not goal:
@@ -274,16 +275,22 @@ def estimate_meal_api(request):
 @login_required
 @require_POST
 def log_meal(request):
-    meal_date = request.POST.get('date', str(date.today()))
+    meal_date_str = request.POST.get('date', str(date.today()))
+    # FIX: validate and convert date string to a real date object
+    meal_date = _parse_date(meal_date_str)
+
     meal_type = request.POST.get('meal_type', 'lunch')
-    name      = request.POST.get('name', '').strip()
-    try:
-        calories = int(request.POST.get('calories', 0) or 0)
-        protein  = int(request.POST.get('protein',  0) or 0)
-        carbs    = int(request.POST.get('carbs',    0) or 0)
-        fat      = int(request.POST.get('fat',      0) or 0)
-    except (ValueError, TypeError):
-        calories = protein = carbs = fat = 0
+    # FIX: validate meal_type against known values
+    if meal_type not in MEAL_ORDER:
+        meal_type = 'lunch'
+
+    name = request.POST.get('name', '').strip()
+
+    # FIX: use _safe_int for all numeric fields
+    calories = _safe_int(request.POST.get('calories'))
+    protein  = _safe_int(request.POST.get('protein'))
+    carbs    = _safe_int(request.POST.get('carbs'))
+    fat      = _safe_int(request.POST.get('fat'))
 
     # If no macros provided, try to estimate from name
     if name and calories == 0:
@@ -297,9 +304,15 @@ def log_meal(request):
 
     if name:
         MealEntry.objects.create(
-            user=request.user, date=meal_date, meal_type=meal_type,
-            name=name, calories=calories, protein=protein,
-            carbs=carbs, fat=fat, notes=notes,
+            user=request.user,
+            date=meal_date,
+            meal_type=meal_type,
+            name=name,
+            calories=calories,
+            protein=protein,
+            carbs=carbs,
+            fat=fat,
+            notes=notes,
         )
     return redirect(f'/meals/?date={meal_date}')
 
@@ -320,13 +333,13 @@ def set_goals(request):
         NutritionGoal.objects.update_or_create(
             user=request.user,
             defaults={
-                'calories': int(request.POST.get('calories', 1800)),
-                'protein':  int(request.POST.get('protein',  120)),
-                'carbs':    int(request.POST.get('carbs',    180)),
-                'fat':      int(request.POST.get('fat',      60)),
+                'calories': _safe_int(request.POST.get('calories'), 1800),
+                'protein':  _safe_int(request.POST.get('protein'),  120),
+                'carbs':    _safe_int(request.POST.get('carbs'),    180),
+                'fat':      _safe_int(request.POST.get('fat'),      60),
             }
         )
-    except (ValueError, Exception):
+    except Exception:
         pass
     return redirect('/meals/')
 
@@ -336,21 +349,28 @@ def set_goals(request):
 def save_recipe(request):
     name     = request.POST.get('name', '').strip()
     category = request.POST.get('category', 'lunch')
+
     if name:
-        calories = int(request.POST.get('calories', 0) or 0)
-        protein  = int(request.POST.get('protein',  0) or 0)
-        # Auto-estimate if not provided
+        # FIX: safely cast all numeric fields before use
+        calories  = _safe_int(request.POST.get('calories'))
+        protein   = _safe_int(request.POST.get('protein'))
+        prep_time = _safe_int(request.POST.get('prep_time'))
+
+        # Auto-estimate if calories not provided
         if calories == 0:
             est      = estimate_nutrition(name)
             calories = est['kcal']
             protein  = est['protein']
+
         RecipeIdea.objects.create(
-            user=request.user, name=name, category=category,
+            user=request.user,
+            name=name,
+            category=category,
             ingredients=request.POST.get('ingredients', ''),
             instructions=request.POST.get('instructions', ''),
             calories=calories,
             protein=protein,
-            prep_time=int(request.POST.get('prep_time', 0) or 0),
+            prep_time=prep_time,
         )
     return redirect('/meals/')
 

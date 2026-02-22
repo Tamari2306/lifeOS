@@ -5,146 +5,181 @@
 {% block extra_head %}
 <style>
   :root {
-    --orange:#f97316; --rose:#fb7185; --amber:#fbbf24; --green:#34d399;
-    --surf:rgba(255,255,255,0.045); --rim:rgba(255,255,255,0.09);
-    --rim2:rgba(255,255,255,0.16); --muted:#64748b; --soft:#94a3b8;
+    --brand:#e07b54;
+    --brand2:#c9623a;
+    --brand-light:#f0a07a;
+    --amber:#f5c47a;
+    --rose:#f28b82;
+    --green:#5cb88a;
+    --blue:#6aaccc;
+    --surf:rgba(255,255,255,0.055);
+    --rim:rgba(255,255,255,0.10);
+    --muted:#8a7a72;
+    --soft:#b0a09a;
+    --text:#f5ede8;
+    --subtext:#d4c4bc;
   }
-  .hdr { display:flex; justify-content:space-between; align-items:flex-start; padding:8px 0 20px; }
-  .hdr-title { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; line-height:1;
-               background:linear-gradient(115deg,#f97316,#fb7185); -webkit-background-clip:text;
+
+  .hdr { display:flex; justify-content:space-between; align-items:flex-start; padding:8px 0 18px; }
+  .hdr-title { font-family:'Syne',sans-serif; font-size:clamp(22px,5vw,30px); font-weight:800; line-height:1;
+               background:linear-gradient(115deg,var(--brand),var(--amber)); -webkit-background-clip:text;
                -webkit-text-fill-color:transparent; background-clip:text; }
-  .hdr-cal { text-align:right; }
-  .hdr-cal-num { font-family:'Syne',sans-serif; font-size:30px; font-weight:800;
-                 background:linear-gradient(135deg,#f97316,#fbbf24);
-                 -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-  .hdr-cal-lbl { font-size:10px; color:var(--muted); }
 
-  /* GLASS */
-  .gc { background:var(--surf); border:1px solid var(--rim); border-radius:22px;
-        backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); overflow:hidden; margin-bottom:14px; }
-  .gcp { padding:18px 20px; }
+  .gc { background:var(--surf); border:1px solid var(--rim); border-radius:20px;
+        backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); margin-bottom:14px; overflow:hidden; }
+  .gcp { padding:16px 18px; }
   .sec-lbl { font-family:'Syne',sans-serif; font-size:11px; font-weight:700; color:var(--muted);
-             letter-spacing:.1em; text-transform:uppercase; margin-bottom:14px; }
+             letter-spacing:.1em; text-transform:uppercase; margin-bottom:12px; }
 
-  /* WEEK */
+  /* week strip */
   .week-strip { display:flex; gap:6px; margin-bottom:14px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
   .week-strip::-webkit-scrollbar { display:none; }
-  .wday { display:flex; flex-direction:column; align-items:center; gap:3px; min-width:44px;
+  .wday { display:flex; flex-direction:column; align-items:center; gap:3px; min-width:42px;
           padding:8px 4px; border-radius:14px; background:var(--surf); border:1px solid var(--rim);
           text-decoration:none; transition:all .2s; }
-  .wday.active { border-color:rgba(249,115,22,.4); background:rgba(249,115,22,.1); }
-  .wday-lbl { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; color:var(--muted); }
-  .wday-num { font-family:'Syne',sans-serif; font-size:14px; font-weight:800; color:#e2e8f0; }
-  .wday-cal { font-size:10px; color:var(--orange); font-weight:700; }
+  .wday.active { border-color:rgba(224,123,84,.45); background:rgba(224,123,84,.14); }
+  .wday-l { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; color:var(--muted); }
+  .wday-n { font-family:'Syne',sans-serif; font-size:13px; font-weight:800; color:var(--text); }
+  .wday-c { font-size:10px; color:var(--brand); font-weight:700; }
 
-  /* MACROS */
+  /* macros */
   .macro-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
-  .mbox { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:14px; padding:12px 8px; text-align:center; }
-  .mval { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; line-height:1; }
-  .mlbl { font-size:10px; color:var(--muted); margin-top:4px; }
+  @media(max-width:380px){ .macro-grid { grid-template-columns:repeat(2,1fr); } }
+  .mbox { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:14px; padding:12px 6px; text-align:center; }
+  .mval { font-family:'Syne',sans-serif; font-size:17px; font-weight:800; line-height:1; }
+  .mlbl { font-size:10px; color:var(--muted); margin-top:3px; }
   .mprog { height:4px; background:rgba(255,255,255,.07); border-radius:4px; margin-top:6px; overflow:hidden; }
   .mpfill { height:100%; border-radius:4px; transition:width .7s ease; }
 
-  /* FORMS */
-  .fi { width:100%; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:13px;
-        padding:11px 14px; color:#fff; font-family:'DM Sans',sans-serif; font-size:14px; outline:none;
-        transition:border-color .2s; box-sizing:border-box; }
-  .fi:focus { border-color:rgba(249,115,22,.5); }
-  .fi::placeholder { color:var(--muted); }
-  .fi-sel { appearance:none; -webkit-appearance:none; background-color:#111118; }
-  .field-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.06em;
-               text-transform:uppercase; display:block; margin-bottom:6px; }
-  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+  /* ── SMART LOG FORM ── */
+  .smart-box { background:rgba(224,123,84,.07); border:1px solid rgba(224,123,84,.25); border-radius:18px; padding:16px; margin-bottom:12px; }
+  .smart-input-row { display:flex; gap:8px; align-items:stretch; }
+  .smart-input { flex:1; background:rgba(255,255,255,.07); border:1px solid rgba(224,123,84,.3);
+                 border-radius:13px; padding:12px 14px; color:var(--text); font-family:'DM Sans',sans-serif;
+                 font-size:14px; outline:none; transition:border-color .2s; }
+  .smart-input:focus { border-color:var(--brand); }
+  .smart-input::placeholder { color:var(--muted); }
+  .smart-btn { padding:12px 16px; border:none; border-radius:13px;
+               background:linear-gradient(135deg,var(--brand),var(--amber)); color:#1a0f08;
+               font-family:'Syne',sans-serif; font-size:12px; font-weight:800; cursor:pointer;
+               white-space:nowrap; transition:all .2s; flex-shrink:0; }
+  .smart-btn:hover { opacity:.9; }
+
+  /* result preview */
+  .nutrition-preview { background:rgba(255,255,255,.05); border:1px solid rgba(224,123,84,.2);
+                        border-radius:14px; padding:12px 14px; margin-top:10px; display:none; }
+  .np-name { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:var(--text); margin-bottom:8px; }
+  .np-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  @media(max-width:360px){ .np-grid { grid-template-columns:repeat(2,1fr); } }
+  .np-box { text-align:center; background:rgba(255,255,255,.04); border-radius:10px; padding:8px 4px; }
+  .np-val { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:var(--brand); }
+  .np-key { font-size:9px; color:var(--muted); margin-top:2px; }
+  .np-note { font-size:10px; color:var(--muted); margin-top:8px; text-align:center; }
+  .np-actions { display:flex; gap:8px; margin-top:10px; }
+  .np-log-btn { flex:1; padding:11px; border:none; border-radius:12px;
+                background:linear-gradient(135deg,var(--brand),var(--amber)); color:#1a0f08;
+                font-family:'Syne',sans-serif; font-size:12px; font-weight:800; cursor:pointer; transition:all .2s; }
+  .np-edit-btn { padding:11px 14px; border:1px solid var(--rim); border-radius:12px; background:transparent;
+                 color:var(--soft); font-family:'Syne',sans-serif; font-size:12px; font-weight:700;
+                 cursor:pointer; transition:all .2s; }
+
+  /* manual override fields */
+  .manual-fields { display:none; margin-top:10px; }
   .form-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px; }
-  .btn-org { width:100%; padding:13px; border:none; border-radius:14px;
-             background:linear-gradient(135deg,#f97316,#fb7185); color:#fff;
-             font-family:'Syne',sans-serif; font-size:13px; font-weight:800;
-             cursor:pointer; transition:all .2s; box-shadow:0 4px 18px rgba(249,115,22,.25); }
-  .btn-org:hover { opacity:.9; transform:translateY(-1px); }
-  .btn-sm-del { background:rgba(251,113,133,.1); border:1px solid rgba(251,113,133,.2);
-                border-radius:8px; padding:4px 10px; font-size:11px; color:#fb7185;
-                cursor:pointer; font-family:'Syne',sans-serif; font-weight:600; }
+  @media(max-width:400px){ .form-4 { grid-template-columns:repeat(2,1fr); } }
+  .form-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
 
-  /* MEAL SECTIONS */
+  .fi { width:100%; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:12px;
+        padding:10px 12px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px;
+        outline:none; transition:border-color .2s; box-sizing:border-box; }
+  .fi:focus { border-color:rgba(224,123,84,.5); }
+  .fi::placeholder { color:var(--muted); }
+  .fi-sel { appearance:none; -webkit-appearance:none; background-color:#1c1210; }
+  .field-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.06em;
+               text-transform:uppercase; display:block; margin-bottom:5px; }
+  .fg { margin-bottom:10px; }
+
+  /* meal type tabs */
+  .meal-tabs { display:flex; gap:5px; margin-bottom:12px; overflow-x:auto; scrollbar-width:none; }
+  .meal-tabs::-webkit-scrollbar { display:none; }
+  .mtab { flex-shrink:0; padding:6px 14px; border-radius:20px; border:1px solid var(--rim);
+          background:rgba(255,255,255,.04); color:var(--muted); font-family:'Syne',sans-serif;
+          font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; }
+  .mtab.on { background:rgba(224,123,84,.18); border-color:rgba(224,123,84,.4); color:var(--brand); }
+
+  .btn-or { width:100%; padding:12px; border:none; border-radius:13px;
+            background:linear-gradient(135deg,var(--brand),var(--amber)); color:#1a0f08;
+            font-family:'Syne',sans-serif; font-size:13px; font-weight:800;
+            cursor:pointer; transition:all .2s; box-shadow:0 4px 18px rgba(224,123,84,.25); }
+  .btn-or:hover { opacity:.9; transform:translateY(-1px); }
+
+  /* meals today */
   .meal-section { margin-bottom:14px; }
-  .meal-hdr { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-  .meal-ico { font-size:24px; }
-  .meal-name { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; }
-  .meal-cal  { font-size:12px; color:var(--orange); font-weight:700; margin-left:auto; }
-
-  .meal-item { display:flex; align-items:center; gap:10px; padding:9px 0;
+  .meal-hdr { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .meal-ico { font-size:20px; }
+  .meal-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:var(--text); }
+  .meal-cal { font-size:12px; color:var(--brand); font-weight:700; margin-left:auto; }
+  .meal-item { display:flex; align-items:center; gap:8px; padding:8px 0;
                border-bottom:1px solid rgba(255,255,255,.05); }
   .meal-item:last-child { border-bottom:none; }
-  .meal-item-name { flex:1; font-size:14px; color:#e2e8f0; }
-  .meal-item-macros { font-size:11px; color:var(--muted); }
-  .meal-item-cal { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--orange); }
+  .meal-item-name { flex:1; font-size:13px; color:var(--text); min-width:0; }
+  .meal-item-macros { font-size:10px; color:var(--muted); }
+  .meal-item-cal { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--brand); white-space:nowrap; }
+  .btn-sm-del { background:rgba(242,139,130,.1); border:1px solid rgba(242,139,130,.2);
+                border-radius:8px; padding:4px 9px; font-size:11px; color:var(--rose);
+                cursor:pointer; font-family:'Syne',sans-serif; font-weight:600; flex-shrink:0; }
 
-  /* SUGGESTED */
-  .sugg-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-  .sugg-item { background:rgba(249,115,22,.06); border:1px solid rgba(249,115,22,.15);
-               border-radius:14px; padding:12px; cursor:pointer; transition:all .2s; }
-  .sugg-item:hover { background:rgba(249,115,22,.12); transform:translateY(-1px); }
-  .sugg-name { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; margin-bottom:4px; }
-  .sugg-cal  { font-size:11px; color:var(--orange); font-weight:600; }
-  .sugg-macros { font-size:10px; color:var(--muted); margin-top:2px; }
-
-  /* RECIPE CARDS */
+  /* recipes */
   .recipe-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
-                 border-radius:16px; padding:14px; margin-bottom:10px; }
-  .recipe-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; margin-bottom:6px; }
-  .recipe-meta { display:flex; gap:10px; flex-wrap:wrap; font-size:11px; color:var(--muted); }
-  .recipe-ingredients { font-size:12px; color:#94a3b8; margin-top:8px; line-height:1.6; }
+                 border-radius:14px; padding:12px 14px; margin-bottom:10px; }
+  .recipe-name { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .recipe-meta { display:flex; gap:8px; flex-wrap:wrap; font-size:11px; color:var(--muted); }
 
-  /* TOGGLE */
   .toggle-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
-                padding:13px; background:rgba(249,115,22,.07); border:1px dashed rgba(249,115,22,.3);
-                border-radius:16px; color:var(--orange); font-family:'Syne',sans-serif;
+                padding:12px; background:rgba(224,123,84,.07); border:1px dashed rgba(224,123,84,.3);
+                border-radius:14px; color:var(--brand); font-family:'Syne',sans-serif;
                 font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
-  .toggle-btn:hover { background:rgba(249,115,22,.14); }
+  .toggle-btn:hover { background:rgba(224,123,84,.14); }
 
-  /* TABS */
-  .meal-tabs { display:flex; gap:6px; margin-bottom:14px; overflow-x:auto; scrollbar-width:none; }
-  .meal-tabs::-webkit-scrollbar { display:none; }
-  .mtab { flex-shrink:0; padding:7px 16px; border-radius:20px; border:1px solid var(--rim);
-          background:rgba(255,255,255,.04); color:var(--muted); font-family:'Syne',sans-serif;
-          font-size:12px; font-weight:700; cursor:pointer; transition:all .2s; }
-  .mtab.on { background:rgba(249,115,22,.15); border-color:rgba(249,115,22,.35); color:var(--orange); }
+  /* goals */
+  .goals-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px; }
+  @media(max-width:400px){ .goals-grid { grid-template-columns:repeat(2,1fr); } }
 
-  @keyframes sup { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-  .a1{animation:sup .4s ease both .04s} .a2{animation:sup .4s ease both .10s}
-  .a3{animation:sup .4s ease both .16s} .a4{animation:sup .4s ease both .22s}
-  .a5{animation:sup .4s ease both .28s} .a6{animation:sup .4s ease both .34s}
-  .a7{animation:sup .4s ease both .40s}
+  /* loading spinner */
+  .spinner { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,.3);
+             border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  @keyframes sup { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .a1{animation:sup .38s ease both .04s} .a2{animation:sup .38s ease both .10s}
+  .a3{animation:sup .38s ease both .16s} .a4{animation:sup .38s ease both .22s}
+  .a5{animation:sup .38s ease both .28s}
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- HEADER -->
 <div class="hdr a1">
   <div>
-    <p style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px">
-      {{ view_date|date:"l, M j" }}
-    </p>
+    <p style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">{{ view_date|date:"l, M j" }}</p>
     <h1 class="hdr-title">Meal Planner &#x1F957;</h1>
-    <p style="font-size:12px;color:var(--muted);margin-top:4px">
-      Goal: {{ goal.calories }} kcal/day
-    </p>
+    <p style="font-size:12px;color:var(--muted);margin-top:4px">Goal: {{ goal.calories }} kcal/day</p>
   </div>
-  <div class="hdr-cal">
-    <div class="hdr-cal-num">{{ day_data.calories }}</div>
-    <div class="hdr-cal-lbl">kcal today</div>
+  <div style="text-align:right">
+    <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;line-height:1;
+                background:linear-gradient(135deg,var(--brand),var(--amber));-webkit-background-clip:text;
+                -webkit-text-fill-color:transparent;background-clip:text">{{ day_data.calories }}</div>
+    <div style="font-size:10px;color:var(--muted)">kcal today</div>
   </div>
 </div>
 
 <!-- WEEK STRIP -->
 <div class="week-strip a1">
   {% for d in week_data %}
-  <a href="/meals/?date={{ d.date|date:'Y-m-d' }}"
-     class="wday {% if d.date == view_date %}active{% endif %}">
-    <span class="wday-lbl">{{ d.label }}</span>
-    <span class="wday-num">{{ d.date.day }}</span>
-    <span class="wday-cal">{{ d.calories }}</span>
+  <a href="/meals/?date={{ d.date|date:'Y-m-d' }}" class="wday {% if d.date == view_date %}active{% endif %}">
+    <span class="wday-l">{{ d.label }}</span>
+    <span class="wday-n">{{ d.date.day }}</span>
+    <span class="wday-c">{{ d.calories }}</span>
   </a>
   {% endfor %}
 </div>
@@ -154,101 +189,86 @@
   <div class="gcp">
     <div class="sec-lbl">Today's Nutrition</div>
     <div class="macro-grid">
-      <div class="mbox">
-        <div class="mval" style="color:var(--orange)">{{ day_data.calories }}</div>
-        <div class="mlbl">kcal</div>
-        <div class="mprog"><div class="mpfill" style="width:{{ cal_pct }}%;background:#f97316"></div></div>
-      </div>
-      <div class="mbox">
-        <div class="mval" style="color:#38bdf8">{{ day_data.protein }}g</div>
-        <div class="mlbl">protein</div>
-        <div class="mprog"><div class="mpfill" style="width:{{ protein_pct }}%;background:#38bdf8"></div></div>
-      </div>
-      <div class="mbox">
-        <div class="mval" style="color:#818cf8">{{ day_data.carbs }}g</div>
-        <div class="mlbl">carbs</div>
-        <div class="mprog"><div class="mpfill" style="width:{{ carbs_pct }}%;background:#818cf8"></div></div>
-      </div>
-      <div class="mbox">
-        <div class="mval" style="color:var(--amber)">{{ day_data.fat }}g</div>
-        <div class="mlbl">fat</div>
-        <div class="mprog"><div class="mpfill" style="width:{{ fat_pct }}%;background:#fbbf24"></div></div>
-      </div>
+      <div class="mbox"><div class="mval" style="color:var(--brand)">{{ day_data.calories }}</div><div class="mlbl">kcal</div><div class="mprog"><div class="mpfill" style="width:{{ cal_pct }}%;background:var(--brand)"></div></div></div>
+      <div class="mbox"><div class="mval" style="color:var(--blue)">{{ day_data.protein }}g</div><div class="mlbl">protein</div><div class="mprog"><div class="mpfill" style="width:{{ protein_pct }}%;background:var(--blue)"></div></div></div>
+      <div class="mbox"><div class="mval" style="color:#b39ddb">{{ day_data.carbs }}g</div><div class="mlbl">carbs</div><div class="mprog"><div class="mpfill" style="width:{{ carbs_pct }}%;background:#b39ddb"></div></div></div>
+      <div class="mbox"><div class="mval" style="color:var(--amber)">{{ day_data.fat }}g</div><div class="mlbl">fat</div><div class="mprog"><div class="mpfill" style="width:{{ fat_pct }}%;background:var(--amber)"></div></div></div>
     </div>
-    <div style="margin-top:10px;font-size:11px;color:var(--muted);text-align:center">
-      Goal: {{ goal.calories }} kcal &bull; {{ goal.protein }}g protein &bull; {{ goal.carbs }}g carbs &bull; {{ goal.fat }}g fat
-    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);text-align:center">Goal: {{ goal.calories }} kcal · {{ goal.protein }}g protein · {{ goal.carbs }}g carbs · {{ goal.fat }}g fat</div>
   </div>
 </div>
 
-<!-- LOG MEAL -->
+<!-- SMART LOG MEAL -->
 <div class="gc a3">
   <div class="gcp">
-    <div class="sec-lbl">&#x2795; Log a Meal</div>
-    <form method="POST" action="/meals/log/" id="log-form">
-      {% csrf_token %}
-      <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
+    <div class="sec-lbl">&#x1F916; Smart Meal Logger</div>
 
-      <!-- Meal type tabs -->
-      <div class="meal-tabs" id="meal-tabs">
-        <button type="button" class="mtab on" onclick="setMealType('breakfast',this)">&#x1F373; Breakfast</button>
-        <button type="button" class="mtab" onclick="setMealType('lunch',this)">&#x1F957; Lunch</button>
-        <button type="button" class="mtab" onclick="setMealType('snack',this)">&#x1F34E; Snack</button>
-        <button type="button" class="mtab" onclick="setMealType('dinner',this)">&#x1F35B; Dinner</button>
-      </div>
-      <input type="hidden" name="meal_type" id="meal-type-input" value="breakfast">
-
-      <div style="margin-bottom:10px">
-        <label class="field-lbl">Meal Name</label>
-        <input class="fi" type="text" name="name" id="meal-name-input" placeholder="What did you eat?" required>
-      </div>
-      <div class="form-4">
-        <div>
-          <label class="field-lbl">kcal</label>
-          <input class="fi" type="number" name="calories" id="meal-cal" placeholder="0" min="0">
-        </div>
-        <div>
-          <label class="field-lbl">Protein g</label>
-          <input class="fi" type="number" name="protein" placeholder="0" min="0">
-        </div>
-        <div>
-          <label class="field-lbl">Carbs g</label>
-          <input class="fi" type="number" name="carbs" placeholder="0" min="0">
-        </div>
-        <div>
-          <label class="field-lbl">Fat g</label>
-          <input class="fi" type="number" name="fat" placeholder="0" min="0">
-        </div>
-      </div>
-      <button type="submit" class="btn-org">&#x1F374; Log Meal</button>
-    </form>
-  </div>
-</div>
-
-<!-- SUGGESTED QUICK-ADD -->
-<div class="gc a3">
-  <div class="gcp">
-    <div class="sec-lbl">&#x26A1; Quick Suggestions</div>
-    <div id="sugg-tabs" style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none">
-      <button class="mtab on" onclick="showSugg('breakfast',this)">Breakfast</button>
-      <button class="mtab" onclick="showSugg('lunch',this)">Lunch</button>
-      <button class="mtab" onclick="showSugg('snack',this)">Snack</button>
-      <button class="mtab" onclick="showSugg('dinner',this)">Dinner</button>
+    <!-- Meal type selector -->
+    <div class="meal-tabs" id="meal-tabs">
+      <button type="button" class="mtab on" onclick="setMealType('breakfast',this)">&#x1F373; Breakfast</button>
+      <button type="button" class="mtab" onclick="setMealType('lunch',this)">&#x1F957; Lunch</button>
+      <button type="button" class="mtab" onclick="setMealType('snack',this)">&#x1F34E; Snack</button>
+      <button type="button" class="mtab" onclick="setMealType('dinner',this)">&#x1F35B; Dinner</button>
     </div>
 
-    {% for mt, meals in suggested.items %}
-    <div class="sugg-grid sugg-panel" id="sugg-{{ mt }}" style="{% if mt != 'breakfast' %}display:none{% endif %}">
-      {% for m in meals %}
-      <div class="sugg-item"
-           onclick="quickFill('{{ m.name }}','{{ m.cal }}','{{ m.protein }}','{{ m.carbs }}','{{ m.fat }}','{{ mt }}')">
-        <div class="sugg-name">{{ m.name }}</div>
-        <div class="sugg-cal">{{ m.cal }} kcal</div>
-        <div class="sugg-macros">P:{{ m.protein }}g C:{{ m.carbs }}g F:{{ m.fat }}g</div>
+    <!-- Smart description box -->
+    <div class="smart-box">
+      <p style="font-size:12px;color:var(--soft);margin-bottom:10px;line-height:1.5">
+        ✨ Describe your meal naturally — e.g. <em>"2 fried plantains"</em>, <em>"1 chicken leg piece with rice"</em>, <em>"bowl of oats"</em>
+      </p>
+      <div class="smart-input-row">
+        <input class="smart-input" type="text" id="meal-desc" placeholder="What did you eat? e.g. 1 bowl of jollof rice...">
+        <button class="smart-btn" type="button" onclick="estimateMeal()" id="est-btn">
+          &#x1F50D; Estimate
+        </button>
       </div>
-      {% endfor %}
+
+      <!-- Nutrition preview result -->
+      <div class="nutrition-preview" id="nutrition-preview">
+        <div class="np-name" id="np-name"></div>
+        <div class="np-grid">
+          <div class="np-box"><div class="np-val" id="np-kcal">0</div><div class="np-key">kcal</div></div>
+          <div class="np-box"><div class="np-val" id="np-protein" style="color:var(--blue)">0g</div><div class="np-key">protein</div></div>
+          <div class="np-box"><div class="np-val" id="np-carbs" style="color:#b39ddb">0g</div><div class="np-key">carbs</div></div>
+          <div class="np-box"><div class="np-val" id="np-fat" style="color:var(--amber)">0g</div><div class="np-key">fat</div></div>
+        </div>
+        <div class="np-note" id="np-note">&#x26A0;&#xFE0F; Approximate values — you can edit below</div>
+        <div class="np-actions">
+          <button class="np-log-btn" type="button" onclick="logEstimated()">&#x2795; Log This Meal</button>
+          <button class="np-edit-btn" type="button" onclick="toggleManual()">&#x270F; Edit Values</button>
+        </div>
+      </div>
+
+      <!-- Not found message -->
+      <div id="not-found-msg" style="display:none;margin-top:10px;padding:10px 12px;background:rgba(242,139,130,.08);border:1px solid rgba(242,139,130,.2);border-radius:12px;font-size:12px;color:var(--rose)">
+        &#x2753; Couldn't estimate this meal. Enter values manually below.
+      </div>
     </div>
-    {% endfor %}
-    <p style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center">Tap a suggestion to auto-fill the log form above</p>
+
+    <!-- Manual / override fields -->
+    <div class="manual-fields" id="manual-fields">
+      <form method="POST" action="/meals/log/" id="log-form">
+        {% csrf_token %}
+        <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
+        <input type="hidden" name="meal_type" id="meal-type-input" value="breakfast">
+        <div class="fg">
+          <label class="field-lbl">Meal Name</label>
+          <input class="fi" type="text" name="name" id="manual-name" placeholder="Meal name" required>
+        </div>
+        <div class="form-4">
+          <div><label class="field-lbl">kcal</label><input class="fi" type="number" name="calories" id="manual-cal" placeholder="0" min="0"></div>
+          <div><label class="field-lbl">Protein g</label><input class="fi" type="number" name="protein" id="manual-protein" placeholder="0" min="0"></div>
+          <div><label class="field-lbl">Carbs g</label><input class="fi" type="number" name="carbs" id="manual-carbs" placeholder="0" min="0"></div>
+          <div><label class="field-lbl">Fat g</label><input class="fi" type="number" name="fat" id="manual-fat" placeholder="0" min="0"></div>
+        </div>
+        <button type="submit" class="btn-or">&#x1F374; Log Meal</button>
+      </form>
+    </div>
+
+    <!-- Quick manual entry toggle -->
+    <button class="toggle-btn" type="button" onclick="toggleManual()" style="margin-top:10px" id="manual-toggle-btn">
+      &#x1F4DD; Enter Manually Instead
+    </button>
   </div>
 </div>
 
@@ -256,11 +276,10 @@
 <div class="gc a4">
   <div class="gcp">
     <div class="sec-lbl">&#x1F4CB; Today's Meals</div>
-    {% for mt in meal_order %}
-    {% with group=meals_grouped|dict_key:mt %}
+    {% for group in meals_list %}
     <div class="meal-section">
       <div class="meal-hdr">
-        <span class="meal-ico">{{ group.icon|safe }}</span>
+        <span class="meal-ico">{{ group.icon }}</span>
         <span class="meal-name">{{ group.label }}</span>
         {% if group.calories %}<span class="meal-cal">{{ group.calories }} kcal</span>{% endif %}
       </div>
@@ -268,9 +287,9 @@
       <div class="meal-item">
         <div class="meal-item-name">
           {{ entry.name }}
-          {% if entry.notes %}<span style="color:var(--muted);font-size:11px"> &mdash; {{ entry.notes }}</span>{% endif %}
+          {% if entry.notes %}<div style="font-size:10px;color:var(--muted)">{{ entry.notes }}</div>{% endif %}
         </div>
-        <div style="text-align:right;flex-shrink:0">
+        <div style="text-align:right;flex-shrink:0;margin-right:6px">
           <div class="meal-item-cal">{{ entry.calories }} kcal</div>
           <div class="meal-item-macros">P:{{ entry.protein }}g C:{{ entry.carbs }}g F:{{ entry.fat }}g</div>
         </div>
@@ -280,10 +299,9 @@
         </form>
       </div>
       {% empty %}
-      <div style="font-size:12px;color:var(--muted);padding:6px 0 10px">Nothing logged yet</div>
+      <div style="font-size:12px;color:var(--muted);padding:4px 0 8px">Nothing logged yet</div>
       {% endfor %}
     </div>
-    {% endwith %}
     {% endfor %}
   </div>
 </div>
@@ -291,108 +309,72 @@
 <!-- MY RECIPES -->
 <div class="gc a5">
   <div class="gcp">
-    <div class="sec-lbl">&#x1F4D2; My Recipe Ideas</div>
+    <div class="sec-lbl">&#x1F4D2; My Recipes</div>
     {% for recipe in recipes %}
     <div class="recipe-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div class="recipe-name">{{ recipe.name }}</div>
         <form method="POST" action="/meals/delete-recipe/{{ recipe.id }}/" style="display:contents">
-          {% csrf_token %}
-          <button type="submit" class="btn-sm-del">&#x2715;</button>
+          {% csrf_token %}<button type="submit" class="btn-sm-del">&#x2715;</button>
         </form>
       </div>
       <div class="recipe-meta">
-        <span>&#x1F37D; {{ recipe.get_category_display }}</span>
+        <span>{{ recipe.get_category_display }}</span>
         {% if recipe.calories %}<span>&#x1F525; {{ recipe.calories }} kcal</span>{% endif %}
         {% if recipe.protein %}<span>&#x1F4AA; {{ recipe.protein }}g protein</span>{% endif %}
         {% if recipe.prep_time %}<span>&#x23F1; {{ recipe.prep_time }}min</span>{% endif %}
       </div>
       {% if recipe.ingredients %}
-      <div class="recipe-ingredients">
-        <strong style="color:#e2e8f0;font-size:11px">Ingredients:</strong> {{ recipe.ingredients }}
-      </div>
+      <div style="font-size:12px;color:var(--soft);margin-top:6px;line-height:1.6">{{ recipe.ingredients }}</div>
       {% endif %}
     </div>
     {% empty %}
-    <div style="text-align:center;padding:12px 0;color:var(--muted);font-size:13px">
-      Save your favourite meals and recipes here.
-    </div>
+    <div style="text-align:center;padding:12px;color:var(--muted);font-size:13px">No saved recipes yet.</div>
     {% endfor %}
 
-    <button class="toggle-btn" type="button" style="margin-top:10px"
-            onclick="document.getElementById('recipe-form').style.display=document.getElementById('recipe-form').style.display==='none'?'block':'none'">
-      &#x2795; Save New Recipe
-    </button>
-    <div id="recipe-form" style="display:none;margin-top:14px">
+    <button class="toggle-btn" type="button" onclick="tog('recipe-form')" style="margin-top:8px">&#x2795; Save New Recipe</button>
+    <div id="recipe-form" style="display:none;margin-top:12px">
       <form method="POST" action="/meals/save-recipe/">
         {% csrf_token %}
-        <div class="form-grid">
-          <div>
-            <label class="field-lbl">Recipe Name</label>
-            <input class="fi" type="text" name="name" placeholder="e.g. Chicken Salad" required>
-          </div>
-          <div>
-            <label class="field-lbl">Category</label>
+        <div class="form-2">
+          <div><label class="field-lbl">Recipe Name</label><input class="fi" type="text" name="name" placeholder="e.g. Chicken Stir Fry" required></div>
+          <div><label class="field-lbl">Category</label>
             <select class="fi fi-sel" name="category">
-              <option value="breakfast">Breakfast</option>
-              <option value="lunch" selected>Lunch</option>
-              <option value="dinner">Dinner</option>
-              <option value="snack">Snack</option>
-              <option value="drink">Drink</option>
+              <option value="breakfast">Breakfast</option><option value="lunch" selected>Lunch</option>
+              <option value="dinner">Dinner</option><option value="snack">Snack</option>
             </select>
           </div>
         </div>
-        <div class="form-4" style="margin-bottom:10px">
-          <div>
-            <label class="field-lbl">kcal</label>
-            <input class="fi" type="number" name="calories" placeholder="0">
-          </div>
-          <div>
-            <label class="field-lbl">Protein g</label>
-            <input class="fi" type="number" name="protein" placeholder="0">
-          </div>
-          <div>
-            <label class="field-lbl">Prep (min)</label>
-            <input class="fi" type="number" name="prep_time" placeholder="0">
-          </div>
-          <div></div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:8px">&#x2728; Leave kcal/protein blank and we'll estimate from the name</p>
+        <div class="form-2">
+          <div><label class="field-lbl">kcal (optional)</label><input class="fi" type="number" name="calories" placeholder="auto-estimate"></div>
+          <div><label class="field-lbl">Prep time (min)</label><input class="fi" type="number" name="prep_time" placeholder="0"></div>
         </div>
-        <div style="margin-bottom:10px">
-          <label class="field-lbl">Ingredients</label>
+        <div class="fg"><label class="field-lbl">Ingredients</label>
           <textarea class="fi" name="ingredients" placeholder="List ingredients..." rows="2" style="resize:vertical"></textarea>
         </div>
-        <button type="submit" class="btn-org">&#x1F4BE; Save Recipe</button>
+        <button type="submit" class="btn-or">&#x1F4BE; Save Recipe</button>
       </form>
     </div>
   </div>
 </div>
 
 <!-- NUTRITION GOALS -->
-<div class="gc a6">
+<div class="gc a5">
   <div class="gcp">
-    <div class="sec-lbl">&#x1F3AF; Set Nutrition Goals</div>
-    <form method="POST" action="/meals/set-goals/">
-      {% csrf_token %}
-      <div class="form-4" style="margin-bottom:10px">
-        <div>
-          <label class="field-lbl">Calories</label>
-          <input class="fi" type="number" name="calories" value="{{ goal.calories }}" placeholder="1800">
+    <button class="toggle-btn" type="button" onclick="tog('goals-form')">&#x1F3AF; Set Nutrition Goals</button>
+    <div id="goals-form" style="display:none;margin-top:12px">
+      <form method="POST" action="/meals/set-goals/">
+        {% csrf_token %}
+        <div class="goals-grid">
+          <div><label class="field-lbl">Calories</label><input class="fi" type="number" name="calories" value="{{ goal.calories }}"></div>
+          <div><label class="field-lbl">Protein g</label><input class="fi" type="number" name="protein" value="{{ goal.protein }}"></div>
+          <div><label class="field-lbl">Carbs g</label><input class="fi" type="number" name="carbs" value="{{ goal.carbs }}"></div>
+          <div><label class="field-lbl">Fat g</label><input class="fi" type="number" name="fat" value="{{ goal.fat }}"></div>
         </div>
-        <div>
-          <label class="field-lbl">Protein g</label>
-          <input class="fi" type="number" name="protein" value="{{ goal.protein }}" placeholder="120">
-        </div>
-        <div>
-          <label class="field-lbl">Carbs g</label>
-          <input class="fi" type="number" name="carbs" value="{{ goal.carbs }}" placeholder="180">
-        </div>
-        <div>
-          <label class="field-lbl">Fat g</label>
-          <input class="fi" type="number" name="fat" value="{{ goal.fat }}" placeholder="60">
-        </div>
-      </div>
-      <button type="submit" class="btn-org">&#x2705; Update Goals</button>
-    </form>
+        <button type="submit" class="btn-or">&#x2705; Update Goals</button>
+      </form>
+    </div>
   </div>
 </div>
 
@@ -400,37 +382,101 @@
 
 {% block extra_scripts %}
 <script>
+  var currentEst = {};
+
   function setMealType(val, el) {
     document.getElementById('meal-type-input').value = val;
-    var tabs = document.querySelectorAll('#meal-tabs .mtab');
-    for (var i=0;i<tabs.length;i++) { tabs[i].classList.remove('on'); }
+    document.querySelectorAll('#meal-tabs .mtab').forEach(function(t){ t.classList.remove('on'); });
     el.classList.add('on');
   }
 
-  function showSugg(mt, el) {
-    var panels = document.querySelectorAll('.sugg-panel');
-    for (var i=0;i<panels.length;i++) { panels[i].style.display='none'; }
-    document.getElementById('sugg-'+mt).style.display='grid';
-    var tabs = document.querySelectorAll('#sugg-tabs .mtab');
-    for (var j=0;j<tabs.length;j++) { tabs[j].classList.remove('on'); }
-    el.classList.add('on');
+  function tog(id) {
+    var el = document.getElementById(id);
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
   }
 
-  function quickFill(name, cal, prot, carbs, fat, mt) {
-    document.getElementById('meal-name-input').value = name;
-    document.getElementById('meal-cal').value = cal;
-    document.querySelectorAll('[name="protein"]')[0].value = prot;
-    document.querySelectorAll('[name="carbs"]')[0].value = carbs;
-    document.querySelectorAll('[name="fat"]')[0].value = fat;
-    // Switch meal type tab
-    var tabs = document.querySelectorAll('#meal-tabs .mtab');
-    var types = ['breakfast','lunch','snack','dinner'];
-    for (var i=0;i<tabs.length;i++) {
-      tabs[i].classList.remove('on');
-      if (types[i] === mt) { tabs[i].classList.add('on'); }
+  function toggleManual() {
+    var mf = document.getElementById('manual-fields');
+    var mb = document.getElementById('manual-toggle-btn');
+    if (mf.style.display === 'none' || !mf.style.display) {
+      mf.style.display = 'block';
+      mb.style.display = 'none';
+      var desc = document.getElementById('meal-desc').value;
+      if (desc) document.getElementById('manual-name').value = desc;
+      if (currentEst.kcal) {
+        document.getElementById('manual-cal').value     = currentEst.kcal;
+        document.getElementById('manual-protein').value = currentEst.protein;
+        document.getElementById('manual-carbs').value   = currentEst.carbs;
+        document.getElementById('manual-fat').value     = currentEst.fat;
+      }
+    } else {
+      mf.style.display = 'none';
+      mb.style.display = 'flex';
     }
-    document.getElementById('meal-type-input').value = mt;
-    document.getElementById('log-form').scrollIntoView({behavior:'smooth'});
+  }
+
+  async function estimateMeal() {
+    var desc = document.getElementById('meal-desc').value.trim();
+    if (!desc) { alert('Please describe your meal first.'); return; }
+
+    var btn = document.getElementById('est-btn');
+    btn.innerHTML = '<span class="spinner"></span>';
+    btn.disabled = true;
+
+    document.getElementById('nutrition-preview').style.display = 'none';
+    document.getElementById('not-found-msg').style.display = 'none';
+
+    try {
+      var resp = await fetch('/meals/estimate/', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+        body: JSON.stringify({description: desc})
+      });
+      var data = await resp.json();
+
+      if (data.found) {
+        currentEst = {kcal: data.kcal, protein: data.protein, carbs: data.carbs, fat: data.fat, name: desc};
+        document.getElementById('np-name').textContent = '🍽 ' + desc;
+        document.getElementById('np-kcal').textContent    = data.kcal;
+        document.getElementById('np-protein').textContent = data.protein + 'g';
+        document.getElementById('np-carbs').textContent   = data.carbs + 'g';
+        document.getElementById('np-fat').textContent     = data.fat + 'g';
+        document.getElementById('np-note').textContent    = '⚡ Approximate values — edit if needed';
+        document.getElementById('nutrition-preview').style.display = 'block';
+      } else {
+        document.getElementById('not-found-msg').style.display = 'block';
+        document.getElementById('manual-fields').style.display = 'block';
+        document.getElementById('manual-toggle-btn').style.display = 'none';
+        document.getElementById('manual-name').value = desc;
+      }
+    } catch(e) {
+      document.getElementById('not-found-msg').style.display = 'block';
+    } finally {
+      btn.innerHTML = '&#x1F50D; Estimate';
+      btn.disabled = false;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('meal-desc').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); estimateMeal(); }
+    });
+  });
+
+  function logEstimated() {
+    if (currentEst.kcal === undefined) return;
+    document.getElementById('manual-fields').style.display = 'block';
+    document.getElementById('manual-name').value    = currentEst.name || document.getElementById('meal-desc').value;
+    document.getElementById('manual-cal').value     = currentEst.kcal;
+    document.getElementById('manual-protein').value = currentEst.protein;
+    document.getElementById('manual-carbs').value   = currentEst.carbs;
+    document.getElementById('manual-fat').value     = currentEst.fat;
+    document.getElementById('log-form').submit();
+  }
+
+  function getCookie(name) {
+    var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return v ? v[2] : null;
   }
 </script>
 {% endblock %}
