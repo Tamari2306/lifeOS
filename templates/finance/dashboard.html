@@ -4,10 +4,11 @@
 
 {% block extra_head %}
 <style>
-  .fp { --green:#34d399; --rose:#fb7185; --amber:#fbbf24; --violet:#818cf8; --blue:#38bdf8;
-        --surf:rgba(255,255,255,0.045); --rim:rgba(255,255,255,0.09); --rim2:rgba(255,255,255,0.16);
-        --muted:#64748b; --soft:#94a3b8; }
+  .fp { --green:#34d399; --emerald:#10b981; --rose:#fb7185; --amber:#fbbf24; --violet:#818cf8;
+        --blue:#38bdf8; --surf:rgba(255,255,255,0.045); --rim:rgba(255,255,255,0.09);
+        --rim2:rgba(255,255,255,0.16); --muted:#64748b; --soft:#94a3b8; }
 
+  /* HEADER */
   .hdr { display:flex; justify-content:space-between; align-items:flex-start; padding:8px 0 20px; }
   .hdr-date { font-size:11px; color:var(--muted); font-weight:600; letter-spacing:.08em; text-transform:uppercase; margin-bottom:5px; }
   .hdr-title { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; line-height:1;
@@ -19,6 +20,7 @@
   .sv-lbl { font-size:9px; color:var(--soft); font-weight:600; letter-spacing:.06em; text-transform:uppercase; }
   .sv-num { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; color:var(--green); }
 
+  /* GLASS */
   .gc { background:var(--surf); border:1px solid var(--rim); border-radius:22px;
         backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); overflow:hidden; margin-bottom:14px; }
   .gcp { padding:18px 20px; }
@@ -26,133 +28,163 @@
              letter-spacing:.1em; text-transform:uppercase; margin-bottom:14px; }
 
   /* BUDGET RING */
-  .budget-wrap { display:flex; align-items:center; gap:20px; padding:20px; }
+  .budget-section { display:flex; align-items:center; gap:20px; padding:20px; }
   .ring-wrap { position:relative; width:140px; height:140px; flex-shrink:0; }
   .ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-  .ring-pct-lbl { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:#e2e8f0; line-height:1; }
-  .ring-sub { font-size:10px; color:var(--muted); margin-top:3px; }
-  .ring-bal { font-family:'Syne',sans-serif; font-size:14px; font-weight:800; margin-top:4px; }
-  .c-safe { color:var(--green); } .c-warn { color:var(--amber); } .c-dang { color:var(--rose); }
+  .ring-spent { font-family:'Syne',sans-serif; font-size:13px; font-weight:800; color:#e2e8f0; line-height:1; }
+  .ring-of { font-size:10px; color:var(--muted); margin-top:3px; }
+  .ring-bal { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; margin-top:4px; }
+  .bal-safe { color:var(--green); }
+  .bal-warn { color:var(--amber); }
+  .bal-dang { color:var(--rose); }
   .rtrk { stroke:rgba(255,255,255,.07); }
-  .rprg { stroke-linecap:round; transition:stroke-dashoffset .8s cubic-bezier(.34,1.56,.64,1);
-          transform:rotate(-90deg); transform-origin:50% 50%; }
-  .rp-safe { stroke:url(#fGrad); }
-  .rp-warning { stroke:#fbbf24; }
-  .rp-danger { stroke:#fb7185; }
+  .rprg-safe { stroke:url(#fGrad); stroke-linecap:round;
+               transition:stroke-dashoffset .8s cubic-bezier(.34,1.56,.64,1);
+               transform:rotate(-90deg); transform-origin:50% 50%; }
+  .rprg-warn { stroke:#fbbf24; stroke-linecap:round;
+               transition:stroke-dashoffset .8s cubic-bezier(.34,1.56,.64,1);
+               transform:rotate(-90deg); transform-origin:50% 50%; }
+  .rprg-dang { stroke:#fb7185; stroke-linecap:round;
+               transition:stroke-dashoffset .8s cubic-bezier(.34,1.56,.64,1);
+               transform:rotate(-90deg); transform-origin:50% 50%; }
+  .budget-info { flex:1; }
+  .bi-row { margin-bottom:10px; }
+  .bi-label { font-size:11px; color:var(--muted); font-weight:600; margin-bottom:3px; }
+  .bi-val { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; }
+  .mini-prog { height:5px; background:rgba(255,255,255,.07); border-radius:5px; overflow:hidden; margin-top:6px; }
+  .mini-fill-safe { height:100%; border-radius:5px; background:linear-gradient(90deg,#34d399,#38bdf8); }
+  .mini-fill-warn { height:100%; border-radius:5px; background:var(--amber); }
+  .mini-fill-dang { height:100%; border-radius:5px; background:var(--rose); }
+  .warn-banner { background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.25); border-radius:12px;
+                 padding:10px 14px; font-size:12px; color:var(--amber); font-weight:600; margin-top:12px; }
+  .dang-banner { background:rgba(251,113,133,.1); border:1px solid rgba(251,113,133,.25); border-radius:12px;
+                 padding:10px 14px; font-size:12px; color:var(--rose); font-weight:600; margin-top:12px; }
 
-  .budget-stats { flex:1; display:flex; flex-direction:column; gap:12px; }
-  .b-row { }
-  .b-lbl { font-size:10px; color:var(--muted); font-weight:600; margin-bottom:3px; }
-  .b-val { font-family:'Syne',sans-serif; font-size:17px; font-weight:800; }
-  .mini-bar { height:5px; background:rgba(255,255,255,.07); border-radius:5px; overflow:hidden; margin-top:5px; }
-  .mini-fill { height:100%; border-radius:5px; transition:width .8s ease; }
-  .mf-safe { background:linear-gradient(90deg,#34d399,#38bdf8); }
-  .mf-warning { background:#fbbf24; }
-  .mf-danger { background:#fb7185; }
-
-  .alert-box { margin:0 20px 16px; padding:10px 14px; border-radius:12px; font-size:12px; font-weight:700; }
-  .alert-warn { background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.25); color:var(--amber); }
-  .alert-dang { background:rgba(251,113,133,.1); border:1px solid rgba(251,113,133,.25); color:var(--rose); }
-  .alert-safe { background:rgba(52,211,153,.08); border:1px solid rgba(52,211,153,.2); color:var(--green); }
-
-  /* FORMS */
-  .fi { width:100%; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:14px;
+  /* SET BUDGET FORM */
+  .inline-form { display:flex; gap:10px; align-items:center; }
+  .fi { flex:1; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:14px;
         padding:11px 14px; color:#fff; font-family:'DM Sans',sans-serif; font-size:14px; outline:none;
-        transition:border-color .2s; box-sizing:border-box; }
+        transition:border-color .2s; }
   .fi:focus { border-color:rgba(52,211,153,.5); }
   .fi::placeholder { color:var(--muted); }
-  select.fi { appearance:none; -webkit-appearance:none; }
-  .f-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.06em;
-            text-transform:uppercase; display:block; margin-bottom:6px; }
-  .g2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
-  .g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
-  .inline-row { display:flex; gap:10px; align-items:flex-end; }
-  .inline-row .fi-wrap { flex:1; }
-
-  .btn-grn { padding:11px 20px; border:none; border-radius:14px;
+  .fi-sel { appearance:none; -webkit-appearance:none; }
+  .btn-grn { padding:11px 18px; border:none; border-radius:14px;
              background:linear-gradient(135deg,#34d399,#38bdf8); color:#0a0a12;
              font-family:'Syne',sans-serif; font-size:13px; font-weight:800;
              cursor:pointer; transition:all .2s; white-space:nowrap;
-             box-shadow:0 4px 16px rgba(52,211,153,.22); }
+             box-shadow:0 4px 16px rgba(52,211,153,.25); }
   .btn-grn:hover { opacity:.9; transform:translateY(-1px); }
-  .btn-grn-full { display:block; width:100%; padding:13px; border:none; border-radius:14px;
-                  background:linear-gradient(135deg,#34d399,#38bdf8); color:#0a0a12;
-                  font-family:'Syne',sans-serif; font-size:13px; font-weight:800;
-                  cursor:pointer; transition:all .2s; text-align:center;
-                  box-shadow:0 4px 16px rgba(52,211,153,.22); }
-  .btn-grn-full:hover { opacity:.9; transform:translateY(-1px); }
-  .btn-del { padding:6px 12px; border:none; border-radius:10px;
-             background:rgba(251,113,133,.12); color:var(--rose);
-             border:1px solid rgba(251,113,133,.22); font-family:'Syne',sans-serif;
-             font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; }
-  .btn-del:hover { background:rgba(251,113,133,.22); }
-  .btn-dep { padding:9px 16px; border:none; border-radius:10px;
-             background:linear-gradient(135deg,#34d399,#10b981); color:#0a0a12;
-             font-family:'Syne',sans-serif; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap; }
-  .btn-toggle-goal { display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
-                     padding:13px; background:rgba(52,211,153,.07); border:1px dashed rgba(52,211,153,.25);
-                     border-radius:16px; color:var(--green); font-family:'Syne',sans-serif;
-                     font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
-  .btn-toggle-goal:hover { background:rgba(52,211,153,.13); }
+  .btn-rose { padding:8px 14px; border:none; border-radius:10px;
+              background:rgba(251,113,133,.12); color:var(--rose);
+              border:1px solid rgba(251,113,133,.22); font-family:'Syne',sans-serif;
+              font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; }
+  .btn-rose:hover { background:rgba(251,113,133,.22); }
+  .btn-out { display:block; width:100%; padding:12px; border:1px solid var(--rim2); border-radius:14px;
+             background:rgba(255,255,255,.04); color:var(--soft); font-family:'Syne',sans-serif;
+             font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; text-align:center; }
+  .btn-out:hover { background:rgba(255,255,255,.09); color:#fff; }
 
-  /* EXPENSES */
+  /* EXPENSE FORM */
+  .exp-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+  .exp-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
+  .field-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.06em;
+               text-transform:uppercase; display:block; margin-bottom:6px; }
+
+  /* CAT CHIPS */
+  .cat-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px;
+              font-size:11px; font-weight:700; font-family:'Syne',sans-serif; }
+  .cat-food      { background:rgba(56,189,248,.13); color:#38bdf8; border:1px solid rgba(56,189,248,.22); }
+  .cat-transport { background:rgba(129,140,248,.13); color:#818cf8; border:1px solid rgba(129,140,248,.22); }
+  .cat-bills     { background:rgba(251,113,133,.13); color:#fb7185; border:1px solid rgba(251,113,133,.22); }
+  .cat-shopping  { background:rgba(251,191,36,.13);  color:#fbbf24; border:1px solid rgba(251,191,36,.22); }
+  .cat-health    { background:rgba(52,211,153,.13);  color:#34d399; border:1px solid rgba(52,211,153,.22); }
+  .cat-misc      { background:rgba(148,163,184,.13); color:#94a3b8; border:1px solid rgba(148,163,184,.22); }
+
+  /* EXPENSE LIST */
   .exp-item { display:flex; justify-content:space-between; align-items:center;
               padding:11px 0; border-bottom:1px solid rgba(255,255,255,.05); }
   .exp-item:last-child { border-bottom:none; }
+  .exp-left { display:flex; align-items:center; gap:10px; }
   .exp-ico { width:36px; height:36px; border-radius:10px; display:flex; align-items:center;
              justify-content:center; font-size:16px; background:rgba(255,255,255,.06); flex-shrink:0; }
   .exp-name { font-size:14px; font-weight:600; color:#e2e8f0; }
   .exp-meta { font-size:11px; color:var(--muted); margin-top:2px; }
   .exp-amt { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; color:var(--rose); }
-  .chip { display:inline-flex; align-items:center; padding:2px 8px; border-radius:20px;
-          font-size:10px; font-weight:700; font-family:'Syne',sans-serif; }
-  .ch-food      { background:rgba(56,189,248,.12); color:#38bdf8; border:1px solid rgba(56,189,248,.2); }
-  .ch-transport { background:rgba(129,140,248,.12); color:#818cf8; border:1px solid rgba(129,140,248,.2); }
-  .ch-bills     { background:rgba(251,113,133,.12); color:#fb7185; border:1px solid rgba(251,113,133,.2); }
-  .ch-shopping  { background:rgba(251,191,36,.12);  color:#fbbf24; border:1px solid rgba(251,191,36,.2); }
-  .ch-health    { background:rgba(52,211,153,.12);  color:#34d399; border:1px solid rgba(52,211,153,.2); }
-  .ch-misc      { background:rgba(148,163,184,.12); color:#94a3b8; border:1px solid rgba(148,163,184,.2); }
 
-  /* CATEGORY ROWS */
+  /* CAT BREAKDOWN */
   .cat-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0;
              border-bottom:1px solid rgba(255,255,255,.05); }
   .cat-row:last-child { border-bottom:none; }
+  .cat-row-left { display:flex; align-items:center; gap:8px; min-width:0; flex:1; }
   .cat-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .cat-name { font-size:13px; color:#e2e8f0; max-width:90px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cat-pct { font-size:11px; color:var(--muted); }
+  .cat-total { font-family:'Syne',sans-serif; font-size:13px; font-weight:800; flex-shrink:0; }
 
-  /* SAVINGS */
+  /* SAVINGS GOALS */
   .goal-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
                border-radius:16px; padding:16px; margin-bottom:10px; }
   .goal-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+  .goal-name-row { display:flex; align-items:center; gap:8px; margin-bottom:3px; }
+  .goal-ico { font-size:18px; }
   .goal-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; }
-  .goal-freq { font-size:10px; color:var(--muted); font-weight:600; margin-top:2px; }
+  .goal-freq { font-size:10px; color:var(--muted); font-weight:600; }
   .goal-amt { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; color:var(--green); }
   .goal-of { font-size:11px; color:var(--muted); }
-  .goal-bar { height:6px; background:rgba(255,255,255,.07); border-radius:6px; overflow:hidden; margin:10px 0 6px; }
-  .goal-fill { height:100%; border-radius:6px; background:linear-gradient(90deg,#34d399,#38bdf8);
-               box-shadow:0 0 10px rgba(52,211,153,.3); }
-  .goal-meta { display:flex; justify-content:space-between; font-size:11px; }
-  .goal-pct { color:var(--green); font-weight:700; }
-  .goal-rem { color:var(--muted); }
-  .dep-row { display:flex; gap:8px; margin-top:10px; }
-  .dep-fi { flex:1; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:10px;
-            padding:9px 12px; color:#fff; font-family:'DM Sans',sans-serif; font-size:13px;
-            outline:none; box-sizing:border-box; }
+  .goal-prog-track { height:6px; background:rgba(255,255,255,.07); border-radius:6px; overflow:hidden; margin:10px 0 8px; }
+  .goal-prog-fill { height:100%; border-radius:6px; background:linear-gradient(90deg,#34d399,#38bdf8);
+                    box-shadow:0 0 10px rgba(52,211,153,.35); transition:width .8s ease; }
+  .goal-pct-row { display:flex; justify-content:space-between; align-items:center; }
+  .goal-pct { font-size:11px; color:var(--green); font-weight:700; }
+  .goal-remaining { font-size:11px; color:var(--muted); }
+  .deposit-row { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .dep-fi { flex:1; min-width:80px; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:10px;
+            padding:9px 12px; color:#fff; font-family:'DM Sans',sans-serif; font-size:13px; outline:none; box-sizing:border-box; }
   .dep-fi:focus { border-color:rgba(52,211,153,.5); }
   .dep-fi::placeholder { color:var(--muted); }
+  .dep-btn { padding:9px 16px; border:none; border-radius:10px;
+             background:linear-gradient(135deg,#34d399,#10b981); color:#0a0a12;
+             font-family:'Syne',sans-serif; font-size:12px; font-weight:800; cursor:pointer;
+             white-space:nowrap; flex-shrink:0; min-width:80px; }
+
+  /* GOAL ACTION BUTTONS */
+  .btn-edit-goal { background:rgba(129,140,248,.12); color:var(--violet); border:1px solid rgba(129,140,248,.25); border-radius:9px; padding:6px 12px; font-size:11px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; }
+  .btn-del-goal  { background:rgba(251,113,133,.1); color:#fb7185; border:1px solid rgba(251,113,133,.22); border-radius:9px; padding:6px 12px; font-size:11px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; }
+  .btn-edit-goal:hover { background:rgba(129,140,248,.22); }
+  .btn-del-goal:hover  { background:rgba(251,113,133,.2); }
+
+  /* NEW GOAL FORM */
+  .new-goal-form { display:none; }
+  .new-goal-form.open { display:block; }
+  .toggle-form-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+                     padding:13px; background:rgba(52,211,153,.07); border:1px dashed rgba(52,211,153,.25);
+                     border-radius:16px; color:var(--green); font-family:'Syne',sans-serif;
+                     font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
+  .toggle-form-btn:hover { background:rgba(52,211,153,.13); }
 
   /* ANALYSIS */
-  .an-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .analysis-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .an-box { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
             border-radius:14px; padding:14px; text-align:center; }
   .an-val { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; line-height:1; }
   .an-key { font-size:10px; color:var(--muted); margin-top:5px; }
+  .an-proj-safe { color:var(--green); }
+  .an-proj-warn { color:var(--amber); }
+  .an-proj-over { color:var(--rose); }
 
+  /* CHART */
   .chart-h { max-height:150px; }
   .chart-h-sm { max-height:130px; }
 
-  .new-goal-wrap { display:none; margin-top:14px; }
-  .new-goal-wrap.open { display:block; }
+  /* TABS */
+  .tab-row { display:flex; gap:6px; margin-bottom:16px; }
+  .t-btn { flex:1; padding:9px; border-radius:14px; border:1px solid var(--rim);
+           background:rgba(255,255,255,.04); color:var(--muted); font-family:'Syne',sans-serif;
+           font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; text-align:center; }
+  .t-btn.on { background:linear-gradient(135deg,rgba(52,211,153,.2),rgba(56,189,248,.2));
+              border-color:rgba(52,211,153,.4); color:var(--green); }
 
+  /* ANIMS */
   @keyframes sup { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
   .a1{animation:sup .4s ease both .04s} .a2{animation:sup .4s ease both .10s}
   .a3{animation:sup .4s ease both .16s} .a4{animation:sup .4s ease both .22s}
@@ -178,9 +210,10 @@
     </div>
   </div>
 
-  <!-- BUDGET OVERVIEW RING -->
+  <!-- BUDGET RING + OVERVIEW -->
   <div class="gc a2">
-    <div class="budget-wrap">
+    <div class="budget-section">
+      <!-- Ring -->
       <div class="ring-wrap">
         <svg width="140" height="140" viewBox="0 0 140 140">
           <defs>
@@ -190,37 +223,47 @@
             </linearGradient>
           </defs>
           <circle class="rtrk" cx="70" cy="70" r="60" fill="none" stroke-width="9"/>
-          <circle class="rprg rp-{{ budget_status }}" cx="70" cy="70" r="60" fill="none" stroke-width="9"
-                  stroke-dasharray="376.99" stroke-dashoffset="{{ ring_offset }}"/>
+          <circle class="rprg-{{ budget_status }}" cx="70" cy="70" r="60" fill="none" stroke-width="9"
+                  stroke-dasharray="376.99"
+                  stroke-dashoffset="{{ ring_offset }}"/>
         </svg>
         <div class="ring-center">
-          <div class="ring-pct-lbl">{{ spent_pct }}%</div>
-          <div class="ring-sub">spent</div>
-          <div class="ring-bal c-{{ budget_status }}">{{ balance|floatformat:0 }}</div>
+          <div class="ring-spent">{{ spent_pct }}%</div>
+          <div class="ring-of">spent</div>
+          <div class="ring-bal bal-{{ budget_status }}">
+            {% if balance >= 0 %}+{% endif %}{{ balance|floatformat:0 }}
+          </div>
         </div>
       </div>
-      <div class="budget-stats">
-        <div class="b-row">
-          <div class="b-lbl">Monthly Budget</div>
-          <div class="b-val c-safe">{{ monthly_budget|floatformat:0 }} TZS</div>
+
+      <!-- Info -->
+      <div class="budget-info">
+        <div class="bi-row">
+          <div class="bi-label">Monthly Budget</div>
+          <div class="bi-val" style="color:var(--green)">{{ monthly_budget|floatformat:0 }} TZS</div>
         </div>
-        <div class="b-row">
-          <div class="b-lbl">Spent So Far</div>
-          <div class="b-val c-dang">{{ total_spent|floatformat:0 }} TZS</div>
-          <div class="mini-bar"><div class="mini-fill mf-{{ budget_status }}" style="width:{{ spent_pct }}%"></div></div>
+        <div class="bi-row">
+          <div class="bi-label">Spent</div>
+          <div class="bi-val" style="color:var(--rose)">{{ total_spent|floatformat:0 }} TZS</div>
+          <div class="mini-prog">
+            <div class="mini-fill-{{ budget_status }}" style="width:{{ spent_pct }}%"></div>
+          </div>
         </div>
-        <div class="b-row">
-          <div class="b-lbl">Balance Left</div>
-          <div class="b-val c-{{ budget_status }}">{{ balance|floatformat:0 }} TZS</div>
+        <div class="bi-row">
+          <div class="bi-label">Balance</div>
+          <div class="bi-val bal-{{ budget_status }}">{{ balance|floatformat:0 }} TZS</div>
         </div>
       </div>
     </div>
+
     {% if budget_status == 'warning' %}
-    <div class="alert-box alert-warn">&#x26A0;&#xFE0F; {{ spent_pct }}% used — slow down spending!</div>
+    <div style="padding:0 20px 16px">
+      <div class="warn-banner">&#x26A0;&#xFE0F; You've used {{ spent_pct }}% of your budget. Slow down on spending!</div>
+    </div>
     {% elif budget_status == 'danger' %}
-    <div class="alert-box alert-dang">&#x1F6A8; Critical! {{ spent_pct }}% used with {{ days_left }} days left!</div>
-    {% elif monthly_budget > 0 %}
-    <div class="alert-box alert-safe">&#x2705; On track! You have {{ balance|floatformat:0 }} TZS remaining.</div>
+    <div style="padding:0 20px 16px">
+      <div class="dang-banner">&#x1F6A8; Critical! {{ spent_pct }}% of budget used with {{ days_left }} days left!</div>
+    </div>
     {% endif %}
   </div>
 
@@ -228,17 +271,11 @@
   <div class="gc a3">
     <div class="gcp">
       <div class="sec-lbl">Set Monthly Budget</div>
-      <form method="POST" action="/finance/set-budget/">
+      <form method="POST" action="/finance/set-budget/" class="inline-form">
         {% csrf_token %}
-        <div class="inline-row">
-          <div class="fi-wrap">
-            <input class="fi" type="number" name="amount"
-                   placeholder="Your monthly income / budget (TZS)"
-                   value="{% if monthly_budget > 0 %}{{ monthly_budget|floatformat:0 }}{% endif %}"
-                   min="0" required>
-          </div>
-          <button type="submit" class="btn-grn">Save</button>
-        </div>
+        <input class="fi" type="number" name="amount" placeholder="Enter your monthly budget (TZS)..."
+               value="{{ monthly_budget|floatformat:0 }}" min="0">
+        <button type="submit" class="btn-grn">Save</button>
       </form>
     </div>
   </div>
@@ -249,14 +286,14 @@
       <div class="sec-lbl">&#x2795; Add Expense</div>
       <form method="POST" action="/finance/add-expense/">
         {% csrf_token %}
-        <div class="g2">
+        <div class="exp-grid">
           <div>
-            <label class="f-lbl">Amount (TZS)</label>
-            <input class="fi" type="number" name="amount" placeholder="0" min="1" required>
+            <label class="field-lbl">Amount (TZS)</label>
+            <input class="fi" type="number" name="amount" placeholder="0" min="0" required>
           </div>
           <div>
-            <label class="f-lbl">Category</label>
-            <select class="fi" name="category">
+            <label class="field-lbl">Category</label>
+            <select class="fi fi-sel" name="category">
               <option value="food">&#x1F35C; Food</option>
               <option value="transport">&#x1F697; Transport</option>
               <option value="bills">&#x1F4CB; Bills</option>
@@ -266,17 +303,19 @@
             </select>
           </div>
         </div>
-        <div class="g2" style="margin-bottom:12px">
+        <div class="exp-grid">
           <div>
-            <label class="f-lbl">Note (optional)</label>
+            <label class="field-lbl">Note (optional)</label>
             <input class="fi" type="text" name="note" placeholder="What was this for?">
           </div>
           <div>
-            <label class="f-lbl">Date</label>
+            <label class="field-lbl">Date</label>
             <input class="fi" type="date" name="date" value="{{ today|date:'Y-m-d' }}">
           </div>
         </div>
-        <button type="submit" class="btn-grn-full">&#x2795; Record Expense</button>
+        <button type="submit" class="btn-grn" style="width:100%;padding:13px">
+          &#x2795; Record Expense
+        </button>
       </form>
     </div>
   </div>
@@ -286,11 +325,11 @@
     <div class="gcp">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <span class="sec-lbl" style="margin-bottom:0">Recent Expenses</span>
-        <span style="font-size:11px;color:var(--muted)">{{ total_spent|floatformat:0 }} TZS this month</span>
+        <span style="font-size:11px;color:var(--muted)">This month: {{ total_spent|floatformat:0 }} TZS</span>
       </div>
       {% for exp in recent %}
       <div class="exp-item">
-        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+        <div class="exp-left">
           <div class="exp-ico">
             {% if exp.category == 'food' %}&#x1F35C;
             {% elif exp.category == 'transport' %}&#x1F697;
@@ -299,21 +338,19 @@
             {% elif exp.category == 'health' %}&#x1F3E5;
             {% else %}&#x1F4E6;{% endif %}
           </div>
-          <div style="min-width:0">
-            <div class="exp-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-              {% if exp.note %}{{ exp.note }}{% else %}{{ exp.get_category_display }}{% endif %}
-            </div>
+          <div>
+            <div class="exp-name">{% if exp.note %}{{ exp.note }}{% else %}{{ exp.get_category_display }}{% endif %}</div>
             <div class="exp-meta">
-              <span class="chip ch-{{ exp.category }}">{{ exp.get_category_display }}</span>
+              <span class="cat-chip cat-{{ exp.category }}">{{ exp.get_category_display }}</span>
               &nbsp;{{ exp.date|date:"M j" }}
             </div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:10px">
           <div class="exp-amt">-{{ exp.amount|floatformat:0 }}</div>
           <form method="POST" action="/finance/delete-expense/{{ exp.id }}/">
             {% csrf_token %}
-            <button type="submit" class="btn-del">&#x2715;</button>
+            <button type="submit" class="btn-rose">&#x2715;</button>
           </form>
         </div>
       </div>
@@ -325,7 +362,7 @@
     </div>
   </div>
 
-  <!-- CATEGORY BREAKDOWN -->
+  <!-- CATEGORY BREAKDOWN + DOUGHNUT CHART -->
   {% if by_cat %}
   <div class="gc a5">
     <div class="gcp">
@@ -335,21 +372,28 @@
         <div>
           {% for cat, amt in by_cat.items %}
           <div class="cat-row">
-            <div style="display:flex;align-items:center;gap:8px">
+            <div class="cat-row-left">
               <div class="cat-dot" style="background:
-                {% if cat == 'food' %}#38bdf8{% elif cat == 'transport' %}#818cf8
-                {% elif cat == 'bills' %}#fb7185{% elif cat == 'shopping' %}#fbbf24
-                {% elif cat == 'health' %}#34d399{% else %}#94a3b8{% endif %}"></div>
+                {% if cat == 'food' %}#38bdf8
+                {% elif cat == 'transport' %}#818cf8
+                {% elif cat == 'bills' %}#fb7185
+                {% elif cat == 'shopping' %}#fbbf24
+                {% elif cat == 'health' %}#34d399
+                {% else %}#94a3b8{% endif %}
+              "></div>
               <div>
-                <div style="font-size:12px;color:#e2e8f0">{{ cat|title }}</div>
+                <div class="cat-name">{{ cat|title }}</div>
+                <div class="cat-pct">{% if total_spent %}{{ amt|floatformat:0 }}{% endif %} TZS</div>
               </div>
             </div>
-            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:
-              {% if cat == 'food' %}#38bdf8{% elif cat == 'transport' %}#818cf8
-              {% elif cat == 'bills' %}#fb7185{% elif cat == 'shopping' %}#fbbf24
-              {% elif cat == 'health' %}#34d399{% else %}#94a3b8{% endif %}">
-              {{ amt|floatformat:0 }}
-            </div>
+            <div class="cat-total" style="color:
+              {% if cat == 'food' %}#38bdf8
+              {% elif cat == 'transport' %}#818cf8
+              {% elif cat == 'bills' %}#fb7185
+              {% elif cat == 'shopping' %}#fbbf24
+              {% elif cat == 'health' %}#34d399
+              {% else %}#94a3b8{% endif %}
+            ">{% if total_spent %}{{ amt|floatformat:0 | slice:":6" }}{% endif %}</div>
           </div>
           {% endfor %}
         </div>
@@ -358,10 +402,10 @@
   </div>
   {% endif %}
 
-  <!-- WEEKLY CHART -->
+  <!-- WEEKLY SPENDING CHART -->
   <div class="gc a6">
     <div class="gcp">
-      <div class="sec-lbl">Weekly Spending</div>
+      <div class="sec-lbl">Weekly Spending — {{ month_name }}</div>
       <div class="chart-h"><canvas id="wkChart"></canvas></div>
     </div>
   </div>
@@ -370,35 +414,40 @@
   <div class="gc a6">
     <div class="gcp">
       <div class="sec-lbl">&#x1F4CA; Month-End Analysis</div>
-      <div class="an-grid" style="margin-bottom:14px">
+      <div class="analysis-grid">
         <div class="an-box">
           <div class="an-val" style="color:var(--blue)">{{ daily_avg|floatformat:0 }}</div>
           <div class="an-key">Daily Avg (TZS)</div>
         </div>
         <div class="an-box">
-          <div class="an-val" style="color:{% if projected_end > monthly_budget and monthly_budget > 0 %}var(--rose){% else %}var(--green){% endif %}">
+          <div class="an-val an-proj-{% if projected_end > monthly_budget %}over{% elif projected_end > monthly_budget|add:0 %}warn{% else %}safe{% endif %}">
             {{ projected_end|floatformat:0 }}
           </div>
           <div class="an-key">Projected Total</div>
         </div>
         <div class="an-box">
           <div class="an-val" style="color:var(--violet)">{{ days_left }}</div>
-          <div class="an-key">Days Remaining</div>
+          <div class="an-key">Days Left</div>
         </div>
         <div class="an-box">
-          <div class="an-val" style="color:var(--green)">{{ safe_daily|floatformat:0 }}</div>
-          <div class="an-key">Safe Daily Spend</div>
+          {% if days_left > 0 and balance > 0 %}
+          <div class="an-val" style="color:var(--green)">{{ balance|floatformat:0|divisibleby:days_left }}</div>
+          {% else %}
+          <div class="an-val" style="color:var(--green)">—</div>
+          {% endif %}
+          <div class="an-key">Safe Daily Budget</div>
         </div>
       </div>
+
       {% if projected_end > monthly_budget and monthly_budget > 0 %}
-      <div style="background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.25);border-radius:12px;padding:12px 14px">
-        <div style="font-size:12px;color:var(--rose);font-weight:700">&#x1F6A8; At this pace you'll overspend by {{ projected_end|floatformat:0 }} TZS</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px">Keep daily spending under {{ safe_daily|floatformat:0 }} TZS for the next {{ days_left }} days.</div>
+      <div style="margin-top:12px;background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.25);border-radius:12px;padding:12px 14px">
+        <div style="font-size:12px;color:var(--rose);font-weight:700">&#x1F6A8; At this rate you'll overspend by {{ projected_end|floatformat:0 }} TZS</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Try to keep daily spending under {{ balance|floatformat:0 }} TZS for the next {{ days_left }} days.</div>
       </div>
       {% elif monthly_budget > 0 %}
-      <div style="background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);border-radius:12px;padding:12px 14px">
-        <div style="font-size:12px;color:var(--green);font-weight:700">&#x2705; You're on track — well done!</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px">Projected to end the month with {{ balance|floatformat:0 }} TZS remaining.</div>
+      <div style="margin-top:12px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);border-radius:12px;padding:12px 14px">
+        <div style="font-size:12px;color:var(--green);font-weight:700">&#x2705; You're on track! Keep it up.</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Projected to finish the month with {{ balance|floatformat:0 }} TZS remaining.</div>
       </div>
       {% endif %}
     </div>
@@ -416,31 +465,68 @@
       <div class="goal-card">
         <div class="goal-top">
           <div>
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
-              <span style="font-size:18px">{{ goal.emoji }}</span>
+            <div class="goal-name-row">
+              <span class="goal-ico">{{ goal.emoji }}</span>
               <span class="goal-name">{{ goal.name }}</span>
             </div>
-            <div class="goal-freq">{{ goal.get_frequency_display }} &bull; {{ goal.contribution|floatformat:0 }} TZS</div>
+            <div class="goal-freq">{{ goal.get_frequency_display }} &bull; {{ goal.contribution|floatformat:0 }} TZS/{{ goal.frequency }}</div>
           </div>
           <div style="text-align:right">
             <div class="goal-amt">{{ goal.saved_amount|floatformat:0 }}</div>
             <div class="goal-of">of {{ goal.target_amount|floatformat:0 }} TZS</div>
           </div>
         </div>
-        <div class="goal-bar">
-          <div class="goal-fill" style="width:{{ goal.pct }}%"></div>
+        <div class="goal-prog-track">
+          <div class="goal-prog-fill" style="width:{{ goal.pct }}%"></div>
         </div>
-        <div class="goal-meta">
+        <div class="goal-pct-row">
           <span class="goal-pct">{{ goal.pct }}% complete</span>
-          <span class="goal-rem">{{ goal.remaining|floatformat:0 }} TZS left</span>
+          <span class="goal-remaining">{{ goal.remaining|floatformat:0 }} TZS remaining</span>
         </div>
         <!-- Deposit form -->
-        <form method="POST" action="/finance/deposit/{{ goal.id }}/" class="dep-row">
+        <form method="POST" action="/finance/deposit/{{ goal.id }}/" class="deposit-row">
           {% csrf_token %}
-          <input class="dep-fi" type="number" name="amount" placeholder="Amount to save..." min="1" required>
-          <input class="dep-fi" type="text" name="note" placeholder="Note..." style="max-width:120px">
-          <button type="submit" class="btn-dep">+ Save</button>
+          <input class="dep-fi" type="number" name="amount" placeholder="Add amount..." min="1" required>
+          <input class="dep-fi" type="text" name="note" placeholder="Note..." style="flex:.8">
+          <button type="submit" class="dep-btn">+ Save</button>
         </form>
+        <!-- Goal actions -->
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn-sm btn-edit-goal" type="button"
+                  onclick="toggleEditGoal({{ goal.id }})">&#9998; Edit</button>
+          <form method="POST" action="/finance/delete-goal/{{ goal.id }}/" style="margin:0">
+            {% csrf_token %}
+            <button type="submit" class="btn-sm btn-del-goal"
+                    onclick="return confirm('Delete this savings goal?')">&#x1F5D1; Delete</button>
+          </form>
+        </div>
+        <!-- Inline edit form -->
+        <div id="edit-goal-{{ goal.id }}" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--rim)">
+          <form method="POST" action="/finance/edit-goal/{{ goal.id }}/">
+            {% csrf_token %}
+            <div class="exp-grid" style="margin-bottom:8px">
+              <div>
+                <label class="field-lbl">Goal Name</label>
+                <input class="fi" type="text" name="name" value="{{ goal.name }}" required>
+              </div>
+              <div>
+                <label class="field-lbl">Emoji</label>
+                <input class="fi" type="text" name="emoji" value="{{ goal.emoji }}" maxlength="5">
+              </div>
+            </div>
+            <div class="exp-grid" style="margin-bottom:8px">
+              <div>
+                <label class="field-lbl">Target (TZS)</label>
+                <input class="fi" type="number" name="target_amount" value="{{ goal.target_amount|floatformat:0 }}" required>
+              </div>
+              <div>
+                <label class="field-lbl">Contribution</label>
+                <input class="fi" type="number" name="contribution" value="{{ goal.contribution|floatformat:0 }}">
+              </div>
+            </div>
+            <button type="submit" class="btn-gold" style="padding:10px">&#10003; Update Goal</button>
+          </form>
+        </div>
       </div>
       {% empty %}
       <div style="text-align:center;padding:16px 0;color:var(--muted);font-size:13px">
@@ -449,47 +535,48 @@
       {% endfor %}
 
       <!-- New Goal Form -->
-      <button class="btn-toggle-goal" type="button"
-              onclick="document.getElementById('newGoalWrap').classList.toggle('open')">
+      <button class="toggle-form-btn" onclick="document.getElementById('new-goal-form').classList.toggle('open')" type="button">
         &#x2795; New Savings Goal
       </button>
-      <div id="newGoalWrap" class="new-goal-wrap">
+      <div id="new-goal-form" class="new-goal-form" style="margin-top:14px">
         <form method="POST" action="/finance/add-goal/">
           {% csrf_token %}
-          <div class="g2" style="margin-top:14px">
+          <div class="exp-grid">
             <div>
-              <label class="f-lbl">Goal Name</label>
+              <label class="field-lbl">Goal Name</label>
               <input class="fi" type="text" name="name" placeholder="e.g. Emergency Fund" required>
             </div>
             <div>
-              <label class="f-lbl">Emoji</label>
-              <input class="fi" type="text" name="emoji" placeholder="&#x1F3E0;" maxlength="5">
+              <label class="field-lbl">Emoji</label>
+              <input class="fi" type="text" name="emoji" placeholder="&#x1F3E0;" maxlength="5" value="&#x1F3E0;">
             </div>
           </div>
-          <div class="g2">
+          <div class="exp-grid">
             <div>
-              <label class="f-lbl">Target Amount (TZS)</label>
-              <input class="fi" type="number" name="target_amount" placeholder="500000" min="1" required>
+              <label class="field-lbl">Target Amount (TZS)</label>
+              <input class="fi" type="number" name="target_amount" placeholder="0" min="0" required>
             </div>
             <div>
-              <label class="f-lbl">Contribution per Period</label>
-              <input class="fi" type="number" name="contribution" placeholder="50000" min="0">
+              <label class="field-lbl">Contribution per Period</label>
+              <input class="fi" type="number" name="contribution" placeholder="0" min="0">
             </div>
           </div>
-          <div class="g2" style="margin-bottom:12px">
+          <div class="exp-grid">
             <div>
-              <label class="f-lbl">Frequency</label>
-              <select class="fi" name="frequency">
+              <label class="field-lbl">Frequency</label>
+              <select class="fi fi-sel" name="frequency">
                 <option value="weekly">Weekly</option>
                 <option value="monthly" selected>Monthly</option>
               </select>
             </div>
             <div>
-              <label class="f-lbl">Target Date (optional)</label>
+              <label class="field-lbl">Target Date (optional)</label>
               <input class="fi" type="date" name="target_date">
             </div>
           </div>
-          <button type="submit" class="btn-grn-full">&#x1F4B8; Create Savings Goal</button>
+          <button type="submit" class="btn-grn" style="width:100%;padding:13px">
+            &#x1F4B8; Create Savings Goal
+          </button>
         </form>
       </div>
     </div>
@@ -510,88 +597,125 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
 
-    /* Doughnut */
-    var dEl = document.getElementById('dChart');
-    var catData = {{ cat_chart_data|safe }};
-    if (dEl && catData && catData.length > 0) {
-      new Chart(dEl, {
+    /* ── Doughnut: category breakdown ── */
+    var dCanvas = document.getElementById('dChart');
+    if (dCanvas && {{ cat_chart_data }} && {{ cat_chart_data }}.length > 0) {
+      new Chart(dCanvas, {
         type: 'doughnut',
         data: {
           labels: {{ cat_chart_labels|safe }},
-          datasets: [{ data: catData, backgroundColor: {{ cat_chart_colors|safe }},
+          datasets: [{ data: {{ cat_chart_data|safe }}, backgroundColor: {{ cat_chart_colors|safe }},
                        borderWidth: 0, hoverOffset: 6 }]
         },
         options: {
           responsive: true, maintainAspectRatio: false, cutout: '68%',
-          plugins: { legend: { display: false },
-            tooltip: { backgroundColor:'rgba(10,10,18,0.92)', borderColor:'rgba(52,211,153,0.3)',
-              borderWidth:1, titleColor:'#34d399', bodyColor:'#94a3b8',
-              titleFont:{family:'Syne',weight:'700'}, bodyFont:{family:'DM Sans'}, padding:10 } }
-        }
-      });
-    }
-
-    /* Weekly bar */
-    var wEl = document.getElementById('wkChart');
-    if (wEl) {
-      new Chart(wEl, {
-        type: 'bar',
-        data: {
-          labels: {{ week_labels|safe }},
-          datasets: [{ label:'Spent', data:{{ week_data|safe }},
-            backgroundColor: function(ctx) {
-              var chart=ctx.chart; var area=chart.chartArea; var c=chart.ctx;
-              if (!area) { return 'rgba(52,211,153,0.5)'; }
-              var g=c.createLinearGradient(0,area.bottom,0,area.top);
-              g.addColorStop(0,'rgba(56,189,248,0.4)'); g.addColorStop(1,'rgba(52,211,153,0.85)');
-              return g;
-            }, borderRadius:8, borderSkipped:false }]
-        },
-        options: { responsive:true, maintainAspectRatio:false,
-          plugins:{ legend:{display:false}, tooltip:{
-            backgroundColor:'rgba(10,10,18,0.92)', borderColor:'rgba(52,211,153,0.3)', borderWidth:1,
-            titleColor:'#34d399', bodyColor:'#94a3b8',
-            titleFont:{family:'Syne',weight:'700'}, bodyFont:{family:'DM Sans'}, padding:10,
-            callbacks:{ label:function(c){ return c.parsed.y.toLocaleString()+' TZS'; } } } },
-          scales:{
-            x:{ grid:{display:false}, border:{display:false}, ticks:{color:'#64748b',font:{family:'Syne',weight:'700',size:11}} },
-            y:{ grid:{color:'rgba(255,255,255,0.05)'}, border:{display:false}, ticks:{color:'#64748b',font:{family:'DM Sans',size:10},maxTicksLimit:5} }
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(10,10,18,0.92)', borderColor: 'rgba(52,211,153,0.3)', borderWidth: 1,
+              titleColor: '#34d399', bodyColor: '#94a3b8',
+              titleFont: { family: 'Syne', weight: '700' }, bodyFont: { family: 'DM Sans' }, padding: 10
+            }
           }
         }
       });
     }
 
-    /* Trend line */
-    var tEl = document.getElementById('trendChart');
-    if (tEl) {
-      new Chart(tEl, {
-        type: 'line',
+    /* ── Bar: weekly spending ── */
+    var wkCanvas = document.getElementById('wkChart');
+    if (wkCanvas) {
+      var wkLabels = {{ week_labels|safe }};
+      var wkData   = {{ week_data|safe }};
+      var budget   = {{ monthly_budget }};
+      new Chart(wkCanvas, {
+        type: 'bar',
         data: {
-          labels: {{ trend_labels|safe }},
-          datasets: [{ label:'Spending', data:{{ trend_data|safe }},
-            borderColor:'#34d399', borderWidth:2,
+          labels: wkLabels,
+          datasets: [{
+            label: 'Spent',
+            data: wkData,
             backgroundColor: function(ctx) {
-              var chart=ctx.chart; var area=chart.chartArea; var c=chart.ctx;
-              if (!area) { return 'rgba(52,211,153,0.05)'; }
-              var g=c.createLinearGradient(0,area.top,0,area.bottom);
-              g.addColorStop(0,'rgba(52,211,153,0.22)'); g.addColorStop(1,'rgba(52,211,153,0)');
+              var chart = ctx.chart; var area = chart.chartArea; var c = chart.ctx;
+              if (!area) { return 'rgba(251,113,133,0.5)'; }
+              var g = c.createLinearGradient(0, area.bottom, 0, area.top);
+              g.addColorStop(0, 'rgba(56,189,248,0.4)');
+              g.addColorStop(1, 'rgba(52,211,153,0.85)');
               return g;
             },
-            fill:true, tension:0.4, pointBackgroundColor:'#34d399', pointRadius:4, pointHoverRadius:6 }]
+            borderRadius: 8, borderSkipped: false
+          }]
         },
-        options: { responsive:true, maintainAspectRatio:false,
-          plugins:{ legend:{display:false}, tooltip:{
-            backgroundColor:'rgba(10,10,18,0.92)', borderColor:'rgba(52,211,153,0.3)', borderWidth:1,
-            titleColor:'#34d399', bodyColor:'#94a3b8',
-            titleFont:{family:'Syne',weight:'700'}, bodyFont:{family:'DM Sans'}, padding:10,
-            callbacks:{ label:function(c){ return c.parsed.y.toLocaleString()+' TZS'; } } } },
-          scales:{
-            x:{ grid:{display:false}, border:{display:false}, ticks:{color:'#64748b',font:{family:'Syne',weight:'700',size:11}} },
-            y:{ grid:{color:'rgba(255,255,255,0.05)'}, border:{display:false}, ticks:{color:'#64748b',font:{family:'DM Sans',size:10},maxTicksLimit:5} }
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(10,10,18,0.92)', borderColor: 'rgba(52,211,153,0.3)', borderWidth: 1,
+              titleColor: '#34d399', bodyColor: '#94a3b8',
+              titleFont: { family: 'Syne', weight: '700' }, bodyFont: { family: 'DM Sans' }, padding: 10,
+              callbacks: { label: function(c) { return c.parsed.y.toLocaleString() + ' TZS'; } }
+            }
+          },
+          scales: {
+            x: { grid: { display: false }, border: { display: false }, ticks: { color: '#64748b', font: { family: 'Syne', weight: '700', size: 11 } } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false }, ticks: { color: '#64748b', font: { family: 'DM Sans', size: 10 }, maxTicksLimit: 5 } }
+          }
+        }
+      });
+    }
+
+    /* ── Line: 6-month trend ── */
+    var tCanvas = document.getElementById('trendChart');
+    if (tCanvas) {
+      var tLabels = {{ trend_labels|safe }};
+      var tData   = {{ trend_data|safe }};
+      new Chart(tCanvas, {
+        type: 'line',
+        data: {
+          labels: tLabels,
+          datasets: [{
+            label: 'Spending',
+            data: tData,
+            borderColor: '#34d399',
+            borderWidth: 2,
+            backgroundColor: function(ctx) {
+              var chart = ctx.chart; var area = chart.chartArea; var c = chart.ctx;
+              if (!area) { return 'rgba(52,211,153,0.05)'; }
+              var g = c.createLinearGradient(0, area.top, 0, area.bottom);
+              g.addColorStop(0, 'rgba(52,211,153,0.25)');
+              g.addColorStop(1, 'rgba(52,211,153,0)');
+              return g;
+            },
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#34d399',
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(10,10,18,0.92)', borderColor: 'rgba(52,211,153,0.3)', borderWidth: 1,
+              titleColor: '#34d399', bodyColor: '#94a3b8',
+              titleFont: { family: 'Syne', weight: '700' }, bodyFont: { family: 'DM Sans' }, padding: 10,
+              callbacks: { label: function(c) { return c.parsed.y.toLocaleString() + ' TZS'; } }
+            }
+          },
+          scales: {
+            x: { grid: { display: false }, border: { display: false }, ticks: { color: '#64748b', font: { family: 'Syne', weight: '700', size: 11 } } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false }, ticks: { color: '#64748b', font: { family: 'DM Sans', size: 10 }, maxTicksLimit: 5 } }
           }
         }
       });
     }
   });
+
+  function toggleEditGoal(id) {
+    var el = document.getElementById('edit-goal-' + id);
+    if(el){ el.style.display = el.style.display === 'none' ? 'block' : 'none'; }
+  }
 </script>
 {% endblock %}

@@ -157,6 +157,19 @@
   .qa-btn:hover { background:rgba(45,212,191,.06); border-color:var(--teal); color:var(--teal); }
   .qa-area { margin-top:10px; }
 
+
+  /* === DEMO IMAGE === */
+  .demo-thumb { border-radius:12px; overflow:hidden; margin:0 14px 12px; }
+  .demo-thumb img { width:100%; height:155px; object-fit:cover; display:block; }
+  .demo-placeholder { margin:0 14px 12px; height:110px; background:linear-gradient(135deg,rgba(45,212,191,.06),rgba(129,140,248,.06));
+                       border:1px dashed rgba(255,255,255,.11); border-radius:12px;
+                       display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px; }
+  .demo-ph-ico { font-size:26px; opacity:.45; }
+  .demo-ph-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.07em; text-transform:uppercase; }
+  .demo-row { display:flex;align-items:center;gap:5px;padding:0 14px 8px;cursor:pointer;
+              font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase; }
+  .demo-row:hover { color:var(--teal); }
+
   /* === ANIMS === */
   @keyframes sup { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
   .a1{animation:sup .4s ease both .04s} .a2{animation:sup .4s ease both .10s}
@@ -208,7 +221,7 @@
   </div>
 
   <!-- WORKOUT TIMER -->
-  <div class="gc a3" x-data="wTimer()">
+  <div class="gc a3" x-data="wTimer">
     <div class="gcp">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <span class="sec-lbl" style="margin-bottom:0">Workout Timer</span>
@@ -266,7 +279,7 @@
     </div>
 
     <!-- Category filter tabs -->
-    <div class="tab-row" x-data="tabFilter()" id="tab-filter">
+    <div class="tab-row" x-data="tabFilter" id="tab-filter">
       <button class="tab-btn on" x-on:click="filter('all')" id="tab-all">All</button>
       <button class="tab-btn" x-on:click="filter('core')" id="tab-core">&#x1F4A2; Core</button>
       <button class="tab-btn" x-on:click="filter('lower')" id="tab-lower">&#x1F351; Lower</button>
@@ -305,6 +318,18 @@
         <template x-for="i in totalSets" :key="i">
           <div class="sdot" x-bind:class="i <= doneSets ? 'lit' : ''"></div>
         </template>
+      </div>
+
+      <!-- Demo Image / Placeholder -->
+      <div x-show="expanded">
+        {% if ex.demo_image %}
+        <div class="demo-thumb"><img src="{{ ex.demo_image }}" alt="{{ ex.name }} demo" loading="lazy"></div>
+        {% else %}
+        <div class="demo-placeholder">
+          <div class="demo-ph-ico">&#x1F3CB;</div>
+          <div class="demo-ph-lbl">No demo available</div>
+        </div>
+        {% endif %}
       </div>
 
       <!-- Rep panel -->
@@ -429,82 +454,80 @@
 
 {% block extra_scripts %}
 <script>
-  /* ── Workout Timer ── */
-  function wTimer() {
-    return {
-      secs:0, isRunning:false, iv:null,
-      rSecs:0, restOn:false, rIv:null,
-      get dispTime() {
-        var m = String(Math.floor(this.secs/60)).padStart(2,'0');
-        var s = String(this.secs%60).padStart(2,'0');
-        return m+':'+s;
-      },
-      get ringOff() { return 314.16*(1-(this.secs%300)/300); },
-      get restDisp() {
-        if(!this.restOn && this.rSecs===0) { return '--:--'; }
-        var m = String(Math.floor(this.rSecs/60)).padStart(2,'0');
-        var s = String(this.rSecs%60).padStart(2,'0');
-        return m+':'+s;
-      },
-      toggle: function() { this.isRunning ? this.pause() : this.start(); },
-      start: function() {
-        var self=this; self.isRunning=true;
-        self.iv=setInterval(function(){ self.secs++; },1000);
-      },
-      pause: function() { this.isRunning=false; clearInterval(this.iv); },
-      reset: function() { this.pause(); this.secs=0; },
-      doRest: function(s) {
-        var self=this; clearInterval(self.rIv);
-        self.rSecs=s; self.restOn=true;
-        self.rIv=setInterval(function(){
-          if(self.rSecs<=0){ clearInterval(self.rIv); self.restOn=false; showToast('Rest done! Back to it &#x1F4AA;'); }
-          else { self.rSecs--; }
-        },1000);
-      }
-    };
-  }
+  /* ── Register Alpine components BEFORE Alpine boots (fixes defer timing) ── */
+  document.addEventListener('alpine:init', function() {
 
-  /* ── Rep Counter ── */
-  function rCtr(defReps, totSets, exId) {
-    return {
-      reps:defReps, totalSets:totSets, doneSets:0,
-      expanded:false, saved:false, exId:exId,
-      inc: function(){ this.reps++; },
-      dec: function(){ if(this.reps>1){ this.reps--; } },
-      logSet: function(){
-        if(this.doneSets<this.totalSets){
-          this.doneSets++;
-          showToast('Set '+this.doneSets+' done &#8212; '+this.reps+' reps! &#x1F525;');
-          if(this.doneSets>=this.totalSets){
-            showToast('All sets done! Tap Save to record it &#x2705;');
+    /* Workout Timer */
+    Alpine.data('wTimer', function() {
+      return {
+        secs:0, isRunning:false, iv:null,
+        rSecs:0, restOn:false, rIv:null,
+        get dispTime() {
+          var m = String(Math.floor(this.secs/60)).padStart(2,'0');
+          var s = String(this.secs%60).padStart(2,'0');
+          return m+':'+s;
+        },
+        get ringOff() { return 314.16*(1-(this.secs%300)/300); },
+        get restDisp() {
+          if(!this.restOn && this.rSecs===0) { return '--:--'; }
+          var m = String(Math.floor(this.rSecs/60)).padStart(2,'0');
+          var s = String(this.rSecs%60).padStart(2,'0');
+          return m+':'+s;
+        },
+        toggle() { this.isRunning ? this.pause() : this.start(); },
+        start() {
+          var self=this; self.isRunning=true;
+          self.iv=setInterval(function(){ self.secs++; },1000);
+        },
+        pause() { this.isRunning=false; clearInterval(this.iv); },
+        reset() { this.pause(); this.secs=0; },
+        doRest(s) {
+          var self=this; clearInterval(self.rIv);
+          self.rSecs=s; self.restOn=true;
+          self.rIv=setInterval(function(){
+            if(self.rSecs<=0){ clearInterval(self.rIv); self.restOn=false; showToast('Rest done! Back to it 💪'); }
+            else { self.rSecs--; }
+          },1000);
+        }
+      };
+    });
+
+    /* Rep Counter */
+    Alpine.data('rCtr', function(defReps, totSets, exId) {
+      return {
+        reps:defReps, totalSets:totSets, doneSets:0,
+        expanded:false, saved:false, exId:exId,
+        inc() { this.reps++; },
+        dec() { if(this.reps>1){ this.reps--; } },
+        logSet() {
+          if(this.doneSets<this.totalSets){
+            this.doneSets++;
+            showToast('Set '+this.doneSets+' done — '+this.reps+' reps! 🔥');
+            if(this.doneSets>=this.totalSets){
+              showToast('All sets done! Tap Save to record it ✅');
+            }
           }
         }
-      }
-    };
-  }
+      };
+    });
 
-  /* ── Category tabs ── */
-  function tabFilter() {
-    return {
-      current: 'all',
-      filter: function(cat) {
-        this.current = cat;
-        var allTabs = document.querySelectorAll('.tab-btn');
-        for(var i=0;i<allTabs.length;i++){ allTabs[i].classList.remove('on'); }
-        var activeTab = document.getElementById('tab-'+cat);
-        if(activeTab){ activeTab.classList.add('on'); }
-        var cards = document.querySelectorAll('.ex-card');
-        for(var j=0;j<cards.length;j++){
-          var c = cards[j];
-          if(cat==='all' || c.getAttribute('data-cat')===cat){
-            c.style.display='block';
-          } else {
-            c.style.display='none';
-          }
+    /* Category Tabs */
+    Alpine.data('tabFilter', function() {
+      return {
+        current: 'all',
+        filter(cat) {
+          this.current = cat;
+          document.querySelectorAll('.tab-btn').forEach(function(t){ t.classList.remove('on'); });
+          var el = document.getElementById('tab-'+cat);
+          if(el){ el.classList.add('on'); }
+          document.querySelectorAll('.ex-card').forEach(function(c){
+            c.style.display = (cat==='all' || c.getAttribute('data-cat')===cat) ? 'block' : 'none';
+          });
         }
-      }
-    };
-  }
+      };
+    });
+
+  }); // end alpine:init
 
   /* ── Chart.js ── */
   document.addEventListener('DOMContentLoaded', function() {
