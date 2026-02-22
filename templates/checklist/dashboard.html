@@ -48,6 +48,7 @@
   .fi.focus-bl:focus  { border-color:rgba(56,189,248,.5); }
   .fi.focus-am:focus  { border-color:rgba(251,191,36,.5); }
   .fi.focus-gr:focus  { border-color:rgba(52,211,153,.5); }
+  .fi.focus-or:focus  { border-color:rgba(249,115,22,.5); }
   .field-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.06em;
                text-transform:uppercase; display:block; margin-bottom:6px; }
   .fg { margin-bottom:10px; }
@@ -61,6 +62,7 @@
   .btn-bl { background:linear-gradient(135deg,#38bdf8,#2dd4bf); color:#0a0a12; box-shadow:0 4px 18px rgba(56,189,248,.25); }
   .btn-am { background:linear-gradient(135deg,#fbbf24,#f97316); color:#0a0a12; box-shadow:0 4px 18px rgba(251,191,36,.25); }
   .btn-gr { background:linear-gradient(135deg,#34d399,#2dd4bf); color:#0a0a12; box-shadow:0 4px 18px rgba(52,211,153,.25); }
+  .btn-or { background:linear-gradient(135deg,#f97316,#fbbf24); color:#0a0a12; box-shadow:0 4px 18px rgba(249,115,22,.25); }
   .btn-sm { padding:5px 12px; border-radius:9px; font-family:'Syne',sans-serif;
             font-size:11px; font-weight:700; cursor:pointer; border:none; transition:all .2s; }
   .btn-del  { background:rgba(251,113,133,.1); border:1px solid rgba(251,113,133,.2); color:var(--ro); }
@@ -68,6 +70,7 @@
   .btn-prog { background:rgba(251,191,36,.1);  border:1px solid rgba(251,191,36,.2);  color:var(--am); }
   .btn-drop { background:rgba(148,163,184,.1); border:1px solid rgba(148,163,184,.2); color:var(--soft); }
   .btn-rev  { background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.2); color:var(--vi); }
+  .btn-mute { background:rgba(100,116,139,.1); border:1px solid rgba(100,116,139,.2); color:var(--muted); }
 
   /* ── WEEK STRIP ────────────────────────────────── */
   .week-strip { display:flex; gap:6px; margin-bottom:14px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
@@ -89,6 +92,7 @@
   .pf-bl { background:linear-gradient(90deg,#38bdf8,#2dd4bf); box-shadow:0 0 10px rgba(56,189,248,.35); }
   .pf-gr { background:linear-gradient(90deg,#34d399,#2dd4bf); box-shadow:0 0 10px rgba(52,211,153,.35); }
   .pf-am { background:linear-gradient(90deg,#fbbf24,#f97316); box-shadow:0 0 10px rgba(251,191,36,.35); }
+  .pf-or { background:linear-gradient(90deg,#f97316,#fbbf24); box-shadow:0 0 10px rgba(249,115,22,.35); }
 
   /* ── CHECKLIST ITEMS ───────────────────────────── */
   .item-row { display:flex; align-items:flex-start; gap:10px; padding:11px 0;
@@ -101,24 +105,51 @@
   .chk-off { background:rgba(255,255,255,.06); border:2px solid rgba(255,255,255,.2); }
   .chk-on  { background:linear-gradient(135deg,#818cf8,#2dd4bf); }
   .chk-on-bl { background:linear-gradient(135deg,#38bdf8,#2dd4bf); }
+  .chk-on-or { background:linear-gradient(135deg,#f97316,#fbbf24); }
   .item-body { flex:1; min-width:0; }
   .item-title { font-size:14px; color:#e2e8f0; line-height:1.4; }
   .item-sub   { font-size:11px; color:var(--muted); margin-top:3px; }
   .item-chips { display:flex; gap:5px; flex-wrap:wrap; margin-top:4px; }
   .chip { padding:2px 9px; border-radius:20px; font-size:10px; font-weight:700;
           font-family:'Syne',sans-serif; }
-  .chip-vi { background:rgba(129,140,248,.13); color:#818cf8; }
-  .chip-bl { background:rgba(56,189,248,.13);  color:#38bdf8; }
-  .chip-gr { background:rgba(52,211,153,.13);  color:#34d399; }
-  .chip-am { background:rgba(251,191,36,.13);  color:#fbbf24; }
-  .chip-ro { background:rgba(251,113,133,.13); color:#fb7185; }
+  .chip-vi   { background:rgba(129,140,248,.13); color:#818cf8; }
+  .chip-bl   { background:rgba(56,189,248,.13);  color:#38bdf8; }
+  .chip-gr   { background:rgba(52,211,153,.13);  color:#34d399; }
+  .chip-am   { background:rgba(251,191,36,.13);  color:#fbbf24; }
+  .chip-ro   { background:rgba(251,113,133,.13); color:#fb7185; }
+  .chip-or   { background:rgba(249,115,22,.13);  color:#f97316; }
   .chip-soft { background:rgba(148,163,184,.13); color:#94a3b8; }
 
-  /* priority dots */
   .pri-hi { color:var(--ro); } .pri-md { color:var(--am); } .pri-lo { color:var(--soft); }
   .pri-dot { font-size:10px; }
 
-  /* empty */
+  /* ── ROUTINE SPECIFIC ──────────────────────────── */
+  .routine-section { margin-bottom:0; }
+  .routine-item { display:flex; align-items:center; gap:10px; padding:12px 0;
+                  border-bottom:1px solid rgba(255,255,255,.05); transition:opacity .2s; }
+  .routine-item:last-child { border-bottom:none; }
+  .routine-item.done .routine-title { text-decoration:line-through; color:var(--muted); }
+  .routine-item.done { opacity:.75; }
+  .routine-body { flex:1; min-width:0; }
+  .routine-title { font-size:14px; color:#e2e8f0; line-height:1.3; }
+  .routine-meta  { display:flex; gap:5px; margin-top:4px; flex-wrap:wrap; align-items:center; }
+
+  /* time-of-day badge colours */
+  .tod-morning   { background:rgba(251,191,36,.13);  color:#fbbf24; }
+  .tod-afternoon { background:rgba(249,115,22,.13);  color:#f97316; }
+  .tod-evening   { background:rgba(129,140,248,.13); color:#818cf8; }
+  .tod-anytime   { background:rgba(52,211,153,.13);  color:#34d399; }
+
+  /* manage routines list */
+  .manage-routine-row { display:flex; align-items:center; gap:8px; padding:9px 0;
+                        border-bottom:1px solid rgba(255,255,255,.04); }
+  .manage-routine-row:last-child { border-bottom:none; }
+  .manage-routine-row.inactive { opacity:.45; }
+  .mr-title { flex:1; font-size:13px; color:#e2e8f0; }
+  .mr-badge { font-size:10px; color:var(--muted); padding:2px 7px;
+              background:rgba(255,255,255,.05); border-radius:20px; white-space:nowrap; }
+
+  /* ── EMPTY ─────────────────────────────────────── */
   .empty { padding:24px; text-align:center; }
   .empty-ico { font-size:32px; margin-bottom:8px; }
   .empty-ttl { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:#e2e8f0; margin-bottom:4px; }
@@ -159,9 +190,9 @@
                     border-bottom:1px solid rgba(255,255,255,.04); }
   .week-task-item:last-child { border-bottom:none; }
   .wt-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:5px; }
-  .wt-todo     { background:var(--muted); }
+  .wt-todo       { background:var(--muted); }
   .wt-inprogress { background:var(--am); }
-  .wt-done     { background:var(--gr); }
+  .wt-done       { background:var(--gr); }
   .wt-body { flex:1; }
   .wt-title { font-size:13px; color:#e2e8f0; line-height:1.4; }
   .wt-title.done-txt { text-decoration:line-through; color:var(--muted); }
@@ -188,6 +219,7 @@
   .ta-bl { background:rgba(56,189,248,.07);  border:1px dashed rgba(56,189,248,.3);  color:var(--bl); }
   .ta-am { background:rgba(251,191,36,.07);  border:1px dashed rgba(251,191,36,.3);  color:var(--am); }
   .ta-gr { background:rgba(52,211,153,.07);  border:1px dashed rgba(52,211,153,.3);  color:var(--gr); }
+  .ta-or { background:rgba(249,115,22,.07);  border:1px dashed rgba(249,115,22,.3);  color:var(--or); }
   .toggle-add:hover { filter:brightness(1.15); }
 
   /* ── STATS ROW ─────────────────────────────────── */
@@ -203,7 +235,6 @@
   .a3{animation:sup .38s ease both .15s} .a4{animation:sup .38s ease both .21s}
   .a5{animation:sup .38s ease both .27s} .a6{animation:sup .38s ease both .33s}
 
-  /* today highlight on week board */
   .day-col.is-today { border-color:rgba(251,191,36,.3); }
   .day-col.is-today .day-col-hdr { background:rgba(251,191,36,.06); }
   .day-col.is-today .day-col-name { color:var(--am); }
@@ -262,11 +293,222 @@
     {% endfor %}
   </div>
 
-  <!-- Progress -->
-  <div class="gc a2">
+  <!-- ══ DAILY ROUTINE ══════════════════════════════════════ -->
+  {% if routine_logs %}
+  <div class="gc a2" style="border-color:rgba(249,115,22,.2)">
+    <div class="gcp">
+
+      <!-- Header + progress -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div>
+          <div class="sec-lbl" style="margin-bottom:2px;color:var(--or)">&#x1F504; Daily Routine</div>
+          <div style="font-size:11px;color:var(--muted)">{{ routine_done }}/{{ routine_total }} completed today</div>
+        </div>
+        {% if routine_pct == 100 and routine_total > 0 %}
+        <span style="font-size:20px">&#x1F3C6;</span>
+        {% else %}
+        <span style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--or)">{{ routine_pct }}%</span>
+        {% endif %}
+      </div>
+
+      <!-- Progress bar -->
+      <div class="prog-bar" style="margin-bottom:14px">
+        <div class="prog-fill pf-or" style="width:{{ routine_pct }}%"></div>
+      </div>
+
+      {% if routine_pct == 100 %}
+      <div style="text-align:center;padding:6px 0 10px;font-size:13px;color:var(--gr);font-weight:700">
+        &#x1F389; Routine complete! You crushed it today.
+      </div>
+      {% endif %}
+
+      <!-- Routine items grouped by time of day -->
+      {% regroup routine_logs by routine_task.time_of_day as logs_by_time %}
+
+      {% for time_group in logs_by_time %}
+      <div style="margin-bottom:12px">
+        <!-- Time group label -->
+        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+                    color:var(--muted);margin-bottom:4px;padding-bottom:4px;
+                    border-bottom:1px solid rgba(255,255,255,.05)">
+          {% if time_group.grouper == 'morning' %}🌅 Morning
+          {% elif time_group.grouper == 'afternoon' %}☀️ Afternoon
+          {% elif time_group.grouper == 'evening' %}🌙 Evening
+          {% else %}🔄 Anytime{% endif %}
+        </div>
+
+        {% for log in time_group.list %}
+        <div class="routine-item {% if log.completed %}done{% endif %}">
+          <!-- Toggle button -->
+          <form method="POST" action="/checklist/routine/log/{{ log.id }}/" style="display:contents">
+            {% csrf_token %}
+            <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
+            <button type="submit" class="chk {% if log.completed %}chk-on-or{% else %}chk-off{% endif %}">
+              {% if log.completed %}
+              <span style="font-size:11px;color:#0a0a12">&#10003;</span>
+              {% else %}
+              <span style="font-size:9px;color:rgba(255,255,255,.25)">&#10003;</span>
+              {% endif %}
+            </button>
+          </form>
+
+          <!-- Task info -->
+          <div class="routine-body">
+            <div class="routine-title">{{ log.routine_task.title }}</div>
+            <div class="routine-meta">
+              <span class="chip chip-or">{{ log.routine_task.get_category_display }}</span>
+              {% if log.completed and log.completed_at %}
+              <span style="font-size:10px;color:var(--gr)">✓ {{ log.completed_at|time:"H:i" }}</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+      <!-- Manage routines toggle -->
+      <button class="toggle-add ta-or" type="button" onclick="tog('manage-routines')" style="margin-top:4px">
+        &#x2699;&#xFE0F; Manage Routine Tasks
+      </button>
+
+      <!-- Manage routines panel -->
+      <div id="manage-routines" style="display:none;margin-top:14px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px">
+          These tasks appear every day. Deactivate to hide without deleting.
+        </div>
+
+        {% for rt in all_routines %}
+        <div class="manage-routine-row {% if not rt.is_active %}inactive{% endif %}">
+          <div class="mr-title">
+            {% if not rt.is_active %}<s>{% endif %}
+            {{ rt.title }}
+            {% if not rt.is_active %}</s>{% endif %}
+          </div>
+          <span class="mr-badge">{{ rt.get_time_of_day_display }}</span>
+          <!-- Deactivate / reactivate -->
+          <form method="POST" action="/checklist/routine/toggle-active/{{ rt.id }}/" style="display:contents">
+            {% csrf_token %}
+            <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
+            <button type="submit" class="btn-sm {% if rt.is_active %}btn-mute{% else %}btn-rev{% endif %}">
+              {% if rt.is_active %}Hide{% else %}Show{% endif %}
+            </button>
+          </form>
+          <!-- Delete permanently -->
+          <form method="POST" action="/checklist/routine/delete/{{ rt.id }}/" style="display:contents">
+            {% csrf_token %}
+            <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
+            <button type="submit" class="btn-sm btn-del"
+                    onclick="return confirm('Delete \'{{ rt.title }}\' and all its history?')">
+              &#x2715;
+            </button>
+          </form>
+        </div>
+        {% empty %}
+        <div style="font-size:12px;color:var(--muted);text-align:center;padding:10px 0">
+          No routine tasks yet. Add your first one below!
+        </div>
+        {% endfor %}
+
+        <!-- Add new routine task -->
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06)">
+          <div style="font-size:10px;color:var(--or);font-weight:700;letter-spacing:.08em;
+                      text-transform:uppercase;margin-bottom:10px">&#x2795; New Routine Task</div>
+          <form method="POST" action="/checklist/routine/add/">
+            {% csrf_token %}
+            <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
+            <div class="fg">
+              <input class="fi focus-or" type="text" name="title"
+                     placeholder="e.g. Morning prayer, Workout, Read 20 mins..." required>
+            </div>
+            <div class="form-2">
+              <div>
+                <label class="field-lbl">Category</label>
+                <select class="fi fi-sel focus-or" name="category">
+                  <option value="health">💪 Health</option>
+                  <option value="spiritual">✝️ Spiritual</option>
+                  <option value="personal" selected>👤 Personal</option>
+                  <option value="work">💼 Work</option>
+                  <option value="finance">💰 Finance</option>
+                  <option value="other">📦 Other</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-lbl">Time of Day</label>
+                <select class="fi fi-sel focus-or" name="time_of_day">
+                  <option value="morning">🌅 Morning</option>
+                  <option value="afternoon">☀️ Afternoon</option>
+                  <option value="evening">🌙 Evening</option>
+                  <option value="anytime" selected>🔄 Anytime</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-or">&#x1F504; Add to Daily Routine</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  {% else %}
+  <!-- No routines yet — show a prominent add prompt -->
+  <div class="gc a2" style="border-color:rgba(249,115,22,.15);border-style:dashed">
+    <div class="gcp">
+      <div style="text-align:center;padding:8px 0">
+        <div style="font-size:28px;margin-bottom:8px">&#x1F504;</div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#e2e8f0;margin-bottom:4px">
+          Set Up Your Daily Routine
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">
+          Add tasks you want to complete <em>every day</em> — prayer, workouts,<br>journaling, reading — and tick them off each morning.
+        </div>
+        <button class="toggle-add ta-or" type="button" onclick="tog('first-routine-form')" style="max-width:300px;margin:0 auto">
+          &#x2795; Add Your First Routine Task
+        </button>
+      </div>
+      <div id="first-routine-form" style="display:none;margin-top:14px">
+        <form method="POST" action="/checklist/routine/add/">
+          {% csrf_token %}
+          <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
+          <div class="fg">
+            <input class="fi focus-or" type="text" name="title"
+                   placeholder="e.g. Morning prayer, Workout, Read 20 mins..." required>
+          </div>
+          <div class="form-2">
+            <div>
+              <label class="field-lbl">Category</label>
+              <select class="fi fi-sel focus-or" name="category">
+                <option value="health">💪 Health</option>
+                <option value="spiritual">✝️ Spiritual</option>
+                <option value="personal" selected>👤 Personal</option>
+                <option value="work">💼 Work</option>
+                <option value="finance">💰 Finance</option>
+                <option value="other">📦 Other</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-lbl">Time of Day</label>
+              <select class="fi fi-sel focus-or" name="time_of_day">
+                <option value="morning">🌅 Morning</option>
+                <option value="afternoon">☀️ Afternoon</option>
+                <option value="evening">🌙 Evening</option>
+                <option value="anytime" selected>🔄 Anytime</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-or">&#x1F504; Add to Daily Routine</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Progress (personal tasks) -->
+  <div class="gc a3">
     <div class="gcp">
       <div class="prog-row">
-        <span class="sec-lbl" style="margin-bottom:0">{{ view_date|date:"M j" }} — Personal</span>
+        <span class="sec-lbl" style="margin-bottom:0">{{ view_date|date:"M j" }} — Personal Tasks</span>
         <span style="font-size:12px;color:var(--muted)">{{ done }}/{{ total }}</span>
       </div>
       <div class="prog-bar" style="margin-top:8px">
@@ -281,7 +523,7 @@
   </div>
 
   <!-- Add task -->
-  <div class="gc a3">
+  <div class="gc a4">
     <div class="gcp">
       <div class="sec-lbl">&#x2795; Add Task</div>
       <form method="POST" action="/checklist/add/">
@@ -316,7 +558,7 @@
   </div>
 
   <!-- Task list -->
-  <div class="gc a4">
+  <div class="gc a5">
     <div class="gcp">
       <div class="sec-lbl">Tasks — {{ view_date|date:"M j" }}</div>
       {% if items %}
@@ -372,7 +614,7 @@
   </div>
 
   <!-- Day Reflection -->
-  <div class="gc a5">
+  <div class="gc a6">
     <div class="gcp">
       <div class="sec-lbl">&#x1F31F; Day Reflection</div>
       <form method="POST" action="/checklist/reflect/">
@@ -417,7 +659,6 @@
 <!-- ══════════════════════════════════════════════════════════ -->
 <div class="panel {% if active_tab == 'work' %}active{% endif %}" id="tab-work">
 
-  <!-- Week strip -->
   <div class="week-strip a2">
     {% for d in week_data %}
     <a href="/checklist/?date={{ d.date|date:'Y-m-d' }}&tab=work"
@@ -430,7 +671,6 @@
     {% endfor %}
   </div>
 
-  <!-- Work progress -->
   <div class="gc a2">
     <div class="gcp">
       <div class="prog-row">
@@ -448,7 +688,6 @@
     </div>
   </div>
 
-  <!-- Add work task -->
   <div class="gc a3">
     <div class="gcp">
       <div class="sec-lbl">&#x2795; Add Work Task</div>
@@ -486,12 +725,10 @@
     </div>
   </div>
 
-  <!-- Work task list -->
   <div class="gc a4">
     <div class="gcp">
       <div class="sec-lbl">Work Tasks — {{ view_date|date:"M j" }}</div>
 
-      <!-- Pending -->
       {% for item in work_items %}{% if not item.completed %}
       <div class="item-row">
         <form method="POST" action="/checklist/work/toggle/{{ item.id }}/" style="display:contents">
@@ -520,7 +757,6 @@
       </div>
       {% endif %}{% endfor %}
 
-      <!-- Done -->
       {% for item in work_items %}{% if item.completed %}
       <div class="item-row done">
         <form method="POST" action="/checklist/work/toggle/{{ item.id }}/" style="display:contents">
@@ -552,7 +788,6 @@
     </div>
   </div>
 
-  <!-- Work summary box if tasks done -->
   {% if work_done > 0 %}
   <div class="gc a5">
     <div class="gcp">
@@ -563,7 +798,7 @@
           <div class="stat-key">Completed</div>
         </div>
         <div class="stat-box">
-          <div class="stat-val" style="color:var(--am)">{{ work_total|add:"-1"|add:"1" }}</div>
+          <div class="stat-val" style="color:var(--am)">{{ work_total }}</div>
           <div class="stat-key">Total Tasks</div>
         </div>
         <div class="stat-box">
@@ -591,7 +826,6 @@
 <!-- ══════════════════════════════════════════════════════════ -->
 <div class="panel {% if active_tab == 'week' %}active{% endif %}" id="tab-week">
 
-  <!-- Week nav -->
   <div class="nav-strip a2">
     <a href="/checklist/?tab=week&week={{ prev_week }}&wyear={{ prev_wyear }}" class="nav-btn">&#x2190;</a>
     <div style="text-align:center">
@@ -601,36 +835,26 @@
     <a href="/checklist/?tab=week&week={{ next_week }}&wyear={{ next_wyear }}" class="nav-btn">&#x2192;</a>
   </div>
 
-  <!-- Stats -->
   <div class="stats-3 a2">
     <div class="stat-box">
       <div class="stat-val" style="color:var(--gr)">{{ week_tasks|length }}</div>
       <div class="stat-key">Total Tasks</div>
     </div>
     <div class="stat-box">
-      <div class="stat-val" style="color:var(--am)">
-        {% with done_count=0 %}
-        {% for t in week_tasks %}{% if t.status == 'inprogress' %}{{ forloop.counter|add:"0" }}{% endif %}{% endfor %}
-        {% endwith %}
-        {{ week_tasks|length }}
-      </div>
-      <div class="stat-key">Planned Days</div>
+      <div class="stat-val" style="color:var(--am)">{{ week_num }}</div>
+      <div class="stat-key">Week No.</div>
     </div>
     <div class="stat-box" style="border-color:rgba(52,211,153,.15);background:rgba(52,211,153,.04)">
       <div class="stat-val" style="color:var(--gr)">
-        {% for t in week_tasks %}{% if t.status == 'done' %}&#x2714;{% endif %}{% endfor %}
-        {% with n=0 %}{% for t in week_tasks %}{% if t.status == 'done' %}{% with n=n|add:1 %}{% endwith %}{% endif %}{% endfor %}{% endwith %}
-        0
+        {% with c=0 %}{% for t in week_tasks %}{% if t.status == 'done' %}{{ forloop.counter }}{% endif %}{% endfor %}{% endwith %}0
       </div>
       <div class="stat-key">Completed</div>
     </div>
   </div>
 
-  <!-- Add week task -->
   <div class="gc a3">
     <div class="gcp">
-      <button class="toggle-add ta-am" type="button"
-              onclick="tog('wk-form')">&#x2795; Plan a Task This Week</button>
+      <button class="toggle-add ta-am" type="button" onclick="tog('wk-form')">&#x2795; Plan a Task This Week</button>
       <div id="wk-form" style="display:none;margin-top:14px">
         <form method="POST" action="/checklist/week/add/">
           {% csrf_token %}
@@ -681,7 +905,6 @@
     </div>
   </div>
 
-  <!-- Week board — tasks by day -->
   <div class="week-board a4">
     {% for day_i, day in tasks_by_day.items %}
     <div class="day-col {% if day.date == today %}is-today{% endif %}">
@@ -736,20 +959,13 @@
           </div>
         </div>
         {% empty %}
-        <div style="padding:10px 0;font-size:12px;color:var(--muted);text-align:center">
-          Nothing planned
-        </div>
+        <div style="padding:10px 0;font-size:12px;color:var(--muted);text-align:center">Nothing planned</div>
         {% endfor %}
-
-        <!-- Unplanned tasks shown under "Any Day" — day_i == -1 doesn't exist,
-             so show unplanned tasks only on first card if they exist -->
       </div>
     </div>
     {% endfor %}
 
-    <!-- Unplanned tasks (no planned_day set) -->
-    {% with unplanned=week_tasks %}
-    {% if unplanned %}
+    {% if week_tasks %}
     <div class="day-col">
       <div class="day-col-hdr">
         <div class="day-col-name">&#x1F4CB; Unscheduled</div>
@@ -793,7 +1009,6 @@
       </div>
     </div>
     {% endif %}
-    {% endwith %}
 
     {% if not week_tasks %}
     <div class="gc">
@@ -814,7 +1029,6 @@
 <!-- ══════════════════════════════════════════════════════════ -->
 <div class="panel {% if active_tab == 'month' %}active{% endif %}" id="tab-month">
 
-  <!-- Month nav -->
   <div class="nav-strip a2">
     <a href="/checklist/?tab=month&month={{ prev_month }}&myear={{ prev_myear }}" class="nav-btn">&#x2190;</a>
     <div style="text-align:center">
@@ -824,7 +1038,6 @@
     <a href="/checklist/?tab=month&month={{ next_month }}&myear={{ next_myear }}" class="nav-btn">&#x2192;</a>
   </div>
 
-  <!-- Month stats -->
   <div class="stats-3 a2">
     <div class="stat-box">
       <div class="stat-val" style="color:var(--bl)">{{ month_goals_active.count }}</div>
@@ -840,12 +1053,9 @@
     </div>
   </div>
 
-  <!-- Add month goal -->
   <div class="gc a3">
     <div class="gcp">
-      <button class="toggle-add ta-gr" type="button" onclick="tog('mg-form')">
-        &#x2795; Add Monthly Goal
-      </button>
+      <button class="toggle-add ta-gr" type="button" onclick="tog('mg-form')">&#x2795; Add Monthly Goal</button>
       <div id="mg-form" style="display:none;margin-top:14px">
         <form method="POST" action="/checklist/month/add/">
           {% csrf_token %}
@@ -872,7 +1082,6 @@
     </div>
   </div>
 
-  <!-- Active goals -->
   {% if month_goals_active %}
   <div class="gc a4">
     <div class="gcp">
@@ -885,13 +1094,9 @@
               {% if goal.priority == 'high' %}&#x1F525;{% elif goal.priority == 'medium' %}&#x26A1;{% else %}&#x1F4CD;{% endif %}
               {{ goal.title }}
             </div>
-            {% if goal.description %}
-            <div class="goal-desc">{{ goal.description }}</div>
-            {% endif %}
+            {% if goal.description %}<div class="goal-desc">{{ goal.description }}</div>{% endif %}
             {% if goal.linked_tasks.count %}
-            <div class="goal-linked">
-              &#x1F517; {{ goal.linked_tasks.count }} week task{{ goal.linked_tasks.count|pluralize }} linked
-            </div>
+            <div class="goal-linked">&#x1F517; {{ goal.linked_tasks.count }} week task{{ goal.linked_tasks.count|pluralize }} linked</div>
             {% endif %}
           </div>
         </div>
@@ -917,7 +1122,6 @@
   </div>
   {% endif %}
 
-  <!-- Completed goals -->
   {% if month_goals_done %}
   <div class="gc a5">
     <div class="gcp">
@@ -938,16 +1142,13 @@
             </form>
           </div>
         </div>
-        {% if goal.description %}
-        <div class="goal-desc" style="margin-top:4px">{{ goal.description }}</div>
-        {% endif %}
+        {% if goal.description %}<div class="goal-desc" style="margin-top:4px">{{ goal.description }}</div>{% endif %}
       </div>
       {% endfor %}
     </div>
   </div>
   {% endif %}
 
-  <!-- Dropped goals -->
   {% if month_goals_dropped %}
   <div class="gc a6">
     <div class="gcp">
@@ -997,11 +1198,8 @@
       document.getElementById('tab-'+t).classList.remove('active');
     });
     document.getElementById('tab-'+name).classList.add('active');
-
     document.querySelectorAll('.ptab').forEach(function(b) { b.classList.remove('on'); });
     document.querySelector('.ptab-'+name).classList.add('on');
-
-    // Update URL so refresh stays on same tab
     var url = new URL(window.location.href);
     url.searchParams.set('tab', name);
     window.history.replaceState({}, '', url);

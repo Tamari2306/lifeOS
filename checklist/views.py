@@ -4,13 +4,15 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
-from .models import ChecklistItem, DayReflection, MonthGoal, WeekTask, WorkDailyItem
+from .models import (
+    ChecklistItem, DayReflection, MonthGoal, WeekTask, WorkDailyItem,
+    RoutineTask, RoutineLog,
+)
 
 
-# ── helpers ─────────────────────────────────────────────────────────────────
+# ── helpers ──────────────────────────────────────────────────────────────────
 
 def _week_range(year, week):
-    """Return (monday, sunday) for an ISO week."""
     monday = date.fromisocalendar(year, week, 1)
     sunday = date.fromisocalendar(year, week, 7)
     return monday, sunday
@@ -23,6 +25,34 @@ def _parse_date(date_str, fallback=None):
         return datetime.strptime(date_str, '%Y-%m-%d').date()
     except (ValueError, TypeError):
         return fallback
+
+
+def _safe_int(val, default=0):
+    try:
+        return int(val or default)
+    except (ValueError, TypeError):
+        return default
+
+
+def _ensure_routine_logs(user, target_date):
+    """
+    For every active RoutineTask belonging to this user,
+    make sure a RoutineLog row exists for target_date.
+    Returns the queryset of logs for that date.
+    """
+    active_tasks = RoutineTask.objects.filter(user=user, is_active=True)
+    for task in active_tasks:
+        RoutineLog.objects.get_or_create(
+            routine_task=task,
+            user=user,
+            date=target_date,
+        )
+    # Return logs for active tasks only (exclude logs for deactivated tasks)
+    return RoutineLog.objects.filter(
+        user=user,
+        date=target_date,
+        routine_task__is_active=True,
+    ).select_related('routine_task')
 
 
 # ── MAIN DASHBOARD ────────────────────────────────────────────────────────────
@@ -42,6 +72,15 @@ def dashboard(request):
 
     reflection = DayReflection.objects.filter(user=request.user, date=view_date).first()
 
+    # ── routine tasks for this day ──
+    routine_logs = _ensure_routine_logs(request.user, view_date)
+    routine_total = routine_logs.count()
+    routine_done  = routine_logs.filter(completed=True).count()
+    routine_pct   = int(routine_done / routine_total * 100) if routine_total else 0
+
+    # All routine tasks (for manage-routines section)
+    all_routines = RoutineTask.objects.filter(user=request.user)
+
     # week strip
     week_data = []
     for i in range(6, -1, -1):
@@ -53,26 +92,24 @@ def dashboard(request):
         week_data.append({'date': d, 'label': d.strftime('%a'), 'pct': d_pct, 'done': d_done, 'total': d_total})
 
     # ── work daily ──
-    work_items      = WorkDailyItem.objects.filter(user=request.user, date=view_date)
-    work_total      = work_items.count()
-    work_done       = work_items.filter(completed=True).count()
-    work_pct        = int(work_done / work_total * 100) if work_total else 0
+    work_items  = WorkDailyItem.objects.filter(user=request.user, date=view_date)
+    work_total  = work_items.count()
+    work_done   = work_items.filter(completed=True).count()
+    work_pct    = int(work_done / work_total * 100) if work_total else 0
 
     # ── week planner ──
-    iso        = today.isocalendar()
-    cur_year   = iso[0]
-    cur_week   = iso[1]
-    week_num   = int(request.GET.get('week', cur_week))
-    week_year  = int(request.GET.get('wyear', cur_year))
-    # clamp
-    if week_num < 1:   week_num = 1
-    if week_num > 53:  week_num = 52
+    iso       = today.isocalendar()
+    cur_year  = iso[0]
+    cur_week  = iso[1]
+    week_num  = _safe_int(request.GET.get('week'), cur_week)
+    week_year = _safe_int(request.GET.get('wyear'), cur_year)
+    if week_num < 1:  week_num = 1
+    if week_num > 53: week_num = 52
     w_monday, w_sunday = _week_range(week_year, week_num)
-    week_tasks  = WeekTask.objects.filter(user=request.user, year=week_year, week_number=week_num)
+    week_tasks = WeekTask.objects.filter(user=request.user, year=week_year, week_number=week_num)
 
-    # group week tasks by day
     tasks_by_day = {}
-    days_of_week = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+    days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     for i, day_name in enumerate(days_of_week):
         day_date = w_monday + timedelta(days=i)
         tasks_by_day[i] = {
@@ -82,15 +119,15 @@ def dashboard(request):
             'tasks': [t for t in week_tasks if t.planned_day == i],
         }
 
-    prev_week = week_num - 1 if week_num > 1 else 52
-    next_week = week_num + 1 if week_num < 52 else 1
+    prev_week  = week_num - 1 if week_num > 1 else 52
+    next_week  = week_num + 1 if week_num < 52 else 1
     prev_wyear = week_year if week_num > 1 else week_year - 1
     next_wyear = week_year if week_num < 52 else week_year + 1
 
     # ── month planner ──
-    cur_month  = int(request.GET.get('month', today.month))
-    cur_m_year = int(request.GET.get('myear', today.year))
-    month_goals = MonthGoal.objects.filter(user=request.user, year=cur_m_year, month=cur_month)
+    cur_month  = _safe_int(request.GET.get('month'), today.month)
+    cur_m_year = _safe_int(request.GET.get('myear'), today.year)
+    month_goals         = MonthGoal.objects.filter(user=request.user, year=cur_m_year, month=cur_month)
     month_goals_active  = month_goals.filter(status='active')
     month_goals_done    = month_goals.filter(status='done')
     month_goals_dropped = month_goals.filter(status='dropped')
@@ -102,21 +139,18 @@ def dashboard(request):
     prev_myear = cur_m_year if cur_month > 1 else cur_m_year - 1
     next_myear = cur_m_year if cur_month < 12 else cur_m_year + 1
 
-    # month goal links to week tasks
     for goal in month_goals:
         goal.linked_tasks = WeekTask.objects.filter(user=request.user, month_goal=goal)
 
-    # all month goals for the week task form
     all_month_goals = MonthGoal.objects.filter(user=request.user, status='active').order_by('-year', '-month')
 
     return render(request, 'checklist/dashboard.html', {
-        # navigation
-        'today':       today,
-        'view_date':   view_date,
-        'yesterday':   today - timedelta(days=1),
-        'tomorrow':    today + timedelta(days=1),
-        'active_tab':  active_tab,
-        'is_today':    view_date == today,
+        'today':      today,
+        'view_date':  view_date,
+        'yesterday':  today - timedelta(days=1),
+        'tomorrow':   today + timedelta(days=1),
+        'active_tab': active_tab,
+        'is_today':   view_date == today,
 
         # daily personal
         'items':       items,
@@ -126,6 +160,13 @@ def dashboard(request):
         'reflection':  reflection,
         'week_data':   week_data,
 
+        # routines
+        'routine_logs':  routine_logs,
+        'routine_total': routine_total,
+        'routine_done':  routine_done,
+        'routine_pct':   routine_pct,
+        'all_routines':  all_routines,
+
         # work daily
         'work_items':  work_items,
         'work_total':  work_total,
@@ -133,18 +174,18 @@ def dashboard(request):
         'work_pct':    work_pct,
 
         # weekly
-        'week_num':         week_num,
-        'week_year':        week_year,
-        'w_monday':         w_monday,
-        'w_sunday':         w_sunday,
-        'week_tasks':       week_tasks,
-        'tasks_by_day':     tasks_by_day,
-        'days_of_week':     days_of_week,
-        'prev_week':        prev_week,
-        'next_week':        next_week,
-        'prev_wyear':       prev_wyear,
-        'next_wyear':       next_wyear,
-        'all_month_goals':  all_month_goals,
+        'week_num':        week_num,
+        'week_year':       week_year,
+        'w_monday':        w_monday,
+        'w_sunday':        w_sunday,
+        'week_tasks':      week_tasks,
+        'tasks_by_day':    tasks_by_day,
+        'days_of_week':    days_of_week,
+        'prev_week':       prev_week,
+        'next_week':       next_week,
+        'prev_wyear':      prev_wyear,
+        'next_wyear':      next_wyear,
+        'all_month_goals': all_month_goals,
 
         # monthly
         'cur_month':           cur_month,
@@ -160,7 +201,7 @@ def dashboard(request):
     })
 
 
-# ── PERSONAL CHECKLIST ───────────────────────────────────────────────────────
+# ── PERSONAL CHECKLIST ────────────────────────────────────────────────────────
 
 @login_required
 @require_POST
@@ -206,21 +247,76 @@ def save_reflection(request):
             'what_went_well':  request.POST.get('what_went_well', ''),
             'what_to_improve': request.POST.get('what_to_improve', ''),
             'grateful_for':    request.POST.get('grateful_for', ''),
-            'mood_rating':     int(request.POST.get('mood_rating', 3)),
+            'mood_rating':     _safe_int(request.POST.get('mood_rating'), 3),
         }
     )
     return redirect(f'/checklist/?date={ref_date}&tab=daily')
 
 
-# ── WORK DAILY ───────────────────────────────────────────────────────────────
+# ── ROUTINE TASKS ─────────────────────────────────────────────────────────────
+
+@login_required
+@require_POST
+def add_routine_task(request):
+    """Create a new predefined routine task."""
+    title       = request.POST.get('title', '').strip()
+    category    = request.POST.get('category', 'personal')
+    time_of_day = request.POST.get('time_of_day', 'anytime')
+    if title:
+        # Set order to end of list
+        last_order = RoutineTask.objects.filter(user=request.user).count()
+        RoutineTask.objects.create(
+            user=request.user,
+            title=title,
+            category=category,
+            time_of_day=time_of_day,
+            order=last_order,
+        )
+    return_date = request.POST.get('date', str(date.today()))
+    return redirect(f'/checklist/?date={return_date}&tab=daily')
+
+
+@login_required
+@require_POST
+def delete_routine_task(request, task_id):
+    """Permanently remove a routine task (and all its logs)."""
+    task = get_object_or_404(RoutineTask, id=task_id, user=request.user)
+    task.delete()
+    return_date = request.POST.get('date', str(date.today()))
+    return redirect(f'/checklist/?date={return_date}&tab=daily')
+
+
+@login_required
+@require_POST
+def toggle_routine_task(request, task_id):
+    """Deactivate/reactivate a routine task without deleting it."""
+    task = get_object_or_404(RoutineTask, id=task_id, user=request.user)
+    task.is_active = not task.is_active
+    task.save()
+    return_date = request.POST.get('date', str(date.today()))
+    return redirect(f'/checklist/?date={return_date}&tab=daily')
+
+
+@login_required
+@require_POST
+def toggle_routine_log(request, log_id):
+    """Mark a routine as done/not-done for a specific day."""
+    log = get_object_or_404(RoutineLog, id=log_id, user=request.user)
+    log.completed    = not log.completed
+    log.completed_at = timezone.now() if log.completed else None
+    log.save()
+    return redirect(f'/checklist/?date={log.date}&tab=daily')
+
+
+# ── WORK DAILY ────────────────────────────────────────────────────────────────
 
 @login_required
 @require_POST
 def add_work_item(request):
-    title     = request.POST.get('title', '').strip()
-    notes     = request.POST.get('notes', '').strip()
-    priority  = request.POST.get('priority', 'medium')
-    item_date = request.POST.get('date', str(date.today()))
+    title        = request.POST.get('title', '').strip()
+    notes        = request.POST.get('notes', '').strip()
+    priority     = request.POST.get('priority', 'medium')
+    item_date    = request.POST.get('date', str(date.today()))
     week_task_id = request.POST.get('week_task_id', '')
 
     week_task = None
@@ -257,7 +353,7 @@ def delete_work_item(request, item_id):
     return redirect(f'/checklist/?date={item_date}&tab=work')
 
 
-# ── WEEK TASKS ───────────────────────────────────────────────────────────────
+# ── WEEK TASKS ────────────────────────────────────────────────────────────────
 
 @login_required
 @require_POST
@@ -265,8 +361,8 @@ def add_week_task(request):
     title       = request.POST.get('title', '').strip()
     notes       = request.POST.get('notes', '').strip()
     priority    = request.POST.get('priority', 'medium')
-    week_num    = int(request.POST.get('week_number', date.today().isocalendar()[1]))
-    week_year   = int(request.POST.get('week_year', date.today().isocalendar()[0]))
+    week_num    = _safe_int(request.POST.get('week_number'), date.today().isocalendar()[1])
+    week_year   = _safe_int(request.POST.get('week_year'), date.today().isocalendar()[0])
     planned_day = request.POST.get('planned_day', '')
     goal_id     = request.POST.get('month_goal_id', '')
 
@@ -307,7 +403,7 @@ def delete_week_task(request, task_id):
     return redirect(f'/checklist/?tab=week&week={week}&wyear={wyear}')
 
 
-# ── MONTH GOALS ──────────────────────────────────────────────────────────────
+# ── MONTH GOALS ───────────────────────────────────────────────────────────────
 
 @login_required
 @require_POST
@@ -315,8 +411,8 @@ def add_month_goal(request):
     title    = request.POST.get('title', '').strip()
     desc     = request.POST.get('description', '').strip()
     priority = request.POST.get('priority', 'medium')
-    month    = int(request.POST.get('month', date.today().month))
-    year     = int(request.POST.get('year', date.today().year))
+    month    = _safe_int(request.POST.get('month'), date.today().month)
+    year     = _safe_int(request.POST.get('year'), date.today().year)
 
     if title:
         MonthGoal.objects.create(
