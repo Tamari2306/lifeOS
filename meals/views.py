@@ -10,11 +10,12 @@ from .models import MealEntry, NutritionGoal, RecipeIdea
 
 MEAL_ORDER = ['breakfast', 'lunch', 'snack', 'dinner']
 
+# In meals/views.py — replace MEAL_ICONS with actual emoji
 MEAL_ICONS = {
-    'breakfast': '&#x1F373;',
-    'lunch':     '&#x1F957;',
-    'snack':     '&#x1F34E;',
-    'dinner':    '&#x1F35B;',
+    'breakfast': '🍳',
+    'lunch':     '🥗',
+    'snack':     '🍎',
+    'dinner':    '🍛',
 }
 
 # ── Nutrition database (per common serving) ──────────────────────────────────

@@ -60,11 +60,11 @@
   .dang-banner { background:rgba(251,113,133,.1); border:1px solid rgba(251,113,133,.25); border-radius:12px;
                  padding:10px 14px; font-size:12px; color:var(--rose); font-weight:600; margin-top:12px; }
 
-  /* SET BUDGET FORM */
+  /* FORMS */
   .inline-form { display:flex; gap:10px; align-items:center; }
   .fi { flex:1; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:14px;
         padding:11px 14px; color:#fff; font-family:'DM Sans',sans-serif; font-size:14px; outline:none;
-        transition:border-color .2s; }
+        transition:border-color .2s; width:100%; box-sizing:border-box; }
   .fi:focus { border-color:rgba(52,211,153,.5); }
   .fi::placeholder { color:var(--muted); }
   .fi-sel { appearance:none; -webkit-appearance:none; }
@@ -86,7 +86,6 @@
 
   /* EXPENSE FORM */
   .exp-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
-  .exp-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
   .field-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.06em;
                text-transform:uppercase; display:block; margin-bottom:6px; }
 
@@ -104,27 +103,40 @@
   .exp-item { display:flex; justify-content:space-between; align-items:center;
               padding:11px 0; border-bottom:1px solid rgba(255,255,255,.05); }
   .exp-item:last-child { border-bottom:none; }
-  .exp-left { display:flex; align-items:center; gap:10px; }
+  .exp-left { display:flex; align-items:center; gap:10px; min-width:0; flex:1; }
   .exp-ico { width:36px; height:36px; border-radius:10px; display:flex; align-items:center;
              justify-content:center; font-size:16px; background:rgba(255,255,255,.06); flex-shrink:0; }
-  .exp-name { font-size:14px; font-weight:600; color:#e2e8f0; }
+  .exp-name { font-size:14px; font-weight:600; color:#e2e8f0;
+              white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; }
   .exp-meta { font-size:11px; color:var(--muted); margin-top:2px; }
-  .exp-amt { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; color:var(--rose); }
+  .exp-amt { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; color:var(--rose); flex-shrink:0; }
 
-  /* CAT BREAKDOWN */
+  /* CAT BREAKDOWN — FIXED: no truncation on category names */
   .cat-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0;
-             border-bottom:1px solid rgba(255,255,255,.05); }
+             border-bottom:1px solid rgba(255,255,255,.05); gap:8px; }
   .cat-row:last-child { border-bottom:none; }
-  .cat-row-left { display:flex; align-items:center; gap:8px; min-width:0; flex:1; }
+  .cat-row-left { display:flex; align-items:center; gap:8px; flex:1; min-width:0; }
   .cat-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-  .cat-name { font-size:13px; color:#e2e8f0; max-width:90px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .cat-pct { font-size:11px; color:var(--muted); }
+  .cat-name-block { min-width:0; }
+  .cat-name { font-size:13px; color:#e2e8f0; }
+  .cat-sub  { font-size:11px; color:var(--muted); }
   .cat-total { font-family:'Syne',sans-serif; font-size:13px; font-weight:800; flex-shrink:0; }
+
+  /* ANALYSIS */
+  .analysis-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .an-box { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+            border-radius:14px; padding:14px; text-align:center; }
+  .an-val { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; line-height:1; }
+  .an-key { font-size:10px; color:var(--muted); margin-top:5px; }
+
+  /* CHART */
+  .chart-h { max-height:150px; }
+  .chart-h-sm { max-height:130px; }
 
   /* SAVINGS GOALS */
   .goal-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
                border-radius:16px; padding:16px; margin-bottom:10px; }
-  .goal-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+  .goal-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; gap:8px; }
   .goal-name-row { display:flex; align-items:center; gap:8px; margin-bottom:3px; }
   .goal-ico { font-size:18px; }
   .goal-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; }
@@ -137,21 +149,38 @@
   .goal-pct-row { display:flex; justify-content:space-between; align-items:center; }
   .goal-pct { font-size:11px; color:var(--green); font-weight:700; }
   .goal-remaining { font-size:11px; color:var(--muted); }
-  .deposit-row { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
-  .dep-fi { flex:1; min-width:80px; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:10px;
-            padding:9px 12px; color:#fff; font-family:'DM Sans',sans-serif; font-size:13px; outline:none; box-sizing:border-box; }
+
+  /* DEPOSIT ROW — stacks on mobile, row on wider screens */
+  .deposit-row { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+  @media(min-width:420px) { .deposit-row { flex-direction:row; align-items:stretch; } }
+  .dep-fi { width:100%; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:10px;
+            padding:10px 12px; color:#fff; font-family:'DM Sans',sans-serif; font-size:13px;
+            outline:none; box-sizing:border-box; }
   .dep-fi:focus { border-color:rgba(52,211,153,.5); }
   .dep-fi::placeholder { color:var(--muted); }
-  .dep-btn { padding:9px 16px; border:none; border-radius:10px;
+  @media(min-width:420px) { .dep-fi { flex:1; width:auto; } }
+  .dep-btn { width:100%; padding:10px 16px; border:none; border-radius:10px;
              background:linear-gradient(135deg,#34d399,#10b981); color:#0a0a12;
-             font-family:'Syne',sans-serif; font-size:12px; font-weight:800; cursor:pointer;
-             white-space:nowrap; flex-shrink:0; min-width:80px; }
+             font-family:'Syne',sans-serif; font-size:12px; font-weight:800;
+             cursor:pointer; white-space:nowrap; }
+  @media(min-width:420px) { .dep-btn { width:auto; flex-shrink:0; } }
 
   /* GOAL ACTION BUTTONS */
-  .btn-edit-goal { background:rgba(129,140,248,.12); color:var(--violet); border:1px solid rgba(129,140,248,.25); border-radius:9px; padding:6px 12px; font-size:11px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; }
-  .btn-del-goal  { background:rgba(251,113,133,.1); color:#fb7185; border:1px solid rgba(251,113,133,.22); border-radius:9px; padding:6px 12px; font-size:11px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; }
+  .goal-actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .btn-edit-goal { background:rgba(129,140,248,.12); color:var(--violet);
+                   border:1px solid rgba(129,140,248,.25); border-radius:9px;
+                   padding:7px 14px; font-size:11px; font-weight:700;
+                   font-family:'Syne',sans-serif; cursor:pointer; transition:all .2s; }
+  .btn-del-goal  { background:rgba(251,113,133,.1); color:#fb7185;
+                   border:1px solid rgba(251,113,133,.22); border-radius:9px;
+                   padding:7px 14px; font-size:11px; font-weight:700;
+                   font-family:'Syne',sans-serif; cursor:pointer; transition:all .2s; }
   .btn-edit-goal:hover { background:rgba(129,140,248,.22); }
   .btn-del-goal:hover  { background:rgba(251,113,133,.2); }
+
+  /* INLINE EDIT FORM */
+  .goal-edit-form { display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--rim); }
+  .goal-edit-form.open { display:block; }
 
   /* NEW GOAL FORM */
   .new-goal-form { display:none; }
@@ -161,28 +190,6 @@
                      border-radius:16px; color:var(--green); font-family:'Syne',sans-serif;
                      font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
   .toggle-form-btn:hover { background:rgba(52,211,153,.13); }
-
-  /* ANALYSIS */
-  .analysis-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .an-box { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
-            border-radius:14px; padding:14px; text-align:center; }
-  .an-val { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; line-height:1; }
-  .an-key { font-size:10px; color:var(--muted); margin-top:5px; }
-  .an-proj-safe { color:var(--green); }
-  .an-proj-warn { color:var(--amber); }
-  .an-proj-over { color:var(--rose); }
-
-  /* CHART */
-  .chart-h { max-height:150px; }
-  .chart-h-sm { max-height:130px; }
-
-  /* TABS */
-  .tab-row { display:flex; gap:6px; margin-bottom:16px; }
-  .t-btn { flex:1; padding:9px; border-radius:14px; border:1px solid var(--rim);
-           background:rgba(255,255,255,.04); color:var(--muted); font-family:'Syne',sans-serif;
-           font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; text-align:center; }
-  .t-btn.on { background:linear-gradient(135deg,rgba(52,211,153,.2),rgba(56,189,248,.2));
-              border-color:rgba(52,211,153,.4); color:var(--green); }
 
   /* ANIMS */
   @keyframes sup { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
@@ -200,7 +207,7 @@
   <div class="hdr a1">
     <div>
       <p class="hdr-date">{{ month_name }}</p>
-      <h1 class="hdr-title">My Finances &#x1F4B0;</h1>
+      <h1 class="hdr-title">My Finances 💰</h1>
       <p style="font-size:12px;color:var(--muted);margin-top:4px">{{ days_left }} days left this month</p>
     </div>
     <div class="saved-pill">
@@ -210,10 +217,9 @@
     </div>
   </div>
 
-  <!-- BUDGET RING + OVERVIEW -->
+  <!-- BUDGET RING -->
   <div class="gc a2">
     <div class="budget-section">
-      <!-- Ring -->
       <div class="ring-wrap">
         <svg width="140" height="140" viewBox="0 0 140 140">
           <defs>
@@ -224,8 +230,7 @@
           </defs>
           <circle class="rtrk" cx="70" cy="70" r="60" fill="none" stroke-width="9"/>
           <circle class="rprg-{{ budget_status }}" cx="70" cy="70" r="60" fill="none" stroke-width="9"
-                  stroke-dasharray="376.99"
-                  stroke-dashoffset="{{ ring_offset }}"/>
+                  stroke-dasharray="376.99" stroke-dashoffset="{{ ring_offset }}"/>
         </svg>
         <div class="ring-center">
           <div class="ring-spent">{{ spent_pct }}%</div>
@@ -235,8 +240,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Info -->
       <div class="budget-info">
         <div class="bi-row">
           <div class="bi-label">Monthly Budget</div>
@@ -255,14 +258,13 @@
         </div>
       </div>
     </div>
-
     {% if budget_status == 'warning' %}
     <div style="padding:0 20px 16px">
-      <div class="warn-banner">&#x26A0;&#xFE0F; You've used {{ spent_pct }}% of your budget. Slow down on spending!</div>
+      <div class="warn-banner">⚠️ You've used {{ spent_pct }}% of your budget. Slow down on spending!</div>
     </div>
     {% elif budget_status == 'danger' %}
     <div style="padding:0 20px 16px">
-      <div class="dang-banner">&#x1F6A8; Critical! {{ spent_pct }}% of budget used with {{ days_left }} days left!</div>
+      <div class="dang-banner">🚨 Critical! {{ spent_pct }}% of budget used with {{ days_left }} days left!</div>
     </div>
     {% endif %}
   </div>
@@ -274,7 +276,7 @@
       <form method="POST" action="/finance/set-budget/" class="inline-form">
         {% csrf_token %}
         <input class="fi" type="number" name="amount" placeholder="Enter your monthly budget (TZS)..."
-               value="{{ monthly_budget|floatformat:0 }}" min="0">
+               value="{{ monthly_budget|floatformat:0 }}" min="0" style="flex:1">
         <button type="submit" class="btn-grn">Save</button>
       </form>
     </div>
@@ -283,7 +285,7 @@
   <!-- ADD EXPENSE -->
   <div class="gc a4">
     <div class="gcp">
-      <div class="sec-lbl">&#x2795; Add Expense</div>
+      <div class="sec-lbl">➕ Add Expense</div>
       <form method="POST" action="/finance/add-expense/">
         {% csrf_token %}
         <div class="exp-grid">
@@ -294,12 +296,12 @@
           <div>
             <label class="field-lbl">Category</label>
             <select class="fi fi-sel" name="category">
-              <option value="food">&#x1F35C; Food</option>
-              <option value="transport">&#x1F697; Transport</option>
-              <option value="bills">&#x1F4CB; Bills</option>
-              <option value="shopping">&#x1F6CD; Shopping</option>
-              <option value="health">&#x1F3E5; Health</option>
-              <option value="misc">&#x1F4E6; Misc</option>
+              <option value="food">🍜 Food</option>
+              <option value="transport">🚗 Transport</option>
+              <option value="bills">📋 Bills</option>
+              <option value="shopping">🛍 Shopping</option>
+              <option value="health">🏥 Health</option>
+              <option value="misc">📦 Misc</option>
             </select>
           </div>
         </div>
@@ -314,7 +316,7 @@
           </div>
         </div>
         <button type="submit" class="btn-grn" style="width:100%;padding:13px">
-          &#x2795; Record Expense
+          ➕ Record Expense
         </button>
       </form>
     </div>
@@ -331,12 +333,12 @@
       <div class="exp-item">
         <div class="exp-left">
           <div class="exp-ico">
-            {% if exp.category == 'food' %}&#x1F35C;
-            {% elif exp.category == 'transport' %}&#x1F697;
-            {% elif exp.category == 'bills' %}&#x1F4CB;
-            {% elif exp.category == 'shopping' %}&#x1F6CD;
-            {% elif exp.category == 'health' %}&#x1F3E5;
-            {% else %}&#x1F4E6;{% endif %}
+            {% if exp.category == 'food' %}🍜
+            {% elif exp.category == 'transport' %}🚗
+            {% elif exp.category == 'bills' %}📋
+            {% elif exp.category == 'shopping' %}🛍
+            {% elif exp.category == 'health' %}🏥
+            {% else %}📦{% endif %}
           </div>
           <div>
             <div class="exp-name">{% if exp.note %}{{ exp.note }}{% else %}{{ exp.get_category_display }}{% endif %}</div>
@@ -346,11 +348,11 @@
             </div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
           <div class="exp-amt">-{{ exp.amount|floatformat:0 }}</div>
           <form method="POST" action="/finance/delete-expense/{{ exp.id }}/">
             {% csrf_token %}
-            <button type="submit" class="btn-rose">&#x2715;</button>
+            <button type="submit" class="btn-rose">✕</button>
           </form>
         </div>
       </div>
@@ -362,7 +364,7 @@
     </div>
   </div>
 
-  <!-- CATEGORY BREAKDOWN + DOUGHNUT CHART -->
+  <!-- CATEGORY BREAKDOWN — FIXED: text no longer truncated -->
   {% if by_cat %}
   <div class="gc a5">
     <div class="gcp">
@@ -381,9 +383,9 @@
                 {% elif cat == 'health' %}#34d399
                 {% else %}#94a3b8{% endif %}
               "></div>
-              <div>
+              <div class="cat-name-block">
                 <div class="cat-name">{{ cat|title }}</div>
-                <div class="cat-pct">{% if total_spent %}{{ amt|floatformat:0 }}{% endif %} TZS</div>
+                <div class="cat-sub">{{ amt|floatformat:0 }} TZS</div>
               </div>
             </div>
             <div class="cat-total" style="color:
@@ -393,7 +395,9 @@
               {% elif cat == 'shopping' %}#fbbf24
               {% elif cat == 'health' %}#34d399
               {% else %}#94a3b8{% endif %}
-            ">{% if total_spent %}{{ amt|floatformat:0 | slice:":6" }}{% endif %}</div>
+            ">
+              {% if total_spent %}{% widthratio amt total_spent 100 %}%{% endif %}
+            </div>
           </div>
           {% endfor %}
         </div>
@@ -413,14 +417,14 @@
   <!-- MONTH-END ANALYSIS -->
   <div class="gc a6">
     <div class="gcp">
-      <div class="sec-lbl">&#x1F4CA; Month-End Analysis</div>
+      <div class="sec-lbl">📊 Month-End Analysis</div>
       <div class="analysis-grid">
         <div class="an-box">
           <div class="an-val" style="color:var(--blue)">{{ daily_avg|floatformat:0 }}</div>
           <div class="an-key">Daily Avg (TZS)</div>
         </div>
         <div class="an-box">
-          <div class="an-val an-proj-{% if projected_end > monthly_budget %}over{% elif projected_end > monthly_budget|add:0 %}warn{% else %}safe{% endif %}">
+          <div class="an-val" style="color:{% if projected_end > monthly_budget %}var(--rose){% else %}var(--green){% endif %}">
             {{ projected_end|floatformat:0 }}
           </div>
           <div class="an-key">Projected Total</div>
@@ -431,7 +435,7 @@
         </div>
         <div class="an-box">
           {% if days_left > 0 and balance > 0 %}
-          <div class="an-val" style="color:var(--green)">{{ balance|floatformat:0|divisibleby:days_left }}</div>
+          <div class="an-val" style="color:var(--green)">{{ safe_daily|floatformat:0 }}</div>
           {% else %}
           <div class="an-val" style="color:var(--green)">—</div>
           {% endif %}
@@ -441,12 +445,12 @@
 
       {% if projected_end > monthly_budget and monthly_budget > 0 %}
       <div style="margin-top:12px;background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.25);border-radius:12px;padding:12px 14px">
-        <div style="font-size:12px;color:var(--rose);font-weight:700">&#x1F6A8; At this rate you'll overspend by {{ projected_end|floatformat:0 }} TZS</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px">Try to keep daily spending under {{ balance|floatformat:0 }} TZS for the next {{ days_left }} days.</div>
+        <div style="font-size:12px;color:var(--rose);font-weight:700">🚨 At this rate you'll overspend by {{ projected_end|floatformat:0 }} TZS</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Try to keep daily spending under {{ safe_daily|floatformat:0 }} TZS for the next {{ days_left }} days.</div>
       </div>
       {% elif monthly_budget > 0 %}
       <div style="margin-top:12px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);border-radius:12px;padding:12px 14px">
-        <div style="font-size:12px;color:var(--green);font-weight:700">&#x2705; You're on track! Keep it up.</div>
+        <div style="font-size:12px;color:var(--green);font-weight:700">✅ You're on track! Keep it up.</div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px">Projected to finish the month with {{ balance|floatformat:0 }} TZS remaining.</div>
       </div>
       {% endif %}
@@ -457,7 +461,7 @@
   <div class="gc a7">
     <div class="gcp">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <span class="sec-lbl" style="margin-bottom:0">&#x1F4B8; Savings Goals</span>
+        <span class="sec-lbl" style="margin-bottom:0">💸 Savings Goals</span>
         <span style="font-size:11px;color:var(--green);font-weight:700">{{ total_saved|floatformat:0 }} TZS saved</span>
       </div>
 
@@ -469,39 +473,43 @@
               <span class="goal-ico">{{ goal.emoji }}</span>
               <span class="goal-name">{{ goal.name }}</span>
             </div>
-            <div class="goal-freq">{{ goal.get_frequency_display }} &bull; {{ goal.contribution|floatformat:0 }} TZS/{{ goal.frequency }}</div>
+            <div class="goal-freq">{{ goal.get_frequency_display }} &bull; {{ goal.contribution|floatformat:0 }} TZS</div>
           </div>
-          <div style="text-align:right">
+          <div style="text-align:right;flex-shrink:0">
             <div class="goal-amt">{{ goal.saved_amount|floatformat:0 }}</div>
             <div class="goal-of">of {{ goal.target_amount|floatformat:0 }} TZS</div>
           </div>
         </div>
+
         <div class="goal-prog-track">
           <div class="goal-prog-fill" style="width:{{ goal.pct }}%"></div>
         </div>
         <div class="goal-pct-row">
           <span class="goal-pct">{{ goal.pct }}% complete</span>
-          <span class="goal-remaining">{{ goal.remaining|floatformat:0 }} TZS remaining</span>
+          <span class="goal-remaining">{{ goal.remaining|floatformat:0 }} TZS left</span>
         </div>
+
         <!-- Deposit form -->
         <form method="POST" action="/finance/deposit/{{ goal.id }}/" class="deposit-row">
           {% csrf_token %}
-          <input class="dep-fi" type="number" name="amount" placeholder="Add amount..." min="1" required>
-          <input class="dep-fi" type="text" name="note" placeholder="Note..." style="flex:.8">
+          <input class="dep-fi" type="number" name="amount" placeholder="Add amount (TZS)..." min="1" required>
+          <input class="dep-fi" type="text" name="note" placeholder="Note...">
           <button type="submit" class="dep-btn">+ Save</button>
         </form>
-        <!-- Goal actions -->
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="btn-sm btn-edit-goal" type="button"
-                  onclick="toggleEditGoal({{ goal.id }})">&#9998; Edit</button>
+
+        <!-- Goal actions: Edit + Delete -->
+        <div class="goal-actions">
+          <button class="btn-edit-goal" type="button"
+                  onclick="toggleEditGoal({{ goal.id }})">✏ Edit</button>
           <form method="POST" action="/finance/delete-goal/{{ goal.id }}/" style="margin:0">
             {% csrf_token %}
-            <button type="submit" class="btn-sm btn-del-goal"
-                    onclick="return confirm('Delete this savings goal?')">&#x1F5D1; Delete</button>
+            <button type="submit" class="btn-del-goal"
+                    onclick="return confirm('Delete this savings goal?')">🗑 Delete</button>
           </form>
         </div>
+
         <!-- Inline edit form -->
-        <div id="edit-goal-{{ goal.id }}" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--rim)">
+        <div id="edit-goal-{{ goal.id }}" class="goal-edit-form">
           <form method="POST" action="/finance/edit-goal/{{ goal.id }}/">
             {% csrf_token %}
             <div class="exp-grid" style="margin-bottom:8px">
@@ -514,7 +522,7 @@
                 <input class="fi" type="text" name="emoji" value="{{ goal.emoji }}" maxlength="5">
               </div>
             </div>
-            <div class="exp-grid" style="margin-bottom:8px">
+            <div class="exp-grid" style="margin-bottom:10px">
               <div>
                 <label class="field-lbl">Target (TZS)</label>
                 <input class="fi" type="number" name="target_amount" value="{{ goal.target_amount|floatformat:0 }}" required>
@@ -524,7 +532,7 @@
                 <input class="fi" type="number" name="contribution" value="{{ goal.contribution|floatformat:0 }}">
               </div>
             </div>
-            <button type="submit" class="btn-gold" style="padding:10px">&#10003; Update Goal</button>
+            <button type="submit" class="btn-grn" style="width:100%">✓ Update Goal</button>
           </form>
         </div>
       </div>
@@ -535,8 +543,9 @@
       {% endfor %}
 
       <!-- New Goal Form -->
-      <button class="toggle-form-btn" onclick="document.getElementById('new-goal-form').classList.toggle('open')" type="button">
-        &#x2795; New Savings Goal
+      <button class="toggle-form-btn" type="button"
+              onclick="document.getElementById('new-goal-form').classList.toggle('open')">
+        ➕ New Savings Goal
       </button>
       <div id="new-goal-form" class="new-goal-form" style="margin-top:14px">
         <form method="POST" action="/finance/add-goal/">
@@ -548,7 +557,7 @@
             </div>
             <div>
               <label class="field-lbl">Emoji</label>
-              <input class="fi" type="text" name="emoji" placeholder="&#x1F3E0;" maxlength="5" value="&#x1F3E0;">
+              <input class="fi" type="text" name="emoji" placeholder="🏆" maxlength="5" value="🏆">
             </div>
           </div>
           <div class="exp-grid">
@@ -575,7 +584,7 @@
             </div>
           </div>
           <button type="submit" class="btn-grn" style="width:100%;padding:13px">
-            &#x1F4B8; Create Savings Goal
+            💸 Create Savings Goal
           </button>
         </form>
       </div>
@@ -599,12 +608,13 @@
 
     /* ── Doughnut: category breakdown ── */
     var dCanvas = document.getElementById('dChart');
-    if (dCanvas && {{ cat_chart_data }} && {{ cat_chart_data }}.length > 0) {
+    var catData  = {{ cat_chart_data|safe }};
+    if (dCanvas && catData && catData.length > 0) {
       new Chart(dCanvas, {
         type: 'doughnut',
         data: {
           labels: {{ cat_chart_labels|safe }},
-          datasets: [{ data: {{ cat_chart_data|safe }}, backgroundColor: {{ cat_chart_colors|safe }},
+          datasets: [{ data: catData, backgroundColor: {{ cat_chart_colors|safe }},
                        borderWidth: 0, hoverOffset: 6 }]
         },
         options: {
@@ -624,19 +634,16 @@
     /* ── Bar: weekly spending ── */
     var wkCanvas = document.getElementById('wkChart');
     if (wkCanvas) {
-      var wkLabels = {{ week_labels|safe }};
-      var wkData   = {{ week_data|safe }};
-      var budget   = {{ monthly_budget }};
       new Chart(wkCanvas, {
         type: 'bar',
         data: {
-          labels: wkLabels,
+          labels: {{ week_labels|safe }},
           datasets: [{
             label: 'Spent',
-            data: wkData,
+            data: {{ week_data|safe }},
             backgroundColor: function(ctx) {
-              var chart = ctx.chart; var area = chart.chartArea; var c = chart.ctx;
-              if (!area) { return 'rgba(251,113,133,0.5)'; }
+              var chart = ctx.chart, area = chart.chartArea, c = chart.ctx;
+              if (!area) return 'rgba(251,113,133,0.5)';
               var g = c.createLinearGradient(0, area.bottom, 0, area.top);
               g.addColorStop(0, 'rgba(56,189,248,0.4)');
               g.addColorStop(1, 'rgba(52,211,153,0.85)');
@@ -653,7 +660,7 @@
               backgroundColor: 'rgba(10,10,18,0.92)', borderColor: 'rgba(52,211,153,0.3)', borderWidth: 1,
               titleColor: '#34d399', bodyColor: '#94a3b8',
               titleFont: { family: 'Syne', weight: '700' }, bodyFont: { family: 'DM Sans' }, padding: 10,
-              callbacks: { label: function(c) { return c.parsed.y.toLocaleString() + ' TZS'; } }
+              callbacks: { label(c) { return c.parsed.y.toLocaleString() + ' TZS'; } }
             }
           },
           scales: {
@@ -667,30 +674,24 @@
     /* ── Line: 6-month trend ── */
     var tCanvas = document.getElementById('trendChart');
     if (tCanvas) {
-      var tLabels = {{ trend_labels|safe }};
-      var tData   = {{ trend_data|safe }};
       new Chart(tCanvas, {
         type: 'line',
         data: {
-          labels: tLabels,
+          labels: {{ trend_labels|safe }},
           datasets: [{
             label: 'Spending',
-            data: tData,
-            borderColor: '#34d399',
-            borderWidth: 2,
+            data: {{ trend_data|safe }},
+            borderColor: '#34d399', borderWidth: 2,
             backgroundColor: function(ctx) {
-              var chart = ctx.chart; var area = chart.chartArea; var c = chart.ctx;
-              if (!area) { return 'rgba(52,211,153,0.05)'; }
+              var chart = ctx.chart, area = chart.chartArea, c = chart.ctx;
+              if (!area) return 'rgba(52,211,153,0.05)';
               var g = c.createLinearGradient(0, area.top, 0, area.bottom);
               g.addColorStop(0, 'rgba(52,211,153,0.25)');
               g.addColorStop(1, 'rgba(52,211,153,0)');
               return g;
             },
-            fill: true,
-            tension: 0.4,
-            pointBackgroundColor: '#34d399',
-            pointRadius: 4,
-            pointHoverRadius: 6
+            fill: true, tension: 0.4,
+            pointBackgroundColor: '#34d399', pointRadius: 4, pointHoverRadius: 6
           }]
         },
         options: {
@@ -701,7 +702,7 @@
               backgroundColor: 'rgba(10,10,18,0.92)', borderColor: 'rgba(52,211,153,0.3)', borderWidth: 1,
               titleColor: '#34d399', bodyColor: '#94a3b8',
               titleFont: { family: 'Syne', weight: '700' }, bodyFont: { family: 'DM Sans' }, padding: 10,
-              callbacks: { label: function(c) { return c.parsed.y.toLocaleString() + ' TZS'; } }
+              callbacks: { label(c) { return c.parsed.y.toLocaleString() + ' TZS'; } }
             }
           },
           scales: {
@@ -715,7 +716,7 @@
 
   function toggleEditGoal(id) {
     var el = document.getElementById('edit-goal-' + id);
-    if(el){ el.style.display = el.style.display === 'none' ? 'block' : 'none'; }
+    if (el) el.classList.toggle('open');
   }
 </script>
 {% endblock %}

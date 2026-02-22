@@ -62,7 +62,10 @@
   .rest-dig { font-family:'Syne',sans-serif; font-size:32px; font-weight:800; color:var(--amber); line-height:1; }
   .rest-hint { font-size:10px; color:var(--muted); margin-top:4px; min-height:14px; }
   .rest-btns { display:flex; gap:5px; margin-top:8px; justify-content:center; }
-  .rb { padding:5px 11px; font-size:11px; }
+  .rb { padding:5px 11px; font-size:11px; background:rgba(255,255,255,.05); border:1px solid var(--rim);
+        border-radius:8px; color:var(--soft); font-family:'Syne',sans-serif; font-weight:700;
+        cursor:pointer; transition:all .2s; }
+  .rb:hover { background:rgba(255,255,255,.1); color:#fff; }
   .t-ctrls { display:flex; gap:10px; }
   .t-main { flex:2; } .t-rst { flex:1; }
 
@@ -81,6 +84,28 @@
              margin-bottom:12px; transition:border-color .25s,box-shadow .25s; }
   .ex-card:hover { border-color:var(--rim2); }
   .ex-card.ex-done { border-color:rgba(45,212,191,.38); box-shadow:0 0 22px rgba(45,212,191,.08); }
+
+  /* === EXERCISE IMAGE / PLACEHOLDER === */
+  .ex-visual { width:100%; height:100px; position:relative; overflow:hidden;
+               border-bottom:1px solid var(--rim); }
+  .ex-visual img { width:100%; height:100%; object-fit:cover; }
+  .ex-visual-placeholder { width:100%; height:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
+  .ex-visual-placeholder .ph-emoji { font-size:38px; line-height:1; }
+  .ex-visual-placeholder .ph-label { font-size:9px; color:var(--muted); font-weight:700;
+    letter-spacing:.1em; text-transform:uppercase; }
+  .ex-done-badge { position:absolute; top:8px; right:8px;
+    background:rgba(45,212,191,.2); border:1px solid rgba(45,212,191,.45);
+    border-radius:20px; padding:3px 10px; font-size:10px; color:var(--teal); font-weight:700; }
+
+  /* Category colour maps for placeholders */
+  .ph-core    { background:linear-gradient(135deg,rgba(45,212,191,.09),rgba(45,212,191,.03)); }
+  .ph-lower   { background:linear-gradient(135deg,rgba(251,113,133,.09),rgba(251,113,133,.03)); }
+  .ph-upper   { background:linear-gradient(135deg,rgba(129,140,248,.09),rgba(129,140,248,.03)); }
+  .ph-cardio  { background:linear-gradient(135deg,rgba(251,191,36,.09),rgba(251,191,36,.03)); }
+  .ph-recovery{ background:linear-gradient(135deg,rgba(52,211,153,.09),rgba(52,211,153,.03)); }
+  .ph-default { background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02)); }
+
   .ex-top { display:flex; justify-content:space-between; align-items:flex-start; padding:14px 14px 8px; }
   .ex-left { flex:1; }
   .ex-name-row { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
@@ -157,19 +182,6 @@
   .qa-btn:hover { background:rgba(45,212,191,.06); border-color:var(--teal); color:var(--teal); }
   .qa-area { margin-top:10px; }
 
-
-  /* === DEMO IMAGE === */
-  .demo-thumb { border-radius:12px; overflow:hidden; margin:0 14px 12px; }
-  .demo-thumb img { width:100%; height:155px; object-fit:cover; display:block; }
-  .demo-placeholder { margin:0 14px 12px; height:110px; background:linear-gradient(135deg,rgba(45,212,191,.06),rgba(129,140,248,.06));
-                       border:1px dashed rgba(255,255,255,.11); border-radius:12px;
-                       display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px; }
-  .demo-ph-ico { font-size:26px; opacity:.45; }
-  .demo-ph-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.07em; text-transform:uppercase; }
-  .demo-row { display:flex;align-items:center;gap:5px;padding:0 14px 8px;cursor:pointer;
-              font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase; }
-  .demo-row:hover { color:var(--teal); }
-
   /* === ANIMS === */
   @keyframes sup { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
   .a1{animation:sup .4s ease both .04s} .a2{animation:sup .4s ease both .10s}
@@ -186,11 +198,11 @@
   <div class="hdr a1">
     <div>
       <p class="hdr-left-date">{{ today|date:"l, M j" }}</p>
-      <h1 class="hdr-title">Let's Train &#x1F4AA;</h1>
+      <h1 class="hdr-title">Let's Train 💪</h1>
       <p class="hdr-sub">{{ workout_name }} &mdash; {{ total_exercises }} exercises</p>
     </div>
     <div class="streak-pill">
-      <span class="str-fire">&#x1F525;</span>
+      <span class="str-fire">🔥</span>
       <span class="str-num">{{ streak }}</span>
       <span class="str-lbl">streak</span>
     </div>
@@ -220,13 +232,13 @@
     </div>
   </div>
 
-  <!-- WORKOUT TIMER -->
-  <div class="gc a3" x-data="wTimer">
+  <!-- WORKOUT TIMER — powered by Alpine.js (loaded in base.html) -->
+  <div class="gc a3" x-data="wTimer()">
     <div class="gcp">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <span class="sec-lbl" style="margin-bottom:0">Workout Timer</span>
         <span style="font-size:11px;color:var(--muted);font-family:'Syne',sans-serif;font-weight:600"
-              x-text="isRunning ? '&#x23F3; Running' : '&#x23F8; Paused'"></span>
+              x-text="isRunning ? '⏳ Running' : '⏸ Paused'"></span>
       </div>
 
       <div class="timer-wrap">
@@ -253,20 +265,20 @@
         <div class="rest-panel">
           <div class="rest-ttl">Rest Timer</div>
           <div class="rest-dig" x-text="restDisp"></div>
-          <div class="rest-hint" x-text="restOn ? '&#x1F525; Resting...' : ''"></div>
+          <div class="rest-hint" x-text="restOn ? '🔥 Resting...' : ''"></div>
           <div class="rest-btns">
-            <button class="ex-tog rb" x-on:click="doRest(30)">30s</button>
-            <button class="ex-tog rb" x-on:click="doRest(60)">60s</button>
-            <button class="ex-tog rb" x-on:click="doRest(90)">90s</button>
+            <button class="rb" type="button" @click="doRest(30)">30s</button>
+            <button class="rb" type="button" @click="doRest(60)">60s</button>
+            <button class="rb" type="button" @click="doRest(90)">90s</button>
           </div>
         </div>
       </div>
 
       <div class="t-ctrls">
-        <button class="btn-main t-main" x-on:click="toggle">
-          <span x-text="isRunning ? '&#x23F8; Pause' : '&#x25B6; Start Workout'"></span>
+        <button class="btn-main t-main" type="button" @click="toggle">
+          <span x-text="isRunning ? '⏸ Pause' : '▶ Start Workout'"></span>
         </button>
-        <button class="btn-sec t-rst" style="margin-top:0" x-on:click="reset">Reset</button>
+        <button class="btn-sec t-rst" type="button" style="margin-top:0" @click="reset">Reset</button>
       </div>
     </div>
   </div>
@@ -279,13 +291,13 @@
     </div>
 
     <!-- Category filter tabs -->
-    <div class="tab-row" x-data="tabFilter" id="tab-filter">
-      <button class="tab-btn on" x-on:click="filter('all')" id="tab-all">All</button>
-      <button class="tab-btn" x-on:click="filter('core')" id="tab-core">&#x1F4A2; Core</button>
-      <button class="tab-btn" x-on:click="filter('lower')" id="tab-lower">&#x1F351; Lower</button>
-      <button class="tab-btn" x-on:click="filter('upper')" id="tab-upper">&#x1F4AA; Upper</button>
-      <button class="tab-btn" x-on:click="filter('cardio')" id="tab-cardio">&#x1F3C3; Cardio</button>
-      <button class="tab-btn" x-on:click="filter('recovery')" id="tab-recovery">&#x1F9D8; Recovery</button>
+    <div class="tab-row" x-data="tabFilter()" id="tab-filter">
+      <button class="tab-btn on" type="button" @click="filter('all')" id="tab-all">All</button>
+      <button class="tab-btn" type="button" @click="filter('core')" id="tab-core">💢 Core</button>
+      <button class="tab-btn" type="button" @click="filter('lower')" id="tab-lower">🍑 Lower</button>
+      <button class="tab-btn" type="button" @click="filter('upper')" id="tab-upper">💪 Upper</button>
+      <button class="tab-btn" type="button" @click="filter('cardio')" id="tab-cardio">🏃 Cardio</button>
+      <button class="tab-btn" type="button" @click="filter('recovery')" id="tab-recovery">🧘 Recovery</button>
     </div>
 
     {% for ex in exercises %}
@@ -294,21 +306,51 @@
          data-cat="{{ ex.category|lower }}"
          x-data="rCtr({{ ex.default_reps }}, {{ ex.sets }}, {{ ex.id }})">
 
+      <!-- Exercise visual: image if available, else styled placeholder -->
+      <div class="ex-visual
+        {% if ex.category|lower == 'core' %}ph-core
+        {% elif ex.category|lower == 'lower' %}ph-lower
+        {% elif ex.category|lower == 'upper' %}ph-upper
+        {% elif ex.category|lower == 'cardio' %}ph-cardio
+        {% elif ex.category|lower == 'recovery' %}ph-recovery
+        {% else %}ph-default{% endif %}">
+
+        {% if ex.image %}
+          <img src="{{ ex.image.url }}" alt="{{ ex.name }}">
+        {% else %}
+          <div class="ex-visual-placeholder">
+            <div class="ph-emoji">
+              {% if ex.category|lower == 'core' %}💢
+              {% elif ex.category|lower == 'lower' %}🦵
+              {% elif ex.category|lower == 'upper' %}💪
+              {% elif ex.category|lower == 'cardio' %}🏃
+              {% elif ex.category|lower == 'recovery' %}🧘
+              {% else %}🏋️{% endif %}
+            </div>
+            <div class="ph-label">{{ ex.category }} · {{ ex.sets }}×{{ ex.default_reps }}</div>
+          </div>
+        {% endif %}
+
+        {% if ex.is_done %}
+          <div class="ex-done-badge">✓ Done</div>
+        {% endif %}
+      </div>
+
       <div class="ex-top">
         <div class="ex-left">
           <div class="ex-name-row">
             <span class="ex-name">{{ ex.name }}</span>
-            {% if ex.is_done %}<span style="color:var(--teal);font-size:14px">&#10003;</span>{% endif %}
+            {% if ex.is_done %}<span style="color:var(--teal);font-size:14px">✓</span>{% endif %}
           </div>
           <div class="ex-meta">
             <span class="chip ch-{{ ex.category|lower }}">{{ ex.category }}</span>
-            <span class="ex-info">{{ ex.sets }}&#x2715;{{ ex.default_reps }} reps</span>
-            {% if ex.description %}<span class="ex-info">&#x2022; {{ ex.description }}</span>{% endif %}
+            <span class="ex-info">{{ ex.sets }}×{{ ex.default_reps }} reps</span>
+            {% if ex.description %}<span class="ex-info">· {{ ex.description }}</span>{% endif %}
           </div>
         </div>
-        <button class="ex-tog" x-on:click="expanded = !expanded">
-          <span x-show="!expanded">&#9660; Track</span>
-          <span x-show="expanded">&#9650; Hide</span>
+        <button class="ex-tog" type="button" @click="expanded = !expanded">
+          <span x-show="!expanded">▾ Track</span>
+          <span x-show="expanded">▴ Hide</span>
         </button>
       </div>
 
@@ -316,20 +358,8 @@
       <div class="dots-row">
         <span class="dlbl">Sets:</span>
         <template x-for="i in totalSets" :key="i">
-          <div class="sdot" x-bind:class="i <= doneSets ? 'lit' : ''"></div>
+          <div class="sdot" :class="i <= doneSets ? 'lit' : ''"></div>
         </template>
-      </div>
-
-      <!-- Demo Image / Placeholder -->
-      <div x-show="expanded">
-        {% if ex.demo_image %}
-        <div class="demo-thumb"><img src="{{ ex.demo_image }}" alt="{{ ex.name }} demo" loading="lazy"></div>
-        {% else %}
-        <div class="demo-placeholder">
-          <div class="demo-ph-ico">&#x1F3CB;</div>
-          <div class="demo-ph-lbl">No demo available</div>
-        </div>
-        {% endif %}
       </div>
 
       <!-- Rep panel -->
@@ -340,20 +370,20 @@
            x-transition:enter-end="opacity-100">
 
         <div class="rep-row">
-          <button class="rbtn rm" x-on:click="dec">&#8722;</button>
+          <button class="rbtn rm" type="button" @click="dec">−</button>
           <div>
             <div class="rnum" x-text="reps"></div>
             <div class="rlbl">reps</div>
           </div>
-          <button class="rbtn rp" x-on:click="inc">&#43;</button>
+          <button class="rbtn rp" type="button" @click="inc">+</button>
         </div>
 
         <!-- Log Set -->
-        <button class="btn-main" x-on:click="logSet" x-bind:disabled="doneSets >= totalSets">
+        <button class="btn-main" type="button" @click="logSet" :disabled="doneSets >= totalSets">
           <span x-show="doneSets < totalSets">
-            Log Set &#160;<span x-text="doneSets + 1"></span>&#160;/&#160;<span x-text="totalSets"></span>
+            Log Set <span x-text="doneSets + 1"></span> / <span x-text="totalSets"></span>
           </span>
-          <span x-show="doneSets >= totalSets">&#10003; All Sets Done!</span>
+          <span x-show="doneSets >= totalSets">✓ All Sets Done!</span>
         </button>
 
         <!-- Save via HTMX -->
@@ -362,22 +392,24 @@
                   hx-post="/fitness/log-exercise/"
                   hx-target="#exercise-{{ ex.id }}"
                   hx-swap="outerHTML"
+                  hx-include="[name='csrfmiddlewaretoken']"
                   hx-vals='{"exercise_id":"{{ ex.id }}","reps":"{{ ex.default_reps }}","sets":"{{ ex.sets }}"}'
-                  x-on:click="saved = true">
-            &#10003; Save &amp; Mark Complete
+                  @click="saved = true"
+                  type="button">
+            ✓ Save & Mark Complete
           </button>
         </div>
 
         <!-- Tally -->
         <div class="tally" x-show="doneSets > 0">
-          <span class="tally-n" x-text="doneSets * reps"></span> total reps done this session
+          <span class="tally-n" x-text="doneSets * reps"></span> total reps this session
         </div>
       </div>
     </div>
     {% empty %}
     <div class="gc">
       <div class="empty-box">
-        <div class="empty-ico">&#127947;</div>
+        <div class="empty-ico">🏋</div>
         <h3 class="empty-ttl">No exercises found</h3>
         <p class="empty-sub">Run <code>python manage.py seed_exercises</code> to load your workout plan.</p>
       </div>
@@ -396,42 +428,42 @@
   <!-- MEAL PLAN -->
   <div class="gc a6">
     <div class="gcp">
-      <div class="sec-lbl">&#x1F957; Work Lunch Ideas</div>
+      <div class="sec-lbl">🥗 Work Lunch Ideas</div>
       <div class="meal-grid">
         <div class="meal-item">
-          <div class="meal-icon">&#x1F357;</div>
-          <div class="meal-name">Chicken &amp; Avo Salad</div>
-          <div class="meal-cal">~420 kcal &bull; 38g protein</div>
+          <div class="meal-icon">🍗</div>
+          <div class="meal-name">Chicken & Avo Salad</div>
+          <div class="meal-cal">~420 kcal · 38g protein</div>
           <div class="meal-note">Grilled chicken, avocado, cucumber, olive oil</div>
         </div>
         <div class="meal-item">
-          <div class="meal-icon">&#x1F95A;</div>
-          <div class="meal-name">Eggs &amp; Sweet Potato</div>
-          <div class="meal-cal">~380 kcal &bull; 24g protein</div>
+          <div class="meal-icon">🥚</div>
+          <div class="meal-name">Eggs & Sweet Potato</div>
+          <div class="meal-cal">~380 kcal · 24g protein</div>
           <div class="meal-note">3 boiled eggs, roasted sweet potato, greens</div>
         </div>
         <div class="meal-item">
-          <div class="meal-icon">&#x1F960;</div>
+          <div class="meal-icon">🌯</div>
           <div class="meal-name">Tuna Wrap</div>
-          <div class="meal-cal">~360 kcal &bull; 30g protein</div>
+          <div class="meal-cal">~360 kcal · 30g protein</div>
           <div class="meal-note">Whole-wheat wrap, tuna, lettuce, tomato</div>
         </div>
         <div class="meal-item">
-          <div class="meal-icon">&#x1F963;</div>
-          <div class="meal-name">Yogurt &amp; Nuts</div>
-          <div class="meal-cal">~280 kcal &bull; 18g protein</div>
+          <div class="meal-icon">🫙</div>
+          <div class="meal-name">Yogurt & Nuts</div>
+          <div class="meal-cal">~280 kcal · 18g protein</div>
           <div class="meal-note">Greek yogurt, mixed nuts, berries</div>
         </div>
         <div class="meal-item">
-          <div class="meal-icon">&#x1F372;</div>
+          <div class="meal-icon">🍲</div>
           <div class="meal-name">Lentil Bowl</div>
-          <div class="meal-cal">~340 kcal &bull; 20g protein</div>
+          <div class="meal-cal">~340 kcal · 20g protein</div>
           <div class="meal-note">Lentils, spinach, tomatoes, lemon dressing</div>
         </div>
         <div class="meal-item">
-          <div class="meal-icon">&#x1F965;</div>
+          <div class="meal-icon">🥥</div>
           <div class="meal-name">Coconut Smoothie</div>
-          <div class="meal-cal">~290 kcal &bull; 15g protein</div>
+          <div class="meal-cal">~290 kcal · 15g protein</div>
           <div class="meal-note">Banana, protein powder, coconut milk, oats</div>
         </div>
       </div>
@@ -440,11 +472,11 @@
 
   <!-- QUICK ADD -->
   <div class="a7" style="margin-bottom:14px">
-    <button class="qa-btn"
+    <button class="qa-btn" type="button"
             hx-get="/fitness/add-exercise-form/"
             hx-target="#qa-area"
             hx-swap="innerHTML">
-      &#43; Add Custom Exercise
+      + Add Custom Exercise
     </button>
     <div id="qa-area" class="qa-area"></div>
   </div>
@@ -453,121 +485,138 @@
 {% endblock %}
 
 {% block extra_scripts %}
+{% csrf_token %}
 <script>
-  /* ── Register Alpine components BEFORE Alpine boots (fixes defer timing) ── */
-  document.addEventListener('alpine:init', function() {
+  /* ── Workout Timer (Alpine component) ── */
+  function wTimer() {
+    return {
+      secs: 0, isRunning: false, iv: null,
+      rSecs: 0, restOn: false, rIv: null,
 
-    /* Workout Timer */
-    Alpine.data('wTimer', function() {
-      return {
-        secs:0, isRunning:false, iv:null,
-        rSecs:0, restOn:false, rIv:null,
-        get dispTime() {
-          var m = String(Math.floor(this.secs/60)).padStart(2,'0');
-          var s = String(this.secs%60).padStart(2,'0');
-          return m+':'+s;
-        },
-        get ringOff() { return 314.16*(1-(this.secs%300)/300); },
-        get restDisp() {
-          if(!this.restOn && this.rSecs===0) { return '--:--'; }
-          var m = String(Math.floor(this.rSecs/60)).padStart(2,'0');
-          var s = String(this.rSecs%60).padStart(2,'0');
-          return m+':'+s;
-        },
-        toggle() { this.isRunning ? this.pause() : this.start(); },
-        start() {
-          var self=this; self.isRunning=true;
-          self.iv=setInterval(function(){ self.secs++; },1000);
-        },
-        pause() { this.isRunning=false; clearInterval(this.iv); },
-        reset() { this.pause(); this.secs=0; },
-        doRest(s) {
-          var self=this; clearInterval(self.rIv);
-          self.rSecs=s; self.restOn=true;
-          self.rIv=setInterval(function(){
-            if(self.rSecs<=0){ clearInterval(self.rIv); self.restOn=false; showToast('Rest done! Back to it 💪'); }
-            else { self.rSecs--; }
-          },1000);
-        }
-      };
-    });
+      get dispTime() {
+        var m = String(Math.floor(this.secs / 60)).padStart(2, '0');
+        var s = String(this.secs % 60).padStart(2, '0');
+        return m + ':' + s;
+      },
+      get ringOff() {
+        return Math.max(0, 314.16 * (1 - (this.secs % 300) / 300));
+      },
+      get restDisp() {
+        if (!this.restOn && this.rSecs === 0) return '--:--';
+        var m = String(Math.floor(this.rSecs / 60)).padStart(2, '0');
+        var s = String(this.rSecs % 60).padStart(2, '0');
+        return m + ':' + s;
+      },
 
-    /* Rep Counter */
-    Alpine.data('rCtr', function(defReps, totSets, exId) {
-      return {
-        reps:defReps, totalSets:totSets, doneSets:0,
-        expanded:false, saved:false, exId:exId,
-        inc() { this.reps++; },
-        dec() { if(this.reps>1){ this.reps--; } },
-        logSet() {
-          if(this.doneSets<this.totalSets){
-            this.doneSets++;
-            showToast('Set '+this.doneSets+' done — '+this.reps+' reps! 🔥');
-            if(this.doneSets>=this.totalSets){
-              showToast('All sets done! Tap Save to record it ✅');
-            }
+      toggle() { this.isRunning ? this.pause() : this.start(); },
+      start() {
+        this.isRunning = true;
+        this.iv = setInterval(() => { this.secs++; }, 1000);
+      },
+      pause() { this.isRunning = false; clearInterval(this.iv); },
+      reset() { this.pause(); this.secs = 0; },
+
+      doRest(s) {
+        clearInterval(this.rIv);
+        this.rSecs = s; this.restOn = true;
+        this.rIv = setInterval(() => {
+          if (this.rSecs <= 0) {
+            clearInterval(this.rIv);
+            this.restOn = false;
+            showToast('Rest done! Back to it 💪');
+          } else {
+            this.rSecs--;
+          }
+        }, 1000);
+      }
+    };
+  }
+
+  /* ── Rep Counter (Alpine component) ── */
+  function rCtr(defReps, totSets, exId) {
+    return {
+      reps: defReps,
+      totalSets: totSets,
+      doneSets: 0,
+      expanded: false,
+      saved: false,
+      exId: exId,
+
+      inc() { this.reps++; },
+      dec() { if (this.reps > 1) this.reps--; },
+      logSet() {
+        if (this.doneSets < this.totalSets) {
+          this.doneSets++;
+          showToast('Set ' + this.doneSets + ' done — ' + this.reps + ' reps! 🔥');
+          if (this.doneSets >= this.totalSets) {
+            showToast('All sets done! Tap Save to record ✅');
           }
         }
-      };
-    });
+      }
+    };
+  }
 
-    /* Category Tabs */
-    Alpine.data('tabFilter', function() {
-      return {
-        current: 'all',
-        filter(cat) {
-          this.current = cat;
-          document.querySelectorAll('.tab-btn').forEach(function(t){ t.classList.remove('on'); });
-          var el = document.getElementById('tab-'+cat);
-          if(el){ el.classList.add('on'); }
-          document.querySelectorAll('.ex-card').forEach(function(c){
-            c.style.display = (cat==='all' || c.getAttribute('data-cat')===cat) ? 'block' : 'none';
-          });
-        }
-      };
-    });
+  /* ── Category tab filter ── */
+  function tabFilter() {
+    return {
+      current: 'all',
+      filter(cat) {
+        this.current = cat;
+        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('on'));
+        var el = document.getElementById('tab-' + cat);
+        if (el) el.classList.add('on');
+        document.querySelectorAll('.ex-card').forEach(c => {
+          c.style.display = (cat === 'all' || c.dataset.cat === cat) ? 'block' : 'none';
+        });
+      }
+    };
+  }
 
-  }); // end alpine:init
-
-  /* ── Chart.js ── */
-  document.addEventListener('DOMContentLoaded', function() {
+  /* ── Chart.js weekly volume ── */
+  document.addEventListener('DOMContentLoaded', function () {
     var canvas = document.getElementById('wChart');
-    if(!canvas){ return; }
+    if (!canvas) return;
     var labels = {{ chart_labels|safe }};
     var vals   = {{ chart_data|safe }};
     new Chart(canvas, {
-      type:'bar',
-      data:{
-        labels:labels,
-        datasets:[{
-          label:'Reps',
-          data:vals,
-          backgroundColor: function(ctx){
-            var chart=ctx.chart; var area=chart.chartArea; var c=chart.ctx;
-            if(!area){ return 'rgba(45,212,191,0.5)'; }
-            var g=c.createLinearGradient(0,area.bottom,0,area.top);
-            g.addColorStop(0,'rgba(129,140,248,0.5)');
-            g.addColorStop(1,'rgba(45,212,191,0.9)');
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Reps',
+          data: vals,
+          backgroundColor: function (ctx) {
+            var chart = ctx.chart, area = chart.chartArea, c = chart.ctx;
+            if (!area) return 'rgba(45,212,191,0.5)';
+            var g = c.createLinearGradient(0, area.bottom, 0, area.top);
+            g.addColorStop(0, 'rgba(129,140,248,0.5)');
+            g.addColorStop(1, 'rgba(45,212,191,0.9)');
             return g;
           },
-          borderRadius:8,
-          borderSkipped:false
+          borderRadius: 8,
+          borderSkipped: false
         }]
       },
-      options:{
-        responsive:true, maintainAspectRatio:false,
-        plugins:{
-          legend:{display:false},
-          tooltip:{
-            backgroundColor:'rgba(10,10,18,0.92)', borderColor:'rgba(45,212,191,0.3)', borderWidth:1,
-            titleColor:'#2dd4bf', bodyColor:'#94a3b8',
-            titleFont:{family:'Syne',weight:'700'}, bodyFont:{family:'DM Sans'}, padding:10,
-            callbacks:{ label:function(c){ return c.parsed.y+' reps'; } }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(10,10,18,0.92)',
+            borderColor: 'rgba(45,212,191,0.3)',
+            borderWidth: 1,
+            titleColor: '#2dd4bf',
+            bodyColor: '#94a3b8',
+            titleFont: { family: 'Syne', weight: '700' },
+            bodyFont: { family: 'DM Sans' },
+            padding: 10,
+            callbacks: { label(c) { return c.parsed.y + ' reps'; } }
           }
         },
-        scales:{
-          x:{ grid:{display:false}, border:{display:false}, ticks:{color:'#64748b',font:{family:'Syne',weight:'700',size:11}} },
-          y:{ grid:{color:'rgba(255,255,255,0.05)'}, border:{display:false}, ticks:{color:'#64748b',font:{family:'DM Sans',size:10},maxTicksLimit:5} }
+        scales: {
+          x: { grid: { display: false }, border: { display: false }, ticks: { color: '#64748b', font: { family: 'Syne', weight: '700', size: 11 } } },
+          y: { grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false }, ticks: { color: '#64748b', font: { family: 'DM Sans', size: 10 }, maxTicksLimit: 5 } }
         }
       }
     });
