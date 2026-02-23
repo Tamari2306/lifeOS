@@ -11,4 +11,5 @@ urlpatterns = [
     path('checklist/',  include('checklist.urls')),
     path('meals/',      include('meals.urls')),
     path('',            include('fitness.urls')),
+    path("analysis/", include("analysis.urls")),
 ]
