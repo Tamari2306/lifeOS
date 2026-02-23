@@ -242,6 +242,7 @@
 {% endblock %}
 
 {% block content %}
+{% load tz %}
 
 <!-- ══ HEADER ════════════════════════════════════════════════ -->
 <div style="padding:8px 0 16px" class="a1">
@@ -358,7 +359,7 @@
             <div class="routine-meta">
               <span class="chip chip-or">{{ log.routine_task.get_category_display }}</span>
               {% if log.completed and log.completed_at %}
-              <span style="font-size:10px;color:var(--gr)">✓ {{ log.completed_at|time:"H:i" }}</span>
+              <span style="font-size:10px;color:var(--gr)">✓ {{ log.completed_at|localtime|time:"H:i" }}</span>
               {% endif %}
             </div>
           </div>
@@ -768,7 +769,7 @@
         <div class="item-body">
           <div class="item-title">{{ item.title }}</div>
           {% if item.completed_at %}
-          <div class="item-sub">Done at {{ item.completed_at|time:"H:i" }}</div>
+          <div class="item-sub">Done at {{ item.completed_at|localtime|time:"H:i" }}</div>
           {% endif %}
         </div>
         <form method="POST" action="/checklist/work/delete/{{ item.id }}/" style="display:contents">
