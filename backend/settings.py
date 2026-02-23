@@ -77,7 +77,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC+3'
+TIME_ZONE = 'Africa/Dar_es_Salaam'
 USE_TZ = True
 
 STATIC_URL = '/static/'
