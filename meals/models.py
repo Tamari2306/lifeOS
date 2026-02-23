@@ -61,3 +61,29 @@ class RecipeIdea(models.Model):
 
     def __str__(self):
         return self.name
+    
+class MealPlan(models.Model):
+    MEAL_TYPE_CHOICES = [
+        ('breakfast', 'Breakfast'),
+        ('lunch',     'Lunch'),
+        ('snack',     'Snack'),
+        ('dinner',    'Dinner'),
+    ]
+
+    user        = models.ForeignKey(User, on_delete=models.CASCADE, related_name='meal_plans')
+    date        = models.DateField()
+    meal_type   = models.CharField(max_length=20, choices=MEAL_TYPE_CHOICES)
+    name        = models.CharField(max_length=255)
+    calories    = models.IntegerField(default=0)
+    protein     = models.IntegerField(default=0)
+    carbs       = models.IntegerField(default=0)
+    fat         = models.IntegerField(default=0)
+    notes       = models.TextField(blank=True)
+    is_logged   = models.BooleanField(default=False)
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['date', 'meal_type']
+
+    def __str__(self):
+        return f"{self.user.username} — {self.date} {self.meal_type}: {self.name}"

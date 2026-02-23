@@ -1,0 +1,459 @@
+{% extends 'base.html' %}
+{% block title %}Monthly Analysis — LifeOS{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --gr:#34d399; --bl:#38bdf8; --vi:#818cf8; --am:#fbbf24;
+    --ro:#fb7185; --or:#f97316; --te:#2dd4bf;
+    --surf:rgba(255,255,255,0.045); --rim:rgba(255,255,255,0.09);
+    --muted:#64748b; --soft:#94a3b8;
+  }
+
+  .an-hdr { padding:10px 0 20px; }
+  .an-title { font-family:'Syne',sans-serif; font-size:clamp(24px,6vw,32px); font-weight:800;
+              background:linear-gradient(115deg,var(--vi),var(--te));
+              -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+  /* NAV */
+  .month-nav { display:flex; align-items:center; justify-content:space-between;
+               background:var(--surf); border:1px solid var(--rim); border-radius:18px;
+               padding:12px 18px; margin-bottom:16px; }
+  .mn-lbl { text-align:center; }
+  .mn-month { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:#e2e8f0; }
+  .mn-sub   { font-size:11px; color:var(--muted); margin-top:2px; }
+  .mn-btn { background:rgba(255,255,255,.06); border:1px solid var(--rim); border-radius:11px;
+            padding:8px 16px; color:var(--soft); font-family:'Syne',sans-serif; font-size:13px;
+            font-weight:700; cursor:pointer; text-decoration:none; transition:all .2s; }
+  .mn-btn:hover { background:rgba(255,255,255,.12); color:#fff; }
+
+  /* SCORE RING */
+  .score-section { display:flex; flex-direction:column; align-items:center;
+                   padding:24px 20px 18px; }
+  .score-ring-wrap { position:relative; width:150px; height:150px; margin-bottom:12px; }
+  .score-ring-center { position:absolute; inset:0; display:flex; flex-direction:column;
+                       align-items:center; justify-content:center; }
+  .score-val  { font-family:'Syne',sans-serif; font-size:36px; font-weight:800; color:#e2e8f0; line-height:1; }
+  .score-lbl  { font-size:10px; color:var(--muted); margin-top:3px; letter-spacing:.06em; text-transform:uppercase; }
+  .score-grade { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; margin-top:6px; }
+
+  /* SECTION CARDS */
+  .gc { background:var(--surf); border:1px solid var(--rim); border-radius:20px;
+        backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); margin-bottom:16px; overflow:hidden; }
+  .gcp { padding:20px 22px; }
+  .sec-hdr { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .sec-ico { font-size:20px; }
+  .sec-title { font-family:'Syne',sans-serif; font-size:14px; font-weight:800; color:#e2e8f0; }
+  .sec-badge { margin-left:auto; font-family:'Syne',sans-serif; font-size:13px; font-weight:800; }
+
+  /* STAT GRID */
+  .stat-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  @media(min-width:400px){ .stat-grid { grid-template-columns:repeat(3,1fr); } }
+  .sbox { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+          border-radius:14px; padding:12px 10px; text-align:center; }
+  .sbox-val { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; line-height:1; }
+  .sbox-key { font-size:10px; color:var(--muted); margin-top:4px; line-height:1.3; }
+
+  /* PROGRESS BAR */
+  .prog-row  { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+  .prog-lbl  { font-size:12px; color:var(--soft); }
+  .prog-pct  { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; }
+  .prog-track { height:7px; background:rgba(255,255,255,.07); border-radius:7px; overflow:hidden; margin-bottom:10px; }
+  .prog-fill  { height:100%; border-radius:7px; transition:width .8s ease; }
+
+  /* INSIGHTS */
+  .insight-item { display:flex; align-items:flex-start; gap:10px; padding:9px 0;
+                  border-bottom:1px solid rgba(255,255,255,.05); }
+  .insight-item:last-child { border-bottom:none; }
+  .insight-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+  .insight-txt { font-size:13px; color:#cbd5e1; line-height:1.5; }
+
+  /* FINANCE BREAKDOWN */
+  .cat-row { display:flex; align-items:center; gap:8px; padding:7px 0;
+             border-bottom:1px solid rgba(255,255,255,.05); }
+  .cat-row:last-child { border-bottom:none; }
+  .cat-dot  { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .cat-name { flex:1; font-size:13px; color:#e2e8f0; }
+  .cat-amt  { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--soft); }
+
+  /* PDF BUTTON */
+  .pdf-btn { display:flex; align-items:center; justify-content:center; gap:8px;
+             width:100%; padding:14px; border:none; border-radius:16px;
+             background:linear-gradient(135deg,var(--vi),var(--te)); color:#0a0a12;
+             font-family:'Syne',sans-serif; font-size:14px; font-weight:800;
+             cursor:pointer; text-decoration:none; transition:all .2s;
+             box-shadow:0 6px 24px rgba(129,140,248,.3); }
+  .pdf-btn:hover { opacity:.9; transform:translateY(-2px); }
+
+  /* EMPTY STATE */
+  .empty-state { text-align:center; padding:28px 20px; }
+  .empty-ico { font-size:36px; margin-bottom:8px; }
+  .empty-ttl { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; color:#e2e8f0; margin-bottom:4px; }
+  .empty-sub { font-size:12px; color:var(--muted); }
+
+  /* ANIMS */
+  @keyframes sup { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  .a1{animation:sup .38s ease both .04s} .a2{animation:sup .38s ease both .10s}
+  .a3{animation:sup .38s ease both .16s} .a4{animation:sup .38s ease both .22s}
+  .a5{animation:sup .38s ease both .28s} .a6{animation:sup .38s ease both .34s}
+  .a7{animation:sup .38s ease both .40s} .a8{animation:sup .38s ease both .46s}
+
+  /* score ring colours by grade */
+  .grade-S  { color:#fbbf24; } .grade-A { color:#34d399; }
+  .grade-B  { color:#38bdf8; } .grade-C { color:#818cf8; }
+  .grade-D  { color:#fb7185; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HEADER -->
+<div class="an-hdr a1">
+  <p style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px">Wellness Report</p>
+  <h1 class="an-title">Monthly Analysis 📊</h1>
+  <p style="font-size:12px;color:var(--muted);margin-top:4px">Your full life overview for {{ display_name }}</p>
+</div>
+
+<!-- MONTH NAV -->
+<div class="month-nav a1">
+  <a href="/analysis/?month={{ prev_month }}&year={{ prev_year }}" class="mn-btn">&#x2190;</a>
+  <div class="mn-lbl">
+    <div class="mn-month">{{ display_name }}</div>
+    <div class="mn-sub">{% if is_current %}Current month{% else %}Past month{% endif %}</div>
+  </div>
+  <a href="/analysis/?month={{ next_month }}&year={{ next_year }}" class="mn-btn">&#x2192;</a>
+</div>
+
+<!-- WELLNESS SCORE -->
+<div class="gc a2">
+  <div class="score-section">
+    <div class="score-ring-wrap">
+      <svg width="150" height="150" viewBox="0 0 150 150">
+        <defs>
+          <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#818cf8"/>
+            <stop offset="100%" style="stop-color:#2dd4bf"/>
+          </linearGradient>
+        </defs>
+        <circle cx="75" cy="75" r="65" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="10"/>
+        <circle cx="75" cy="75" r="65" fill="none" stroke="url(#scoreGrad)" stroke-width="10"
+                stroke-linecap="round" stroke-dasharray="408.41"
+                stroke-dashoffset="{{ score_offset }}"
+                transform="rotate(-90 75 75)"/>
+      </svg>
+      <div class="score-ring-center">
+        <div class="score-val">{{ wellness_score }}</div>
+        <div class="score-lbl">/ 100</div>
+      </div>
+    </div>
+
+    {% if wellness_score >= 90 %}
+      <div class="score-grade grade-S">S — Exceptional ✨</div>
+      <p style="font-size:12px;color:var(--muted);margin-top:4px;text-align:center">You're crushing every area of your life. Keep it up!</p>
+    {% elif wellness_score >= 75 %}
+      <div class="score-grade grade-A">A — Excellent 🏆</div>
+      <p style="font-size:12px;color:var(--muted);margin-top:4px;text-align:center">Strong month across the board. A few areas to polish.</p>
+    {% elif wellness_score >= 60 %}
+      <div class="score-grade grade-B">B — Good 👍</div>
+      <p style="font-size:12px;color:var(--muted);margin-top:4px;text-align:center">Solid progress. Identify 1–2 weak areas and focus there.</p>
+    {% elif wellness_score >= 40 %}
+      <div class="score-grade grade-C">C — Fair 📈</div>
+      <p style="font-size:12px;color:var(--muted);margin-top:4px;text-align:center">Room to grow. Build consistency in your daily habits.</p>
+    {% else %}
+      <div class="score-grade grade-D">D — Needs Work 💪</div>
+      <p style="font-size:12px;color:var(--muted);margin-top:4px;text-align:center">Start small. Pick one habit and be consistent this week.</p>
+    {% endif %}
+  </div>
+
+  <!-- Mini breakdown bars -->
+  <div class="gcp" style="padding-top:0">
+    {% if data.fitness %}
+    <div class="prog-row"><span class="prog-lbl">💪 Fitness</span><span class="prog-pct" style="color:var(--gr)">{{ data.fitness.consistency_pct }}%</span></div>
+    <div class="prog-track"><div class="prog-fill" style="width:{{ data.fitness.consistency_pct }}%;background:linear-gradient(90deg,#34d399,#38bdf8)"></div></div>
+    {% endif %}
+    {% if data.meals %}
+    <div class="prog-row"><span class="prog-lbl">🥗 Nutrition</span><span class="prog-pct" style="color:var(--am)">{{ data.meals.logging_pct }}%</span></div>
+    <div class="prog-track"><div class="prog-fill" style="width:{{ data.meals.logging_pct }}%;background:linear-gradient(90deg,#fbbf24,#f97316)"></div></div>
+    {% endif %}
+    {% if data.finance %}
+    {% with good_pct=data.finance.spent_pct|add:"0" %}
+    <div class="prog-row"><span class="prog-lbl">💰 Budget Control</span><span class="prog-pct" style="color:{% if data.finance.spent_pct <= 80 %}var(--gr){% else %}var(--ro){% endif %}">{{ data.finance.spent_pct }}% spent</span></div>
+    <div class="prog-track"><div class="prog-fill" style="width:{{ data.finance.spent_pct }}%;background:{% if data.finance.spent_pct <= 80 %}linear-gradient(90deg,#34d399,#38bdf8){% else %}linear-gradient(90deg,#fb7185,#f97316){% endif %}"></div></div>
+    {% endwith %}
+    {% endif %}
+    {% if data.checklist %}
+    <div class="prog-row"><span class="prog-lbl">📋 Task Completion</span><span class="prog-pct" style="color:var(--vi)">{{ data.checklist.completion_pct }}%</span></div>
+    <div class="prog-track"><div class="prog-fill" style="width:{{ data.checklist.completion_pct }}%;background:linear-gradient(90deg,#818cf8,#a78bfa)"></div></div>
+    {% endif %}
+    {% if data.checklist.routine_total %}
+    <div class="prog-row"><span class="prog-lbl">🔄 Daily Routines</span><span class="prog-pct" style="color:var(--or)">{{ data.checklist.routine_pct }}%</span></div>
+    <div class="prog-track"><div class="prog-fill" style="width:{{ data.checklist.routine_pct }}%;background:linear-gradient(90deg,#f97316,#fbbf24)"></div></div>
+    {% endif %}
+    {% if data.hydration %}
+    <div class="prog-row"><span class="prog-lbl">💧 Hydration</span><span class="prog-pct" style="color:var(--bl)">{{ data.hydration.goal_met_pct }}%</span></div>
+    <div class="prog-track" style="margin-bottom:0"><div class="prog-fill" style="width:{{ data.hydration.goal_met_pct }}%;background:linear-gradient(90deg,#38bdf8,#2dd4bf)"></div></div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- PDF DOWNLOAD -->
+<a href="/analysis/pdf/?month={{ month }}&year={{ year }}" class="pdf-btn a2">
+  &#x1F4C4; Download PDF Report — {{ display_name }}
+</a>
+
+<!-- ── FITNESS ── -->
+{% if data.fitness %}
+<div class="gc a3">
+  <div class="gcp">
+    <div class="sec-hdr">
+      <span class="sec-ico">💪</span>
+      <span class="sec-title">Fitness</span>
+      <span class="sec-badge" style="color:var(--gr)">{{ data.fitness.workout_days }} workout days</span>
+    </div>
+    <div class="stat-grid">
+      <div class="sbox"><div class="sbox-val" style="color:var(--gr)">{{ data.fitness.workout_days }}</div><div class="sbox-key">Workout Days</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--am)">{{ data.fitness.consistency_pct }}%</div><div class="sbox-key">Consistency</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--bl)">{{ data.fitness.total_sets }}</div><div class="sbox-key">Total Sets</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--vi)">{{ data.fitness.total_reps }}</div><div class="sbox-key">Total Reps</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--or)">{{ data.fitness.current_streak }}</div><div class="sbox-key">Current Streak</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--muted)">{{ data.fitness.rest_days }}</div><div class="sbox-key">Rest Days</div></div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ── NUTRITION ── -->
+{% if data.meals %}
+<div class="gc a3">
+  <div class="gcp">
+    <div class="sec-hdr">
+      <span class="sec-ico">🥗</span>
+      <span class="sec-title">Nutrition</span>
+      <span class="sec-badge" style="color:var(--am)">{{ data.meals.avg_daily_cal }} avg kcal/day</span>
+    </div>
+    <div class="stat-grid">
+      <div class="sbox"><div class="sbox-val" style="color:var(--am)">{{ data.meals.avg_daily_cal }}</div><div class="sbox-key">Avg Daily kcal</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--bl)">{{ data.meals.avg_protein }}g</div><div class="sbox-key">Avg Protein</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:#b39ddb">{{ data.meals.avg_carbs }}g</div><div class="sbox-key">Avg Carbs</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--or)">{{ data.meals.avg_fat }}g</div><div class="sbox-key">Avg Fat</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--gr)">{{ data.meals.days_logged }}</div><div class="sbox-key">Days Logged</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--muted)">{{ data.meals.goal_calories }}</div><div class="sbox-key">Calorie Goal</div></div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ── FINANCE ── -->
+{% if data.finance %}
+<div class="gc a4">
+  <div class="gcp">
+    <div class="sec-hdr">
+      <span class="sec-ico">💰</span>
+      <span class="sec-title">Finance</span>
+      <span class="sec-badge" style="color:{% if data.finance.spent_pct <= 80 %}var(--gr){% else %}var(--ro){% endif %}">{{ data.finance.spent_pct }}% of budget</span>
+    </div>
+    <div class="stat-grid" style="margin-bottom:14px">
+      <div class="sbox"><div class="sbox-val" style="color:var(--gr)">{{ data.finance.budget|floatformat:0 }}</div><div class="sbox-key">Budget TZS</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--ro)">{{ data.finance.total_spent|floatformat:0 }}</div><div class="sbox-key">Spent TZS</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:{% if data.finance.balance >= 0 %}var(--gr){% else %}var(--ro){% endif %}">{{ data.finance.balance|floatformat:0 }}</div><div class="sbox-key">Balance TZS</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--am)">{{ data.finance.total_saved|floatformat:0 }}</div><div class="sbox-key">Total Saved</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--bl)">{{ data.finance.transactions }}</div><div class="sbox-key">Transactions</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--vi)">{{ data.finance.savings_goals }}</div><div class="sbox-key">Savings Goals</div></div>
+    </div>
+
+    {% if data.finance.by_cat %}
+    <div style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Spending by Category</div>
+    {% for cat, amt in data.finance.by_cat.items %}
+    <div class="cat-row">
+      <div class="cat-dot" style="background:
+        {% if cat == 'food' %}#38bdf8
+        {% elif cat == 'transport' %}#818cf8
+        {% elif cat == 'bills' %}#fb7185
+        {% elif cat == 'shopping' %}#fbbf24
+        {% elif cat == 'health' %}#34d399
+        {% else %}#94a3b8{% endif %}
+      "></div>
+      <div class="cat-name">{{ cat|title }}</div>
+      <div class="cat-amt">{{ amt|floatformat:0 }} TZS</div>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- ── PLANNER & ROUTINES ── -->
+{% if data.checklist %}
+<div class="gc a5">
+  <div class="gcp">
+    <div class="sec-hdr">
+      <span class="sec-ico">📋</span>
+      <span class="sec-title">Planner & Routines</span>
+      <span class="sec-badge" style="color:var(--vi)">{{ data.checklist.completion_pct }}% done</span>
+    </div>
+    <div class="stat-grid" style="margin-bottom:14px">
+      <div class="sbox"><div class="sbox-val" style="color:var(--gr)">{{ data.checklist.tasks_done }}</div><div class="sbox-key">Tasks Done</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--muted)">{{ data.checklist.tasks_total }}</div><div class="sbox-key">Tasks Created</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--or)">{{ data.checklist.routine_pct }}%</div><div class="sbox-key">Routine Rate</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--vi)">{{ data.checklist.reflections }}</div><div class="sbox-key">Reflections</div></div>
+      <div class="sbox">
+        <div class="sbox-val" style="color:
+          {% if data.checklist.avg_mood >= 4 %}var(--gr)
+          {% elif data.checklist.avg_mood >= 3 %}var(--am)
+          {% else %}var(--ro){% endif %}
+        ">{{ data.checklist.avg_mood }}</div>
+        <div class="sbox-key">Avg Mood / 5</div>
+      </div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--bl)">{{ data.checklist.reflection_pct }}%</div><div class="sbox-key">Reflection Rate</div></div>
+    </div>
+
+    {% if data.checklist.avg_mood > 0 %}
+    <div style="background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.18);border-radius:12px;padding:12px 14px">
+      <div style="font-size:11px;color:var(--vi);font-weight:700;margin-bottom:2px">Mood This Month</div>
+      <div style="font-size:12px;color:var(--soft)">
+        {% if data.checklist.avg_mood >= 4.5 %}😁 You had a wonderful month emotionally!
+        {% elif data.checklist.avg_mood >= 3.5 %}😊 Generally positive — keep reflecting daily.
+        {% elif data.checklist.avg_mood >= 2.5 %}😐 Mixed feelings this month. What can improve?
+        {% else %}😔 Tough month. Be kind to yourself and seek support.
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- ── HYDRATION ── -->
+{% if data.hydration and data.hydration.days_logged > 0 %}
+<div class="gc a5">
+  <div class="gcp">
+    <div class="sec-hdr">
+      <span class="sec-ico">💧</span>
+      <span class="sec-title">Hydration</span>
+      <span class="sec-badge" style="color:var(--bl)">{{ data.hydration.goal_met_pct }}% goal met</span>
+    </div>
+    <div class="stat-grid">
+      <div class="sbox"><div class="sbox-val" style="color:var(--bl)">{{ data.hydration.days_logged }}</div><div class="sbox-key">Days Logged</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--gr)">{{ data.hydration.days_goal_met }}</div><div class="sbox-key">Goal Met Days</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--am)">{{ data.hydration.goal_met_pct }}%</div><div class="sbox-key">Success Rate</div></div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ── BIBLE ── -->
+{% if data.bible and data.bible.days_read > 0 %}
+<div class="gc a6">
+  <div class="gcp">
+    <div class="sec-hdr">
+      <span class="sec-ico">✝️</span>
+      <span class="sec-title">Bible Reading</span>
+      <span class="sec-badge" style="color:var(--am)">{{ data.bible.reading_pct }}% consistency</span>
+    </div>
+    <div class="stat-grid">
+      <div class="sbox"><div class="sbox-val" style="color:var(--am)">{{ data.bible.days_read }}</div><div class="sbox-key">Days Read</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--gr)">{{ data.bible.reading_pct }}%</div><div class="sbox-key">Consistency</div></div>
+      <div class="sbox"><div class="sbox-val" style="color:var(--bl)">{{ data.bible.entries }}</div><div class="sbox-key">Log Entries</div></div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ── INSIGHTS ── -->
+<div class="gc a7">
+  <div class="gcp">
+    <div class="sec-hdr">
+      <span class="sec-ico">🔍</span>
+      <span class="sec-title">Key Insights</span>
+    </div>
+
+    {% if data.fitness %}
+    <div class="insight-item">
+      <div class="insight-dot" style="background:{% if data.fitness.consistency_pct >= 70 %}var(--gr){% else %}var(--am){% endif %}"></div>
+      <div class="insight-txt">
+        {% if data.fitness.consistency_pct >= 70 %}
+          Excellent workout consistency — {{ data.fitness.workout_days }} days this month ({{ data.fitness.consistency_pct }}%). You're building a strong habit.
+        {% elif data.fitness.consistency_pct >= 40 %}
+          Decent fitness effort with {{ data.fitness.workout_days }} workout days. Aim for 5x/week to reach 70%+ consistency.
+        {% else %}
+          Only {{ data.fitness.workout_days }} workout days this month. Even 3x/week makes a big difference — start small.
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if data.meals %}
+    <div class="insight-item">
+      <div class="insight-dot" style="background:var(--am)"></div>
+      <div class="insight-txt">
+        Average {{ data.meals.avg_daily_cal }} kcal/day with {{ data.meals.avg_protein }}g protein.
+        {% if data.meals.goal_calories and data.meals.avg_daily_cal > 0 %}
+          {% if data.meals.avg_daily_cal < data.meals.goal_calories %}
+            You were {{ data.meals.goal_calories|add:"-0" }} kcal below your goal on average — make sure you're eating enough.
+          {% else %}
+            Well within your {{ data.meals.goal_calories }} kcal goal.
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if data.finance %}
+    <div class="insight-item">
+      <div class="insight-dot" style="background:{% if data.finance.spent_pct <= 80 %}var(--gr){% else %}var(--ro){% endif %}"></div>
+      <div class="insight-txt">
+        {% if data.finance.spent_pct <= 80 %}
+          Good budget control — spent {{ data.finance.spent_pct }}% of your budget with {{ data.finance.balance|floatformat:0 }} TZS remaining.
+        {% else %}
+          Budget alert: {{ data.finance.spent_pct }}% spent. Top spending category was {{ data.finance.top_category|title }}.
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if data.checklist %}
+    <div class="insight-item">
+      <div class="insight-dot" style="background:var(--vi)"></div>
+      <div class="insight-txt">
+        Completed {{ data.checklist.tasks_done }} of {{ data.checklist.tasks_total }} tasks
+        ({{ data.checklist.completion_pct }}%) and wrote {{ data.checklist.reflections }} reflection{{ data.checklist.reflections|pluralize }}.
+        {% if data.checklist.avg_mood >= 4 %}Your mood was great this month! 🌟{% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if not data.fitness and not data.meals and not data.finance and not data.checklist %}
+    <div class="empty-state">
+      <div class="empty-ico">📭</div>
+      <div class="empty-ttl">No data yet for {{ display_name }}</div>
+      <div class="empty-sub">Start logging your fitness, meals, and finances to see your analysis here.</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- PDF DOWNLOAD (bottom) -->
+<a href="/analysis/pdf/?month={{ month }}&year={{ year }}" class="pdf-btn a8" style="margin-bottom:20px">
+  &#x1F4E5; Download Full PDF Report
+</a>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Animate score ring on load
+  document.addEventListener('DOMContentLoaded', function() {
+    var score = {{ wellness_score }};
+    var circumference = 408.41;
+    var offset = circumference * (1 - score / 100);
+    var ring = document.querySelector('.score-ring-wrap circle:last-child');
+    if (ring) {
+      ring.style.strokeDashoffset = circumference; // start empty
+      setTimeout(function() {
+        ring.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(.34,1.1,.64,1)';
+        ring.style.strokeDashoffset = offset;
+      }, 300);
+    }
+  });
+</script>
+{% endblock %}

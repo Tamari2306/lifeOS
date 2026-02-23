@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 
-from .models import MealEntry, NutritionGoal, RecipeIdea
+from .models import MealEntry, MealPlan, NutritionGoal, RecipeIdea
 
 MEAL_ORDER = ['breakfast', 'lunch', 'snack', 'dinner']
 
@@ -234,6 +234,11 @@ def dashboard(request):
     recipes   = RecipeIdea.objects.filter(user=request.user)
     yesterday = today - timedelta(days=1)
     tomorrow  = today + timedelta(days=1)
+    meal_plans = MealPlan.objects.filter(user=request.user, date=view_date)
+    plan_grouped = {}
+    for mt in MEAL_ORDER:
+        plan_grouped[mt] = [p for p in meal_plans if p.meal_type == mt]
+    plan_total_cal = sum(p.calories for p in meal_plans)
 
     return render(request, 'meals/dashboard.html', {
         'today':       today,
@@ -251,6 +256,9 @@ def dashboard(request):
         'recipes':     recipes,
         'is_today':    view_date == today,
         'MEAL_ORDER':  MEAL_ORDER,
+        'meal_plans':       meal_plans,
+        'plan_grouped':     plan_grouped,
+        'plan_total_cal':   plan_total_cal,
     })
 
 
@@ -381,3 +389,75 @@ def delete_recipe(request, recipe_id):
     recipe = get_object_or_404(RecipeIdea, id=recipe_id, user=request.user)
     recipe.delete()
     return redirect('/meals/')
+
+@login_required
+@require_POST
+def add_meal_plan(request):
+    """Add a planned meal suggestion for a specific date."""
+    plan_date_str = request.POST.get('date', str(date.today()))
+    meal_type     = request.POST.get('meal_type', 'breakfast')
+    name          = request.POST.get('name', '').strip()
+
+    if meal_type not in ['breakfast', 'lunch', 'snack', 'dinner']:
+        meal_type = 'breakfast'
+
+    calories = _safe_int(request.POST.get('calories'))
+    protein  = _safe_int(request.POST.get('protein'))
+    carbs    = _safe_int(request.POST.get('carbs'))
+    fat      = _safe_int(request.POST.get('fat'))
+    notes    = request.POST.get('notes', '').strip()
+
+    if name:
+        # Auto-estimate if no macros provided
+        if calories == 0:
+            est = estimate_nutrition(name)
+            calories = est['kcal']
+            protein  = est['protein']
+            carbs    = est['carbs']
+            fat      = est['fat']
+
+        MealPlan.objects.create(
+            user=request.user,
+            date=plan_date_str,
+            meal_type=meal_type,
+            name=name,
+            calories=calories,
+            protein=protein,
+            carbs=carbs,
+            fat=fat,
+            notes=notes,
+        )
+
+    return redirect(f'/meals/?date={plan_date_str}')
+
+
+@login_required
+@require_POST
+def delete_meal_plan(request, plan_id):
+    plan = get_object_or_404(MealPlan, id=plan_id, user=request.user)
+    plan_date = plan.date
+    plan.delete()
+    return redirect(f'/meals/?date={plan_date}')
+
+
+@login_required
+@require_POST
+def log_from_plan(request, plan_id):
+    """Convert a planned meal into a logged meal entry."""
+    plan = get_object_or_404(MealPlan, id=plan_id, user=request.user)
+
+    MealEntry.objects.create(
+        user=request.user,
+        date=plan.date,
+        meal_type=plan.meal_type,
+        name=plan.name,
+        calories=plan.calories,
+        protein=plan.protein,
+        carbs=plan.carbs,
+        fat=plan.fat,
+        notes=plan.notes,
+    )
+    plan.is_logged = True
+    plan.save()
+
+    return redirect(f'/meals/?date={plan.date}')

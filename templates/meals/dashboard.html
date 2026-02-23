@@ -5,147 +5,176 @@
 {% block extra_head %}
 <style>
   :root {
-    --brand:#e07b54;
-    --brand2:#c9623a;
-    --brand-light:#f0a07a;
-    --amber:#f5c47a;
-    --rose:#f28b82;
-    --green:#5cb88a;
-    --blue:#6aaccc;
-    --surf:rgba(255,255,255,0.055);
-    --rim:rgba(255,255,255,0.10);
-    --muted:#8a7a72;
-    --soft:#b0a09a;
-    --text:#f5ede8;
-    --subtext:#d4c4bc;
+    --brand:#e07b54; --brand2:#c9623a; --brand-light:#f0a07a;
+    --amber:#f5c47a; --rose:#f28b82; --green:#5cb88a;
+    --blue:#6aaccc; --vi:#818cf8; --te:#2dd4bf;
+    --surf:rgba(255,255,255,0.055); --rim:rgba(255,255,255,0.10);
+    --muted:#8a7a72; --soft:#b0a09a; --text:#f5ede8; --subtext:#d4c4bc;
   }
 
-  .hdr { display:flex; justify-content:space-between; align-items:flex-start; padding:8px 0 18px; }
-  .hdr-title { font-family:'Syne',sans-serif; font-size:clamp(22px,5vw,30px); font-weight:800; line-height:1;
-               background:linear-gradient(115deg,var(--brand),var(--amber)); -webkit-background-clip:text;
-               -webkit-text-fill-color:transparent; background-clip:text; }
+  /* ── LAYOUT ── */
+  .hdr { display:flex; justify-content:space-between; align-items:flex-start; padding:10px 0 20px; }
+  .hdr-title { font-family:'Syne',sans-serif; font-size:clamp(22px,5vw,30px); font-weight:800;
+               background:linear-gradient(115deg,var(--brand),var(--amber));
+               -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
 
-  .gc { background:var(--surf); border:1px solid var(--rim); border-radius:20px;
-        backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); margin-bottom:14px; overflow:hidden; }
-  .gcp { padding:16px 18px; }
+  .gc { background:var(--surf); border:1px solid var(--rim); border-radius:22px;
+        backdrop-filter:blur(24px); margin-bottom:16px; overflow:hidden; }
+  .gcp { padding:20px 22px; }
   .sec-lbl { font-family:'Syne',sans-serif; font-size:11px; font-weight:700; color:var(--muted);
-             letter-spacing:.1em; text-transform:uppercase; margin-bottom:12px; }
+             letter-spacing:.1em; text-transform:uppercase; margin-bottom:14px; }
 
-  /* week strip */
-  .week-strip { display:flex; gap:6px; margin-bottom:14px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
+  /* ── WEEK STRIP ── */
+  .week-strip { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto;
+                padding-bottom:4px; scrollbar-width:none; }
   .week-strip::-webkit-scrollbar { display:none; }
-  .wday { display:flex; flex-direction:column; align-items:center; gap:3px; min-width:42px;
-          padding:8px 4px; border-radius:14px; background:var(--surf); border:1px solid var(--rim);
+  .wday { display:flex; flex-direction:column; align-items:center; gap:3px; min-width:44px;
+          padding:9px 4px; border-radius:14px; background:var(--surf); border:1px solid var(--rim);
           text-decoration:none; transition:all .2s; }
   .wday.active { border-color:rgba(224,123,84,.45); background:rgba(224,123,84,.14); }
   .wday-l { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; color:var(--muted); }
-  .wday-n { font-family:'Syne',sans-serif; font-size:13px; font-weight:800; color:var(--text); }
+  .wday-n { font-family:'Syne',sans-serif; font-size:14px; font-weight:800; color:var(--text); }
   .wday-c { font-size:10px; color:var(--brand); font-weight:700; }
 
-  /* macros */
-  .macro-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  /* ── MACROS ── */
+  .macro-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
   @media(max-width:380px){ .macro-grid { grid-template-columns:repeat(2,1fr); } }
-  .mbox { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:14px; padding:12px 6px; text-align:center; }
-  .mval { font-family:'Syne',sans-serif; font-size:17px; font-weight:800; line-height:1; }
-  .mlbl { font-size:10px; color:var(--muted); margin-top:3px; }
-  .mprog { height:4px; background:rgba(255,255,255,.07); border-radius:4px; margin-top:6px; overflow:hidden; }
+  .mbox { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08);
+          border-radius:16px; padding:14px 8px; text-align:center; }
+  .mval { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; line-height:1; }
+  .mlbl { font-size:10px; color:var(--muted); margin-top:4px; }
+  .mprog { height:4px; background:rgba(255,255,255,.07); border-radius:4px; margin-top:8px; overflow:hidden; }
   .mpfill { height:100%; border-radius:4px; transition:width .7s ease; }
 
-  /* ── SMART LOG FORM ── */
-  .smart-box { background:rgba(224,123,84,.07); border:1px solid rgba(224,123,84,.25); border-radius:18px; padding:16px; margin-bottom:12px; }
-  .smart-input-row { display:flex; gap:8px; align-items:stretch; }
-  .smart-input { flex:1; background:rgba(255,255,255,.07); border:1px solid rgba(224,123,84,.3);
-                 border-radius:13px; padding:12px 14px; color:var(--text); font-family:'DM Sans',sans-serif;
-                 font-size:14px; outline:none; transition:border-color .2s; }
-  .smart-input:focus { border-color:var(--brand); }
-  .smart-input::placeholder { color:var(--muted); }
-  .smart-btn { padding:12px 16px; border:none; border-radius:13px;
-               background:linear-gradient(135deg,var(--brand),var(--amber)); color:#1a0f08;
-               font-family:'Syne',sans-serif; font-size:12px; font-weight:800; cursor:pointer;
-               white-space:nowrap; transition:all .2s; flex-shrink:0; }
-  .smart-btn:hover { opacity:.9; }
-
-  /* result preview */
-  .nutrition-preview { background:rgba(255,255,255,.05); border:1px solid rgba(224,123,84,.2);
-                        border-radius:14px; padding:12px 14px; margin-top:10px; display:none; }
-  .np-name { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:var(--text); margin-bottom:8px; }
-  .np-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
-  @media(max-width:360px){ .np-grid { grid-template-columns:repeat(2,1fr); } }
-  .np-box { text-align:center; background:rgba(255,255,255,.04); border-radius:10px; padding:8px 4px; }
-  .np-val { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:var(--brand); }
-  .np-key { font-size:9px; color:var(--muted); margin-top:2px; }
-  .np-note { font-size:10px; color:var(--muted); margin-top:8px; text-align:center; }
-  .np-actions { display:flex; gap:8px; margin-top:10px; }
-  .np-log-btn { flex:1; padding:11px; border:none; border-radius:12px;
-                background:linear-gradient(135deg,var(--brand),var(--amber)); color:#1a0f08;
-                font-family:'Syne',sans-serif; font-size:12px; font-weight:800; cursor:pointer; transition:all .2s; }
-  .np-edit-btn { padding:11px 14px; border:1px solid var(--rim); border-radius:12px; background:transparent;
-                 color:var(--soft); font-family:'Syne',sans-serif; font-size:12px; font-weight:700;
-                 cursor:pointer; transition:all .2s; }
-
-  /* manual override fields */
-  .manual-fields { display:none; margin-top:10px; }
-  .form-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px; }
-  @media(max-width:400px){ .form-4 { grid-template-columns:repeat(2,1fr); } }
-  .form-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
-
-  .fi { width:100%; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:12px;
-        padding:10px 12px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px;
-        outline:none; transition:border-color .2s; box-sizing:border-box; }
+  /* ── FORMS ── */
+  .fi { width:100%; background:rgba(255,255,255,.06); border:1px solid var(--rim);
+        border-radius:13px; padding:11px 14px; color:var(--text); font-family:'DM Sans',sans-serif;
+        font-size:14px; outline:none; transition:border-color .2s; box-sizing:border-box; }
   .fi:focus { border-color:rgba(224,123,84,.5); }
   .fi::placeholder { color:var(--muted); }
   .fi-sel { appearance:none; -webkit-appearance:none; background-color:#1c1210; }
   .field-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.06em;
-               text-transform:uppercase; display:block; margin-bottom:5px; }
-  .fg { margin-bottom:10px; }
+               text-transform:uppercase; display:block; margin-bottom:6px; }
+  .fg { margin-bottom:12px; }
+  .form-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+  .form-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; }
+  @media(max-width:400px){ .form-4 { grid-template-columns:repeat(2,1fr); } }
 
-  /* meal type tabs */
-  .meal-tabs { display:flex; gap:5px; margin-bottom:12px; overflow-x:auto; scrollbar-width:none; }
-  .meal-tabs::-webkit-scrollbar { display:none; }
-  .mtab { flex-shrink:0; padding:6px 14px; border-radius:20px; border:1px solid var(--rim);
-          background:rgba(255,255,255,.04); color:var(--muted); font-family:'Syne',sans-serif;
-          font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; }
-  .mtab.on { background:rgba(224,123,84,.18); border-color:rgba(224,123,84,.4); color:var(--brand); }
-
-  .btn-or { width:100%; padding:12px; border:none; border-radius:13px;
+  .btn-or { width:100%; padding:13px; border:none; border-radius:14px;
             background:linear-gradient(135deg,var(--brand),var(--amber)); color:#1a0f08;
             font-family:'Syne',sans-serif; font-size:13px; font-weight:800;
             cursor:pointer; transition:all .2s; box-shadow:0 4px 18px rgba(224,123,84,.25); }
   .btn-or:hover { opacity:.9; transform:translateY(-1px); }
-
-  /* meals today */
-  .meal-section { margin-bottom:14px; }
-  .meal-hdr { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-  .meal-ico { font-size:20px; }
-  .meal-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:var(--text); }
-  .meal-cal { font-size:12px; color:var(--brand); font-weight:700; margin-left:auto; }
-  .meal-item { display:flex; align-items:center; gap:8px; padding:8px 0;
-               border-bottom:1px solid rgba(255,255,255,.05); }
-  .meal-item:last-child { border-bottom:none; }
-  .meal-item-name { flex:1; font-size:13px; color:var(--text); min-width:0; }
-  .meal-item-macros { font-size:10px; color:var(--muted); }
-  .meal-item-cal { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--brand); white-space:nowrap; }
   .btn-sm-del { background:rgba(242,139,130,.1); border:1px solid rgba(242,139,130,.2);
-                border-radius:8px; padding:4px 9px; font-size:11px; color:var(--rose);
+                border-radius:8px; padding:5px 10px; font-size:11px; color:var(--rose);
                 cursor:pointer; font-family:'Syne',sans-serif; font-weight:600; flex-shrink:0; }
-
-  /* recipes */
-  .recipe-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
-                 border-radius:14px; padding:12px 14px; margin-bottom:10px; }
-  .recipe-name { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:var(--text); margin-bottom:4px; }
-  .recipe-meta { display:flex; gap:8px; flex-wrap:wrap; font-size:11px; color:var(--muted); }
-
   .toggle-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
-                padding:12px; background:rgba(224,123,84,.07); border:1px dashed rgba(224,123,84,.3);
+                padding:13px; background:rgba(224,123,84,.07); border:1px dashed rgba(224,123,84,.3);
                 border-radius:14px; color:var(--brand); font-family:'Syne',sans-serif;
                 font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
   .toggle-btn:hover { background:rgba(224,123,84,.14); }
 
-  /* goals */
-  .goals-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px; }
+  /* ── MEAL TYPE TABS ── */
+  .meal-tabs { display:flex; gap:5px; margin-bottom:14px; overflow-x:auto; scrollbar-width:none; }
+  .meal-tabs::-webkit-scrollbar { display:none; }
+  .mtab { flex-shrink:0; padding:7px 16px; border-radius:20px; border:1px solid var(--rim);
+          background:rgba(255,255,255,.04); color:var(--muted); font-family:'Syne',sans-serif;
+          font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; }
+  .mtab.on { background:rgba(224,123,84,.18); border-color:rgba(224,123,84,.4); color:var(--brand); }
+
+  /* ── SMART LOGGER ── */
+  .smart-box { background:rgba(224,123,84,.07); border:1px solid rgba(224,123,84,.25);
+               border-radius:18px; padding:16px; margin-bottom:14px; }
+  .smart-input-row { display:flex; gap:8px; }
+  .smart-input { flex:1; background:rgba(255,255,255,.07); border:1px solid rgba(224,123,84,.3);
+                 border-radius:13px; padding:12px 14px; color:var(--text); font-family:'DM Sans',sans-serif;
+                 font-size:14px; outline:none; }
+  .smart-input:focus { border-color:var(--brand); }
+  .smart-input::placeholder { color:var(--muted); }
+  .smart-btn { padding:12px 16px; border:none; border-radius:13px;
+               background:linear-gradient(135deg,var(--brand),var(--amber)); color:#1a0f08;
+               font-family:'Syne',sans-serif; font-size:12px; font-weight:800;
+               cursor:pointer; white-space:nowrap; flex-shrink:0; }
+
+  .nutrition-preview { background:rgba(255,255,255,.05); border:1px solid rgba(224,123,84,.2);
+                       border-radius:14px; padding:14px; margin-top:10px; display:none; }
+  .np-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  @media(max-width:360px){ .np-grid { grid-template-columns:repeat(2,1fr); } }
+  .np-box { text-align:center; background:rgba(255,255,255,.05); border-radius:10px; padding:9px 4px; }
+  .np-val { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; color:var(--brand); }
+  .np-key { font-size:9px; color:var(--muted); margin-top:2px; }
+  .np-actions { display:flex; gap:8px; margin-top:12px; }
+  .np-log-btn { flex:1; padding:11px; border:none; border-radius:12px;
+                background:linear-gradient(135deg,var(--brand),var(--amber)); color:#1a0f08;
+                font-family:'Syne',sans-serif; font-size:12px; font-weight:800; cursor:pointer; }
+  .np-edit-btn { padding:11px 14px; border:1px solid var(--rim); border-radius:12px;
+                 background:transparent; color:var(--soft); font-family:'Syne',sans-serif;
+                 font-size:12px; font-weight:700; cursor:pointer; }
+
+  .manual-fields { display:none; margin-top:12px; }
+
+  /* ── MEAL ENTRIES ── */
+  .meal-section { margin-bottom:18px; }
+  .meal-section:last-child { margin-bottom:0; }
+  .meal-hdr { display:flex; align-items:center; gap:10px; margin-bottom:10px;
+              padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,.06); }
+  .meal-ico  { font-size:22px; }
+  .meal-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:var(--text); }
+  .meal-cal  { font-size:12px; color:var(--brand); font-weight:700; margin-left:auto; }
+  .meal-item { display:flex; align-items:center; gap:10px; padding:9px 0;
+               border-bottom:1px solid rgba(255,255,255,.04); }
+  .meal-item:last-child { border-bottom:none; }
+  .meal-item-name  { flex:1; font-size:13px; color:var(--text); min-width:0; }
+  .meal-item-macros { font-size:10px; color:var(--muted); }
+  .meal-item-cal   { font-family:'Syne',sans-serif; font-size:13px; font-weight:700;
+                     color:var(--brand); white-space:nowrap; flex-shrink:0; margin-right:6px; }
+
+  /* ── MEAL PLAN CARDS ── */
+  .plan-section { margin-bottom:0; }
+  .plan-card { display:flex; align-items:center; gap:10px; padding:10px 12px;
+               background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+               border-radius:14px; margin-bottom:8px; transition:all .2s; }
+  .plan-card:last-child { margin-bottom:0; }
+  .plan-card.logged { opacity:.55; }
+  .plan-card-body { flex:1; min-width:0; }
+  .plan-name { font-size:13px; color:var(--text); font-weight:600; }
+  .plan-macros { font-size:11px; color:var(--muted); margin-top:3px; }
+  .plan-kcal { font-family:'Syne',sans-serif; font-size:14px; font-weight:800;
+               color:var(--brand); white-space:nowrap; flex-shrink:0; }
+  .plan-actions { display:flex; flex-direction:column; gap:5px; flex-shrink:0; }
+  .btn-log-plan { background:rgba(92,184,138,.12); border:1px solid rgba(92,184,138,.25);
+                  border-radius:9px; padding:5px 10px; font-size:11px; font-weight:700;
+                  color:var(--green); cursor:pointer; font-family:'Syne',sans-serif;
+                  white-space:nowrap; }
+  .btn-del-plan { background:rgba(242,139,130,.1); border:1px solid rgba(242,139,130,.2);
+                  border-radius:9px; padding:5px 10px; font-size:11px; font-weight:700;
+                  color:var(--rose); cursor:pointer; font-family:'Syne',sans-serif; }
+  .plan-toggle-btn { display:flex; align-items:center; justify-content:center; gap:6px;
+                     width:100%; padding:10px; background:rgba(129,140,248,.06);
+                     border:1px dashed rgba(129,140,248,.25); border-radius:12px;
+                     color:var(--vi); font-family:'Syne',sans-serif; font-size:12px;
+                     font-weight:700; cursor:pointer; transition:all .2s; margin-top:10px; }
+  .plan-toggle-btn:hover { background:rgba(129,140,248,.12); }
+
+  /* ── PLAN SUMMARY ── */
+  .plan-summary-bar { display:flex; justify-content:space-between; align-items:center;
+                      background:rgba(129,140,248,.08); border:1px solid rgba(129,140,248,.18);
+                      border-radius:12px; padding:10px 14px; margin-bottom:12px; }
+  .psb-label { font-size:11px; color:var(--vi); font-weight:700; }
+  .psb-val   { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:#e2e8f0; }
+
+  /* ── RECIPES ── */
+  .recipe-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+                 border-radius:14px; padding:14px 16px; margin-bottom:10px; }
+  .recipe-name { font-family:'Syne',sans-serif; font-size:14px; font-weight:700;
+                 color:var(--text); margin-bottom:5px; }
+  .recipe-meta { display:flex; gap:8px; flex-wrap:wrap; font-size:11px; color:var(--muted); }
+
+  /* ── GOALS ── */
+  .goals-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px; }
   @media(max-width:400px){ .goals-grid { grid-template-columns:repeat(2,1fr); } }
 
-  /* loading spinner */
+  /* ── SPINNER ── */
   .spinner { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,.3);
              border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
@@ -153,7 +182,7 @@
   @keyframes sup { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
   .a1{animation:sup .38s ease both .04s} .a2{animation:sup .38s ease both .10s}
   .a3{animation:sup .38s ease both .16s} .a4{animation:sup .38s ease both .22s}
-  .a5{animation:sup .38s ease both .28s}
+  .a5{animation:sup .38s ease both .28s} .a6{animation:sup .38s ease both .34s}
 </style>
 {% endblock %}
 
@@ -162,14 +191,19 @@
 <div class="hdr a1">
   <div>
     <p style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">{{ view_date|date:"l, M j" }}</p>
-    <h1 class="hdr-title">Meal Planner &#x1F957;</h1>
+    <h1 class="hdr-title">Meal Planner 🍽</h1>
     <p style="font-size:12px;color:var(--muted);margin-top:4px">Goal: {{ goal.calories }} kcal/day</p>
   </div>
   <div style="text-align:right">
-    <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;line-height:1;
-                background:linear-gradient(135deg,var(--brand),var(--amber));-webkit-background-clip:text;
-                -webkit-text-fill-color:transparent;background-clip:text">{{ day_data.calories }}</div>
-    <div style="font-size:10px;color:var(--muted)">kcal today</div>
+    <div style="font-family:'Syne',sans-serif;font-size:34px;font-weight:800;line-height:1;
+                background:linear-gradient(135deg,var(--brand),var(--amber));
+                -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">
+      {{ day_data.calories }}
+    </div>
+    <div style="font-size:10px;color:var(--muted)">kcal logged</div>
+    {% if plan_total_cal %}
+    <div style="font-size:11px;color:var(--vi);font-weight:700;margin-top:2px">{{ plan_total_cal }} planned</div>
+    {% endif %}
   </div>
 </div>
 
@@ -179,7 +213,7 @@
   <a href="/meals/?date={{ d.date|date:'Y-m-d' }}" class="wday {% if d.date == view_date %}active{% endif %}">
     <span class="wday-l">{{ d.label }}</span>
     <span class="wday-n">{{ d.date.day }}</span>
-    <span class="wday-c">{{ d.calories }}</span>
+    <span class="wday-c">{% if d.calories %}{{ d.calories }}{% else %}—{% endif %}</span>
   </a>
   {% endfor %}
 </div>
@@ -194,88 +228,167 @@
       <div class="mbox"><div class="mval" style="color:#b39ddb">{{ day_data.carbs }}g</div><div class="mlbl">carbs</div><div class="mprog"><div class="mpfill" style="width:{{ carbs_pct }}%;background:#b39ddb"></div></div></div>
       <div class="mbox"><div class="mval" style="color:var(--amber)">{{ day_data.fat }}g</div><div class="mlbl">fat</div><div class="mprog"><div class="mpfill" style="width:{{ fat_pct }}%;background:var(--amber)"></div></div></div>
     </div>
-    <div style="margin-top:8px;font-size:11px;color:var(--muted);text-align:center">Goal: {{ goal.calories }} kcal · {{ goal.protein }}g protein · {{ goal.carbs }}g carbs · {{ goal.fat }}g fat</div>
+    <div style="margin-top:10px;font-size:11px;color:var(--muted);text-align:center">
+      Goal: {{ goal.calories }} kcal · {{ goal.protein }}g protein · {{ goal.carbs }}g carbs · {{ goal.fat }}g fat
+    </div>
   </div>
 </div>
 
-<!-- SMART LOG MEAL -->
+
+<!-- ══ MEAL PLAN FOR TODAY ══════════════════════════════════════════════════ -->
 <div class="gc a3">
   <div class="gcp">
-    <div class="sec-lbl">&#x1F916; Smart Meal Logger</div>
-
-    <!-- Meal type selector -->
-    <div class="meal-tabs" id="meal-tabs">
-      <button type="button" class="mtab on" onclick="setMealType('breakfast',this)">&#x1F373; Breakfast</button>
-      <button type="button" class="mtab" onclick="setMealType('lunch',this)">&#x1F957; Lunch</button>
-      <button type="button" class="mtab" onclick="setMealType('snack',this)">&#x1F34E; Snack</button>
-      <button type="button" class="mtab" onclick="setMealType('dinner',this)">&#x1F35B; Dinner</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <span class="sec-lbl" style="margin-bottom:0">📅 Today's Meal Plan</span>
+      {% if plan_total_cal %}
+      <span style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--vi)">{{ plan_total_cal }} kcal planned</span>
+      {% endif %}
     </div>
 
-    <!-- Smart description box -->
+    {% for mt in MEAL_ORDER %}
+    {% with group=plan_grouped|default_if_none:'' %}
+    {% with plans=plan_grouped|default:'' %}
+
+    <!-- Meal type header -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;margin-top:{% if not forloop.first %}14px{% else %}0{% endif %}">
+      <span style="font-size:18px">
+        {% if mt == 'breakfast' %}🍳{% elif mt == 'lunch' %}🥗{% elif mt == 'snack' %}🍎{% else %}🍛{% endif %}
+      </span>
+      <span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text)">{{ mt|title }}</span>
+    </div>
+
+    <!-- Plan items for this meal type -->
+    {% for plan in meal_plans %}{% if plan.meal_type == mt %}
+    <div class="plan-card {% if plan.is_logged %}logged{% endif %}">
+      <div class="plan-card-body">
+        <div class="plan-name">
+          {% if plan.is_logged %}<span style="color:var(--green)">✓</span> {% endif %}
+          {{ plan.name }}
+        </div>
+        <div class="plan-macros">
+          {% if plan.calories %}{{ plan.calories }} kcal{% endif %}
+          {% if plan.protein %} · {{ plan.protein }}g protein{% endif %}
+          {% if plan.carbs %} · {{ plan.carbs }}g carbs{% endif %}
+          {% if plan.notes %} · {{ plan.notes }}{% endif %}
+        </div>
+      </div>
+      <div class="plan-actions">
+        {% if not plan.is_logged %}
+        <form method="POST" action="/meals/plan/log/{{ plan.id }}/" style="display:contents">
+          {% csrf_token %}
+          <button type="submit" class="btn-log-plan">✓ Ate it</button>
+        </form>
+        {% endif %}
+        <form method="POST" action="/meals/plan/delete/{{ plan.id }}/" style="display:contents">
+          {% csrf_token %}
+          <button type="submit" class="btn-del-plan">✕</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}{% endfor %}
+
+    <!-- Add plan item for this meal type inline -->
+    <button class="plan-toggle-btn" type="button" onclick="tog('plan-form-{{ mt }}')">
+      ＋ Plan {{ mt|title }}
+    </button>
+    <div id="plan-form-{{ mt }}" style="display:none;margin-top:10px;padding:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px">
+      <form method="POST" action="/meals/plan/add/">
+        {% csrf_token %}
+        <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
+        <input type="hidden" name="meal_type" value="{{ mt }}">
+        <div class="fg">
+          <label class="field-lbl">What will you eat?</label>
+          <input class="fi" type="text" name="name"
+                 placeholder="e.g. 2 boiled eggs with toast..." required
+                 style="border-color:rgba(129,140,248,.3)">
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:8px">✨ Macros estimated automatically — or enter manually:</p>
+        <div class="form-4">
+          <div><label class="field-lbl">kcal</label><input class="fi" type="number" name="calories" placeholder="auto" min="0" style="font-size:13px;padding:9px 10px"></div>
+          <div><label class="field-lbl">Protein</label><input class="fi" type="number" name="protein" placeholder="auto" min="0" style="font-size:13px;padding:9px 10px"></div>
+          <div><label class="field-lbl">Carbs</label><input class="fi" type="number" name="carbs" placeholder="auto" min="0" style="font-size:13px;padding:9px 10px"></div>
+          <div><label class="field-lbl">Fat</label><input class="fi" type="number" name="fat" placeholder="auto" min="0" style="font-size:13px;padding:9px 10px"></div>
+        </div>
+        <button type="submit" class="btn-or" style="background:linear-gradient(135deg,#818cf8,#2dd4bf);box-shadow:none">📅 Add to Plan</button>
+      </form>
+    </div>
+
+    {% endwith %}{% endwith %}
+    {% endfor %}
+
+  </div>
+</div>
+
+
+<!-- ══ SMART LOG MEAL ════════════════════════════════════════════════════════ -->
+<div class="gc a4">
+  <div class="gcp">
+    <div class="sec-lbl">🤖 Smart Meal Logger</div>
+
+    <div class="meal-tabs" id="meal-tabs">
+      <button type="button" class="mtab on" onclick="setMealType('breakfast',this)">🍳 Breakfast</button>
+      <button type="button" class="mtab" onclick="setMealType('lunch',this)">🥗 Lunch</button>
+      <button type="button" class="mtab" onclick="setMealType('snack',this)">🍎 Snack</button>
+      <button type="button" class="mtab" onclick="setMealType('dinner',this)">🍛 Dinner</button>
+    </div>
+
     <div class="smart-box">
       <p style="font-size:12px;color:var(--soft);margin-bottom:10px;line-height:1.5">
-        ✨ Describe your meal naturally — e.g. <em>"2 fried plantains"</em>, <em>"1 chicken leg piece with rice"</em>, <em>"bowl of oats"</em>
+        ✨ Describe naturally — e.g. <em>"2 fried plantains"</em>, <em>"bowl of jollof rice"</em>
       </p>
       <div class="smart-input-row">
-        <input class="smart-input" type="text" id="meal-desc" placeholder="What did you eat? e.g. 1 bowl of jollof rice...">
-        <button class="smart-btn" type="button" onclick="estimateMeal()" id="est-btn">
-          &#x1F50D; Estimate
-        </button>
+        <input class="smart-input" type="text" id="meal-desc" placeholder="What did you eat?...">
+        <button class="smart-btn" type="button" onclick="estimateMeal()" id="est-btn">🔍 Estimate</button>
       </div>
 
-      <!-- Nutrition preview result -->
       <div class="nutrition-preview" id="nutrition-preview">
-        <div class="np-name" id="np-name"></div>
+        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px" id="np-name"></div>
         <div class="np-grid">
           <div class="np-box"><div class="np-val" id="np-kcal">0</div><div class="np-key">kcal</div></div>
           <div class="np-box"><div class="np-val" id="np-protein" style="color:var(--blue)">0g</div><div class="np-key">protein</div></div>
           <div class="np-box"><div class="np-val" id="np-carbs" style="color:#b39ddb">0g</div><div class="np-key">carbs</div></div>
           <div class="np-box"><div class="np-val" id="np-fat" style="color:var(--amber)">0g</div><div class="np-key">fat</div></div>
         </div>
-        <div class="np-note" id="np-note">&#x26A0;&#xFE0F; Approximate values — you can edit below</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:8px;text-align:center">⚡ Approximate — edit if needed</div>
         <div class="np-actions">
-          <button class="np-log-btn" type="button" onclick="logEstimated()">&#x2795; Log This Meal</button>
-          <button class="np-edit-btn" type="button" onclick="toggleManual()">&#x270F; Edit Values</button>
+          <button class="np-log-btn" type="button" onclick="logEstimated()">＋ Log This Meal</button>
+          <button class="np-edit-btn" type="button" onclick="toggleManual()">✏ Edit Values</button>
         </div>
       </div>
 
-      <!-- Not found message -->
       <div id="not-found-msg" style="display:none;margin-top:10px;padding:10px 12px;background:rgba(242,139,130,.08);border:1px solid rgba(242,139,130,.2);border-radius:12px;font-size:12px;color:var(--rose)">
-        &#x2753; Couldn't estimate this meal. Enter values manually below.
+        ❓ Couldn't estimate. Enter values manually below.
       </div>
     </div>
 
-    <!-- Manual / override fields -->
     <div class="manual-fields" id="manual-fields">
       <form method="POST" action="/meals/log/" id="log-form">
         {% csrf_token %}
         <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
         <input type="hidden" name="meal_type" id="meal-type-input" value="breakfast">
-        <div class="fg">
-          <label class="field-lbl">Meal Name</label>
-          <input class="fi" type="text" name="name" id="manual-name" placeholder="Meal name" required>
-        </div>
+        <div class="fg"><label class="field-lbl">Meal Name</label>
+          <input class="fi" type="text" name="name" id="manual-name" placeholder="Meal name" required></div>
         <div class="form-4">
           <div><label class="field-lbl">kcal</label><input class="fi" type="number" name="calories" id="manual-cal" placeholder="0" min="0"></div>
           <div><label class="field-lbl">Protein g</label><input class="fi" type="number" name="protein" id="manual-protein" placeholder="0" min="0"></div>
           <div><label class="field-lbl">Carbs g</label><input class="fi" type="number" name="carbs" id="manual-carbs" placeholder="0" min="0"></div>
           <div><label class="field-lbl">Fat g</label><input class="fi" type="number" name="fat" id="manual-fat" placeholder="0" min="0"></div>
         </div>
-        <button type="submit" class="btn-or">&#x1F374; Log Meal</button>
+        <button type="submit" class="btn-or">🍴 Log Meal</button>
       </form>
     </div>
 
-    <!-- Quick manual entry toggle -->
-    <button class="toggle-btn" type="button" onclick="toggleManual()" style="margin-top:10px" id="manual-toggle-btn">
-      &#x1F4DD; Enter Manually Instead
+    <button class="toggle-btn" type="button" onclick="toggleManual()" style="margin-top:12px" id="manual-toggle-btn">
+      📝 Enter Manually Instead
     </button>
   </div>
 </div>
 
-<!-- MEALS TODAY -->
-<div class="gc a4">
+
+<!-- ══ MEALS TODAY ═══════════════════════════════════════════════════════════ -->
+<div class="gc a5">
   <div class="gcp">
-    <div class="sec-lbl">&#x1F4CB; Today's Meals</div>
+    <div class="sec-lbl">📋 Today's Logged Meals</div>
     {% for group in meals_list %}
     <div class="meal-section">
       <div class="meal-hdr">
@@ -289,81 +402,88 @@
           {{ entry.name }}
           {% if entry.notes %}<div style="font-size:10px;color:var(--muted)">{{ entry.notes }}</div>{% endif %}
         </div>
-        <div style="text-align:right;flex-shrink:0;margin-right:6px">
+        <div style="text-align:right;flex-shrink:0">
           <div class="meal-item-cal">{{ entry.calories }} kcal</div>
           <div class="meal-item-macros">P:{{ entry.protein }}g C:{{ entry.carbs }}g F:{{ entry.fat }}g</div>
         </div>
         <form method="POST" action="/meals/delete/{{ entry.id }}/" style="display:contents">
           {% csrf_token %}
-          <button type="submit" class="btn-sm-del">&#x2715;</button>
+          <button type="submit" class="btn-sm-del">✕</button>
         </form>
       </div>
       {% empty %}
-      <div style="font-size:12px;color:var(--muted);padding:4px 0 8px">Nothing logged yet</div>
+      <div style="font-size:12px;color:var(--muted);padding:4px 0 10px">Nothing logged yet</div>
       {% endfor %}
     </div>
     {% endfor %}
   </div>
 </div>
 
-<!-- MY RECIPES -->
-<div class="gc a5">
+
+<!-- ══ MY RECIPES ════════════════════════════════════════════════════════════ -->
+<div class="gc a6">
   <div class="gcp">
-    <div class="sec-lbl">&#x1F4D2; My Recipes</div>
+    <div class="sec-lbl">📒 My Recipes</div>
     {% for recipe in recipes %}
     <div class="recipe-card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <div class="recipe-name">{{ recipe.name }}</div>
         <form method="POST" action="/meals/delete-recipe/{{ recipe.id }}/" style="display:contents">
-          {% csrf_token %}<button type="submit" class="btn-sm-del">&#x2715;</button>
+          {% csrf_token %}<button type="submit" class="btn-sm-del">✕</button>
         </form>
       </div>
       <div class="recipe-meta">
         <span>{{ recipe.get_category_display }}</span>
-        {% if recipe.calories %}<span>&#x1F525; {{ recipe.calories }} kcal</span>{% endif %}
-        {% if recipe.protein %}<span>&#x1F4AA; {{ recipe.protein }}g protein</span>{% endif %}
-        {% if recipe.prep_time %}<span>&#x23F1; {{ recipe.prep_time }}min</span>{% endif %}
+        {% if recipe.calories %}<span>🔥 {{ recipe.calories }} kcal</span>{% endif %}
+        {% if recipe.protein %}<span>💪 {{ recipe.protein }}g protein</span>{% endif %}
+        {% if recipe.prep_time %}<span>⏱ {{ recipe.prep_time }}min</span>{% endif %}
       </div>
       {% if recipe.ingredients %}
-      <div style="font-size:12px;color:var(--soft);margin-top:6px;line-height:1.6">{{ recipe.ingredients }}</div>
+      <div style="font-size:12px;color:var(--soft);margin-top:8px;line-height:1.6">{{ recipe.ingredients }}</div>
       {% endif %}
     </div>
     {% empty %}
-    <div style="text-align:center;padding:12px;color:var(--muted);font-size:13px">No saved recipes yet.</div>
+    <div style="text-align:center;padding:14px 0;color:var(--muted);font-size:13px">No saved recipes yet.</div>
     {% endfor %}
 
-    <button class="toggle-btn" type="button" onclick="tog('recipe-form')" style="margin-top:8px">&#x2795; Save New Recipe</button>
-    <div id="recipe-form" style="display:none;margin-top:12px">
+    <button class="toggle-btn" type="button" onclick="tog('recipe-form')" style="margin-top:8px">＋ Save New Recipe</button>
+    <div id="recipe-form" style="display:none;margin-top:14px">
       <form method="POST" action="/meals/save-recipe/">
         {% csrf_token %}
         <div class="form-2">
-          <div><label class="field-lbl">Recipe Name</label><input class="fi" type="text" name="name" placeholder="e.g. Chicken Stir Fry" required></div>
+          <div><label class="field-lbl">Recipe Name</label>
+            <input class="fi" type="text" name="name" placeholder="e.g. Chicken Stir Fry" required></div>
           <div><label class="field-lbl">Category</label>
             <select class="fi fi-sel" name="category">
-              <option value="breakfast">Breakfast</option><option value="lunch" selected>Lunch</option>
-              <option value="dinner">Dinner</option><option value="snack">Snack</option>
+              <option value="breakfast">Breakfast</option>
+              <option value="lunch" selected>Lunch</option>
+              <option value="dinner">Dinner</option>
+              <option value="snack">Snack</option>
             </select>
           </div>
         </div>
-        <p style="font-size:11px;color:var(--muted);margin-bottom:8px">&#x2728; Leave kcal/protein blank and we'll estimate from the name</p>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:8px">✨ Leave kcal blank to auto-estimate</p>
         <div class="form-2">
-          <div><label class="field-lbl">kcal (optional)</label><input class="fi" type="number" name="calories" placeholder="auto-estimate"></div>
-          <div><label class="field-lbl">Prep time (min)</label><input class="fi" type="number" name="prep_time" placeholder="0"></div>
+          <div><label class="field-lbl">kcal (optional)</label>
+            <input class="fi" type="number" name="calories" placeholder="auto-estimate"></div>
+          <div><label class="field-lbl">Prep time (min)</label>
+            <input class="fi" type="number" name="prep_time" placeholder="0"></div>
         </div>
         <div class="fg"><label class="field-lbl">Ingredients</label>
           <textarea class="fi" name="ingredients" placeholder="List ingredients..." rows="2" style="resize:vertical"></textarea>
         </div>
-        <button type="submit" class="btn-or">&#x1F4BE; Save Recipe</button>
+        <button type="submit" class="btn-or">💾 Save Recipe</button>
       </form>
     </div>
   </div>
 </div>
 
-<!-- NUTRITION GOALS -->
-<div class="gc a5">
+
+<!-- ══ NUTRITION GOALS ═══════════════════════════════════════════════════════ -->
+<div class="gc a6">
   <div class="gcp">
-    <button class="toggle-btn" type="button" onclick="tog('goals-form')">&#x1F3AF; Set Nutrition Goals</button>
-    <div id="goals-form" style="display:none;margin-top:12px">
+    <button class="toggle-btn" type="button" onclick="tog('goals-form')">🎯 Set Nutrition Goals</button>
+    <div id="goals-form" style="display:none;margin-top:14px">
       <form method="POST" action="/meals/set-goals/">
         {% csrf_token %}
         <div class="goals-grid">
@@ -372,7 +492,7 @@
           <div><label class="field-lbl">Carbs g</label><input class="fi" type="number" name="carbs" value="{{ goal.carbs }}"></div>
           <div><label class="field-lbl">Fat g</label><input class="fi" type="number" name="fat" value="{{ goal.fat }}"></div>
         </div>
-        <button type="submit" class="btn-or">&#x2705; Update Goals</button>
+        <button type="submit" class="btn-or">✅ Update Goals</button>
       </form>
     </div>
   </div>
@@ -392,56 +512,50 @@
 
   function tog(id) {
     var el = document.getElementById(id);
-    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    if (!el) return;
+    el.style.display = el.style.display === 'none' || !el.style.display ? 'block' : 'none';
   }
 
   function toggleManual() {
     var mf = document.getElementById('manual-fields');
     var mb = document.getElementById('manual-toggle-btn');
-    if (mf.style.display === 'none' || !mf.style.display) {
-      mf.style.display = 'block';
-      mb.style.display = 'none';
+    var open = mf.style.display === 'block';
+    mf.style.display = open ? 'none' : 'block';
+    mb.style.display = open ? 'flex' : 'none';
+    if (!open) {
       var desc = document.getElementById('meal-desc').value;
       if (desc) document.getElementById('manual-name').value = desc;
-      if (currentEst.kcal) {
+      if (currentEst.kcal !== undefined) {
         document.getElementById('manual-cal').value     = currentEst.kcal;
         document.getElementById('manual-protein').value = currentEst.protein;
         document.getElementById('manual-carbs').value   = currentEst.carbs;
         document.getElementById('manual-fat').value     = currentEst.fat;
       }
-    } else {
-      mf.style.display = 'none';
-      mb.style.display = 'flex';
     }
   }
 
   async function estimateMeal() {
     var desc = document.getElementById('meal-desc').value.trim();
     if (!desc) { alert('Please describe your meal first.'); return; }
-
     var btn = document.getElementById('est-btn');
     btn.innerHTML = '<span class="spinner"></span>';
     btn.disabled = true;
-
     document.getElementById('nutrition-preview').style.display = 'none';
     document.getElementById('not-found-msg').style.display = 'none';
-
     try {
       var resp = await fetch('/meals/estimate/', {
         method: 'POST',
-        headers: {'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+        headers: {'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
         body: JSON.stringify({description: desc})
       });
       var data = await resp.json();
-
       if (data.found) {
-        currentEst = {kcal: data.kcal, protein: data.protein, carbs: data.carbs, fat: data.fat, name: desc};
-        document.getElementById('np-name').textContent = '🍽 ' + desc;
+        currentEst = {kcal:data.kcal, protein:data.protein, carbs:data.carbs, fat:data.fat, name:desc};
+        document.getElementById('np-name').textContent    = '🍽 ' + desc;
         document.getElementById('np-kcal').textContent    = data.kcal;
         document.getElementById('np-protein').textContent = data.protein + 'g';
         document.getElementById('np-carbs').textContent   = data.carbs + 'g';
         document.getElementById('np-fat').textContent     = data.fat + 'g';
-        document.getElementById('np-note').textContent    = '⚡ Approximate values — edit if needed';
         document.getElementById('nutrition-preview').style.display = 'block';
       } else {
         document.getElementById('not-found-msg').style.display = 'block';
@@ -452,7 +566,7 @@
     } catch(e) {
       document.getElementById('not-found-msg').style.display = 'block';
     } finally {
-      btn.innerHTML = '&#x1F50D; Estimate';
+      btn.innerHTML = '🔍 Estimate';
       btn.disabled = false;
     }
   }
