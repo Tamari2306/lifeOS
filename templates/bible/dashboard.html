@@ -219,33 +219,50 @@
 </div>
 
 <!-- LOG READING -->
+<!-- LOG READING — replace the entire section between these comments -->
 <div class="gc a4">
   <div class="gcp">
     <div class="sec-lbl">&#x270D; Log Today's Reading</div>
+
     <form method="POST" action="/bible/log-reading/">
       {% csrf_token %}
-      {% if plan %}<input type="hidden" name="plan_id" value="{{ plan.id }}">{% endif %}
-      <div class="form-grid" style="margin-bottom:10px">
+
+      <div style="margin-bottom:12px">
+        <label class="field-lbl">Book</label>
+        <input class="fi" type="text" name="book"
+               placeholder="e.g. Genesis, Matthew, Psalms..." required>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
         <div>
-          <label class="field-lbl">Book</label>
-          <input class="fi" type="text" name="book" placeholder="e.g. Psalms" value="{% if plan %}{{ plan.book_name }}{% endif %}" required>
+          <label class="field-lbl">Starting Chapter</label>
+          <input class="fi" type="number" name="start_chapter"
+                 placeholder="1" min="1" value="1" required>
         </div>
         <div>
-          <label class="field-lbl">Chapter</label>
-          <input class="fi" type="number" name="chapter" placeholder="1" min="1" required>
+          <label class="field-lbl">Chapters Read</label>
+          <input class="fi" type="number" name="chapter_count"
+                 placeholder="1" min="1" value="1" required>
         </div>
       </div>
-      <div style="margin-bottom:10px">
-        <label class="field-lbl">Reflection / Key Verse (optional)</label>
-        <input class="fi" type="text" name="note" placeholder="What spoke to you today?">
+
+      {% if plan %}
+      <input type="hidden" name="plan_id" value="{{ plan.id }}">
+      {% endif %}
+
+      <div style="margin-bottom:14px">
+        <label class="field-lbl">Note (optional)</label>
+        <input class="fi" type="text" name="note"
+               placeholder="What stood out to you?">
       </div>
+
       <button type="submit" class="btn-gold">&#x1F4D6; Log Reading</button>
     </form>
 
-    {% if today_read %}
+    {% if today_logs %}
     <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06)">
       <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:8px">TODAY'S READINGS</div>
-      {% for log in today_read %}
+      {% for log in today_logs %}
       <div style="font-size:13px;color:#e2e8f0;padding:4px 0">
         &#x2714;&#xFE0F; {{ log.book }} ch.{{ log.chapter }}
         {% if log.note %}<span style="color:var(--muted)"> &mdash; {{ log.note }}</span>{% endif %}
@@ -253,6 +270,7 @@
       {% endfor %}
     </div>
     {% endif %}
+
   </div>
 </div>
 
