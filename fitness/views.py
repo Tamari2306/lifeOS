@@ -58,25 +58,14 @@ def _weekly_chart(user):
 
 
 def _calc_workout_duration(logs):
-    """
-    FIX: Calculate actual workout duration from real timestamps.
-    Uses logged_at timestamps if available, otherwise estimates from sets.
-    Each set is ~2.5 min (including rest). Warm-up/cool-down adds ~5 min.
-    """
     if not logs:
         return 0
-
-    # Try to use real start/end timestamps from the log entries
     timestamps = [l.logged_at for l in logs if hasattr(l, 'logged_at') and l.logged_at]
     if len(timestamps) >= 2:
         timestamps.sort()
         delta = timestamps[-1] - timestamps[0]
-        # Add average time for the last exercise (~5 min) then round up
         total_seconds = delta.total_seconds() + 300
         return max(5, round(total_seconds / 60))
-
-    # Fallback: estimate based on volume
-    # Avg 45s per set + 90s rest = ~2.25 min per set, plus 5 min warmup
     total_sets = sum(l.sets for l in logs)
     return max(5, round(total_sets * 2.25 + 5))
 
@@ -93,15 +82,12 @@ def dashboard(request):
     streak     = _streak(request.user)
     chart_labels, chart_data = _weekly_chart(request.user)
 
-    # FIX: use real duration calculation instead of sets * 2
     workout_minutes = _calc_workout_duration(today_logs)
 
-    # Workout start time — earliest logged_at for today
     workout_start_time = None
     if today_logs:
         times = [l.logged_at for l in today_logs if hasattr(l, 'logged_at') and l.logged_at]
         if times:
-            # Convert to local time for display
             earliest = min(times)
             workout_start_time = timezone.localtime(earliest).strftime('%I:%M %p')
 
@@ -114,7 +100,25 @@ def dashboard(request):
     total_exercises = exercises.count()
     progress_pct    = int(completed_count / total_exercises * 100) if total_exercises else 0
 
-    context = {
+    # ── Workout calendar dates — MUST be built before the context dict ──
+    try:
+        raw_dates = (
+            WorkoutLog.objects
+            .filter(user=request.user)
+            .values_list('logged_at__date', 'date')
+            .distinct()
+        )
+        date_set = set()
+        for logged_at_date, workout_date in raw_dates:
+            d = logged_at_date or workout_date
+            if d is not None:
+                date_set.add(d.strftime('%Y-%m-%d'))
+        workout_dates_json = json.dumps(sorted(date_set))
+    except Exception:
+        workout_dates_json = json.dumps([])
+    # ───────────────────────────────────────────────────────────────────
+
+    ctx = {
         'today':              today,
         'exercises':          exercise_list,
         'completed_count':    completed_count,
@@ -129,8 +133,10 @@ def dashboard(request):
         'quote':              random.choice(QUOTES),
         'chart_labels':       json.dumps(chart_labels),
         'chart_data':         json.dumps(chart_data),
+        'workout_dates':      workout_dates_json,
     }
-    return render(request, 'fitness/dashboard.html', context)
+
+    return render(request, 'fitness/dashboard.html', ctx)
 
 
 @login_required
@@ -145,15 +151,14 @@ def log_exercise(request):
         user=request.user, exercise=exercise, date=date.today(),
         defaults={
             'reps_per_set': reps_per_set,
-            'sets': sets,
-            'completed': True,
-            'logged_at': timezone.now(),   # FIX: store real timestamp
+            'sets':         sets,
+            'completed':    True,
+            'logged_at':    timezone.now(),
         },
     )
     if not created:
         log.reps_per_set = reps_per_set
         log.sets = sets
-        # Don't overwrite logged_at — keep original time
         log.save()
 
     return render(request, 'fitness/partials/exercise_logged.html', {'exercise': exercise, 'log': log})

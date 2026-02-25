@@ -5,176 +5,159 @@
 {% block extra_head %}
 <style>
   :root {
-    --brand:#e07b54; --brand2:#c9623a; --brand-light:#f0a07a;
-    --amber:#f5c47a; --rose:#f28b82; --green:#5cb88a;
-    --blue:#6aaccc; --vi:#818cf8; --te:#2dd4bf;
-    --surf:rgba(255,255,255,0.055); --rim:rgba(255,255,255,0.10);
-    --muted:#8a7a72; --soft:#b0a09a; --text:#f5ede8; --subtext:#d4c4bc;
+    --red:#e8192c; --green:#34d399; --amber:#fbbf24;
+    --blue:#38bdf8; --violet:#818cf8;
+    --muted:#606060; --soft:#a0a0a0; --rim:rgba(255,255,255,0.08);
   }
 
-  /* ── LAYOUT ── */
   .hdr { display:flex; justify-content:space-between; align-items:flex-start; padding:10px 0 20px; }
-  .hdr-title { font-family:'Syne',sans-serif; font-size:clamp(22px,5vw,30px); font-weight:800;
-               background:linear-gradient(115deg,var(--brand),var(--amber));
-               -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .hdr-title { font-family:'Bebas Neue','Syne',sans-serif; font-size:34px; font-weight:400; line-height:1; color:#fff; letter-spacing:.04em; }
 
-  .gc { background:var(--surf); border:1px solid var(--rim); border-radius:22px;
-        backdrop-filter:blur(24px); margin-bottom:16px; overflow:hidden; }
+  .gc { background:rgba(255,255,255,.04); border:1px solid var(--rim); border-radius:16px; margin-bottom:16px; overflow:hidden; }
   .gcp { padding:20px 22px; }
-  .sec-lbl { font-family:'Syne',sans-serif; font-size:11px; font-weight:700; color:var(--muted);
-             letter-spacing:.1em; text-transform:uppercase; margin-bottom:14px; }
+  .sec-lbl { font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; margin-bottom:14px; }
 
-  /* ── WEEK STRIP ── */
-  .week-strip { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto;
-                padding-bottom:4px; scrollbar-width:none; }
+  /* WEEK STRIP */
+  .week-strip { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
   .week-strip::-webkit-scrollbar { display:none; }
   .wday { display:flex; flex-direction:column; align-items:center; gap:3px; min-width:44px;
-          padding:9px 4px; border-radius:14px; background:var(--surf); border:1px solid var(--rim);
+          padding:9px 4px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid var(--rim);
           text-decoration:none; transition:all .2s; }
-  .wday.active { border-color:rgba(224,123,84,.45); background:rgba(224,123,84,.14); }
-  .wday-l { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; color:var(--muted); }
-  .wday-n { font-family:'Syne',sans-serif; font-size:14px; font-weight:800; color:var(--text); }
-  .wday-c { font-size:10px; color:var(--brand); font-weight:700; }
+  .wday.active { border-color:rgba(232,25,44,.45); background:rgba(232,25,44,.1); }
+  .wday-l { font-size:10px; font-weight:700; color:var(--muted); }
+  .wday-n { font-family:'Bebas Neue','Syne',sans-serif; font-size:16px; font-weight:400; color:#fff; }
+  .wday-c { font-size:10px; color:var(--red); font-weight:700; }
 
-  /* ── MACROS ── */
+  /* MACROS */
   .macro-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
   @media(max-width:380px){ .macro-grid { grid-template-columns:repeat(2,1fr); } }
-  .mbox { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08);
-          border-radius:16px; padding:14px 8px; text-align:center; }
-  .mval { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; line-height:1; }
-  .mlbl { font-size:10px; color:var(--muted); margin-top:4px; }
+  .mbox { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:12px; padding:14px 8px; text-align:center; }
+  .mval { font-family:'Bebas Neue','Syne',sans-serif; font-size:20px; font-weight:400; line-height:1; letter-spacing:.03em; }
+  .mlbl { font-size:10px; color:var(--muted); margin-top:4px; text-transform:uppercase; letter-spacing:.04em; }
   .mprog { height:4px; background:rgba(255,255,255,.07); border-radius:4px; margin-top:8px; overflow:hidden; }
   .mpfill { height:100%; border-radius:4px; transition:width .7s ease; }
 
-  /* ── FORMS ── */
-  .fi { width:100%; background:rgba(255,255,255,.06); border:1px solid var(--rim);
-        border-radius:13px; padding:11px 14px; color:var(--text); font-family:'DM Sans',sans-serif;
+  /* FORMS */
+  .fi { width:100%; background:rgba(255,255,255,.05); border:1px solid var(--rim);
+        border-radius:12px; padding:11px 14px; color:#fff;
         font-size:14px; outline:none; transition:border-color .2s; box-sizing:border-box; }
-  .fi:focus { border-color:rgba(224,123,84,.5); }
+  .fi:focus { border-color:rgba(232,25,44,.5); }
   .fi::placeholder { color:var(--muted); }
-  .fi-sel { appearance:none; -webkit-appearance:none; background-color:#1c1210; }
-  .field-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.06em;
-               text-transform:uppercase; display:block; margin-bottom:6px; }
+  .fi-sel { appearance:none; -webkit-appearance:none; background-color:#111; }
+  .field-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.06em; text-transform:uppercase; display:block; margin-bottom:6px; }
   .fg { margin-bottom:12px; }
   .form-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
   .form-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; }
   @media(max-width:400px){ .form-4 { grid-template-columns:repeat(2,1fr); } }
 
-  .btn-or { width:100%; padding:13px; border:none; border-radius:14px;
-            background:linear-gradient(135deg,var(--brand),var(--amber)); color:#1a0f08;
-            font-family:'Syne',sans-serif; font-size:13px; font-weight:800;
-            cursor:pointer; transition:all .2s; box-shadow:0 4px 18px rgba(224,123,84,.25); }
+  .btn-or { width:100%; padding:13px; border:none; border-radius:12px;
+            background:var(--red); color:#fff;
+            font-size:13px; font-weight:800; cursor:pointer; transition:all .2s; }
   .btn-or:hover { opacity:.9; transform:translateY(-1px); }
-  .btn-sm-del { background:rgba(242,139,130,.1); border:1px solid rgba(242,139,130,.2);
-                border-radius:8px; padding:5px 10px; font-size:11px; color:var(--rose);
-                cursor:pointer; font-family:'Syne',sans-serif; font-weight:600; flex-shrink:0; }
+  .btn-sm-del { background:rgba(232,25,44,.1); border:1px solid rgba(232,25,44,.2);
+                border-radius:8px; padding:5px 10px; font-size:11px; color:var(--red);
+                cursor:pointer; font-weight:600; flex-shrink:0; }
   .toggle-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
-                padding:13px; background:rgba(224,123,84,.07); border:1px dashed rgba(224,123,84,.3);
-                border-radius:14px; color:var(--brand); font-family:'Syne',sans-serif;
-                font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
-  .toggle-btn:hover { background:rgba(224,123,84,.14); }
+                padding:13px; background:rgba(232,25,44,.07); border:1px dashed rgba(232,25,44,.3);
+                border-radius:12px; color:var(--red); font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
+  .toggle-btn:hover { background:rgba(232,25,44,.13); }
 
-  /* ── MEAL TYPE TABS ── */
+  /* MEAL TYPE TABS */
   .meal-tabs { display:flex; gap:5px; margin-bottom:14px; overflow-x:auto; scrollbar-width:none; }
   .meal-tabs::-webkit-scrollbar { display:none; }
   .mtab { flex-shrink:0; padding:7px 16px; border-radius:20px; border:1px solid var(--rim);
-          background:rgba(255,255,255,.04); color:var(--muted); font-family:'Syne',sans-serif;
+          background:rgba(255,255,255,.04); color:var(--muted);
           font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; }
-  .mtab.on { background:rgba(224,123,84,.18); border-color:rgba(224,123,84,.4); color:var(--brand); }
+  .mtab.on { background:rgba(232,25,44,.15); border-color:rgba(232,25,44,.4); color:var(--red); }
 
-  /* ── SMART LOGGER ── */
-  .smart-box { background:rgba(224,123,84,.07); border:1px solid rgba(224,123,84,.25);
-               border-radius:18px; padding:16px; margin-bottom:14px; }
+  /* SMART LOGGER */
+  .smart-box { background:rgba(232,25,44,.06); border:1px solid rgba(232,25,44,.2);
+               border-radius:14px; padding:16px; margin-bottom:14px; }
   .smart-input-row { display:flex; gap:8px; }
-  .smart-input { flex:1; background:rgba(255,255,255,.07); border:1px solid rgba(224,123,84,.3);
-                 border-radius:13px; padding:12px 14px; color:var(--text); font-family:'DM Sans',sans-serif;
+  .smart-input { flex:1; background:rgba(255,255,255,.07); border:1px solid rgba(232,25,44,.25);
+                 border-radius:12px; padding:12px 14px; color:#fff;
                  font-size:14px; outline:none; }
-  .smart-input:focus { border-color:var(--brand); }
+  .smart-input:focus { border-color:var(--red); }
   .smart-input::placeholder { color:var(--muted); }
-  .smart-btn { padding:12px 16px; border:none; border-radius:13px;
-               background:linear-gradient(135deg,var(--brand),var(--amber)); color:#1a0f08;
-               font-family:'Syne',sans-serif; font-size:12px; font-weight:800;
-               cursor:pointer; white-space:nowrap; flex-shrink:0; }
+  .smart-btn { padding:12px 16px; border:none; border-radius:12px;
+               background:var(--red); color:#fff;
+               font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap; flex-shrink:0; }
 
-  .nutrition-preview { background:rgba(255,255,255,.05); border:1px solid rgba(224,123,84,.2);
-                       border-radius:14px; padding:14px; margin-top:10px; display:none; }
+  .nutrition-preview { background:rgba(255,255,255,.04); border:1px solid rgba(232,25,44,.2);
+                       border-radius:12px; padding:14px; margin-top:10px; display:none; }
   .np-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
   @media(max-width:360px){ .np-grid { grid-template-columns:repeat(2,1fr); } }
-  .np-box { text-align:center; background:rgba(255,255,255,.05); border-radius:10px; padding:9px 4px; }
-  .np-val { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; color:var(--brand); }
-  .np-key { font-size:9px; color:var(--muted); margin-top:2px; }
+  .np-box { text-align:center; background:rgba(255,255,255,.04); border-radius:10px; padding:9px 4px; }
+  .np-val { font-family:'Bebas Neue','Syne',sans-serif; font-size:18px; font-weight:400; color:var(--red); letter-spacing:.03em; }
+  .np-key { font-size:9px; color:var(--muted); margin-top:2px; text-transform:uppercase; letter-spacing:.04em; }
   .np-actions { display:flex; gap:8px; margin-top:12px; }
-  .np-log-btn { flex:1; padding:11px; border:none; border-radius:12px;
-                background:linear-gradient(135deg,var(--brand),var(--amber)); color:#1a0f08;
-                font-family:'Syne',sans-serif; font-size:12px; font-weight:800; cursor:pointer; }
-  .np-edit-btn { padding:11px 14px; border:1px solid var(--rim); border-radius:12px;
-                 background:transparent; color:var(--soft); font-family:'Syne',sans-serif;
+  .np-log-btn { flex:1; padding:11px; border:none; border-radius:10px;
+                background:var(--red); color:#fff;
+                font-size:12px; font-weight:800; cursor:pointer; }
+  .np-edit-btn { padding:11px 14px; border:1px solid var(--rim); border-radius:10px;
+                 background:transparent; color:var(--soft);
                  font-size:12px; font-weight:700; cursor:pointer; }
 
   .manual-fields { display:none; margin-top:12px; }
 
-  /* ── MEAL ENTRIES ── */
+  /* MEAL ENTRIES */
   .meal-section { margin-bottom:18px; }
   .meal-section:last-child { margin-bottom:0; }
   .meal-hdr { display:flex; align-items:center; gap:10px; margin-bottom:10px;
               padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,.06); }
   .meal-ico  { font-size:22px; }
-  .meal-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:var(--text); }
-  .meal-cal  { font-size:12px; color:var(--brand); font-weight:700; margin-left:auto; }
-  .meal-item { display:flex; align-items:center; gap:10px; padding:9px 0;
-               border-bottom:1px solid rgba(255,255,255,.04); }
+  .meal-name { font-family:'Bebas Neue','Syne',sans-serif; font-size:17px; font-weight:400; color:#fff; letter-spacing:.04em; }
+  .meal-cal  { font-size:12px; color:var(--red); font-weight:700; margin-left:auto; }
+  .meal-item { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid rgba(255,255,255,.04); }
   .meal-item:last-child { border-bottom:none; }
-  .meal-item-name  { flex:1; font-size:13px; color:var(--text); min-width:0; }
+  .meal-item-name  { flex:1; font-size:13px; color:#e2e8f0; min-width:0; }
   .meal-item-macros { font-size:10px; color:var(--muted); }
-  .meal-item-cal   { font-family:'Syne',sans-serif; font-size:13px; font-weight:700;
-                     color:var(--brand); white-space:nowrap; flex-shrink:0; margin-right:6px; }
+  .meal-item-cal   { font-family:'Bebas Neue','Syne',sans-serif; font-size:15px; font-weight:400;
+                     color:var(--red); white-space:nowrap; flex-shrink:0; margin-right:6px; letter-spacing:.03em; }
 
-  /* ── MEAL PLAN CARDS ── */
-  .plan-section { margin-bottom:0; }
+  /* MEAL PLAN CARDS */
   .plan-card { display:flex; align-items:center; gap:10px; padding:10px 12px;
                background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
-               border-radius:14px; margin-bottom:8px; transition:all .2s; }
+               border-radius:12px; margin-bottom:8px; transition:all .2s; }
   .plan-card:last-child { margin-bottom:0; }
   .plan-card.logged { opacity:.55; }
   .plan-card-body { flex:1; min-width:0; }
-  .plan-name { font-size:13px; color:var(--text); font-weight:600; }
+  .plan-name { font-size:13px; color:#fff; font-weight:600; }
   .plan-macros { font-size:11px; color:var(--muted); margin-top:3px; }
-  .plan-kcal { font-family:'Syne',sans-serif; font-size:14px; font-weight:800;
-               color:var(--brand); white-space:nowrap; flex-shrink:0; }
+  .plan-kcal { font-family:'Bebas Neue','Syne',sans-serif; font-size:16px; font-weight:400;
+               color:var(--red); white-space:nowrap; flex-shrink:0; letter-spacing:.03em; }
   .plan-actions { display:flex; flex-direction:column; gap:5px; flex-shrink:0; }
-  .btn-log-plan { background:rgba(92,184,138,.12); border:1px solid rgba(92,184,138,.25);
+  .btn-log-plan { background:rgba(52,211,153,.12); border:1px solid rgba(52,211,153,.25);
                   border-radius:9px; padding:5px 10px; font-size:11px; font-weight:700;
-                  color:var(--green); cursor:pointer; font-family:'Syne',sans-serif;
-                  white-space:nowrap; }
-  .btn-del-plan { background:rgba(242,139,130,.1); border:1px solid rgba(242,139,130,.2);
+                  color:var(--green); cursor:pointer; white-space:nowrap; }
+  .btn-del-plan { background:rgba(232,25,44,.1); border:1px solid rgba(232,25,44,.2);
                   border-radius:9px; padding:5px 10px; font-size:11px; font-weight:700;
-                  color:var(--rose); cursor:pointer; font-family:'Syne',sans-serif; }
+                  color:var(--red); cursor:pointer; }
   .plan-toggle-btn { display:flex; align-items:center; justify-content:center; gap:6px;
                      width:100%; padding:10px; background:rgba(129,140,248,.06);
-                     border:1px dashed rgba(129,140,248,.25); border-radius:12px;
-                     color:var(--vi); font-family:'Syne',sans-serif; font-size:12px;
+                     border:1px dashed rgba(129,140,248,.25); border-radius:10px;
+                     color:var(--violet); font-size:12px;
                      font-weight:700; cursor:pointer; transition:all .2s; margin-top:10px; }
   .plan-toggle-btn:hover { background:rgba(129,140,248,.12); }
 
-  /* ── PLAN SUMMARY ── */
+  /* PLAN SUMMARY */
   .plan-summary-bar { display:flex; justify-content:space-between; align-items:center;
                       background:rgba(129,140,248,.08); border:1px solid rgba(129,140,248,.18);
                       border-radius:12px; padding:10px 14px; margin-bottom:12px; }
-  .psb-label { font-size:11px; color:var(--vi); font-weight:700; }
-  .psb-val   { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:#e2e8f0; }
+  .psb-label { font-size:11px; color:var(--violet); font-weight:700; }
+  .psb-val   { font-family:'Bebas Neue','Syne',sans-serif; font-size:17px; font-weight:400; color:#e2e8f0; letter-spacing:.03em; }
 
-  /* ── RECIPES ── */
+  /* RECIPES */
   .recipe-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
-                 border-radius:14px; padding:14px 16px; margin-bottom:10px; }
-  .recipe-name { font-family:'Syne',sans-serif; font-size:14px; font-weight:700;
-                 color:var(--text); margin-bottom:5px; }
+                 border-radius:12px; padding:14px 16px; margin-bottom:10px; }
+  .recipe-name { font-size:14px; font-weight:700; color:#fff; margin-bottom:5px; }
   .recipe-meta { display:flex; gap:8px; flex-wrap:wrap; font-size:11px; color:var(--muted); }
 
-  /* ── GOALS ── */
+  /* GOALS */
   .goals-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px; }
   @media(max-width:400px){ .goals-grid { grid-template-columns:repeat(2,1fr); } }
 
-  /* ── SPINNER ── */
+  /* SPINNER */
   .spinner { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,.3);
              border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
@@ -195,14 +178,12 @@
     <p style="font-size:12px;color:var(--muted);margin-top:4px">Goal: {{ goal.calories }} kcal/day</p>
   </div>
   <div style="text-align:right">
-    <div style="font-family:'Syne',sans-serif;font-size:34px;font-weight:800;line-height:1;
-                background:linear-gradient(135deg,var(--brand),var(--amber));
-                -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">
+    <div style="font-family:'Bebas Neue','Syne',sans-serif;font-size:40px;font-weight:400;line-height:1;color:var(--red);letter-spacing:.03em">
       {{ day_data.calories }}
     </div>
     <div style="font-size:10px;color:var(--muted)">kcal logged</div>
     {% if plan_total_cal %}
-    <div style="font-size:11px;color:var(--vi);font-weight:700;margin-top:2px">{{ plan_total_cal }} planned</div>
+    <div style="font-size:11px;color:var(--violet);font-weight:700;margin-top:2px">{{ plan_total_cal }} planned</div>
     {% endif %}
   </div>
 </div>
@@ -223,7 +204,7 @@
   <div class="gcp">
     <div class="sec-lbl">Today's Nutrition</div>
     <div class="macro-grid">
-      <div class="mbox"><div class="mval" style="color:var(--brand)">{{ day_data.calories }}</div><div class="mlbl">kcal</div><div class="mprog"><div class="mpfill" style="width:{{ cal_pct }}%;background:var(--brand)"></div></div></div>
+      <div class="mbox"><div class="mval" style="color:var(--red)">{{ day_data.calories }}</div><div class="mlbl">kcal</div><div class="mprog"><div class="mpfill" style="width:{{ cal_pct }}%;background:var(--red)"></div></div></div>
       <div class="mbox"><div class="mval" style="color:var(--blue)">{{ day_data.protein }}g</div><div class="mlbl">protein</div><div class="mprog"><div class="mpfill" style="width:{{ protein_pct }}%;background:var(--blue)"></div></div></div>
       <div class="mbox"><div class="mval" style="color:#b39ddb">{{ day_data.carbs }}g</div><div class="mlbl">carbs</div><div class="mprog"><div class="mpfill" style="width:{{ carbs_pct }}%;background:#b39ddb"></div></div></div>
       <div class="mbox"><div class="mval" style="color:var(--amber)">{{ day_data.fat }}g</div><div class="mlbl">fat</div><div class="mprog"><div class="mpfill" style="width:{{ fat_pct }}%;background:var(--amber)"></div></div></div>
@@ -235,13 +216,13 @@
 </div>
 
 
-<!-- ══ MEAL PLAN FOR TODAY ══════════════════════════════════════════════════ -->
+<!-- MEAL PLAN FOR TODAY -->
 <div class="gc a3">
   <div class="gcp">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <span class="sec-lbl" style="margin-bottom:0">📅 Today's Meal Plan</span>
       {% if plan_total_cal %}
-      <span style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--vi)">{{ plan_total_cal }} kcal planned</span>
+      <span style="font-family:'Bebas Neue','Syne',sans-serif;font-size:15px;font-weight:400;color:var(--violet);letter-spacing:.03em">{{ plan_total_cal }} kcal planned</span>
       {% endif %}
     </div>
 
@@ -249,15 +230,13 @@
     {% with group=plan_grouped|default_if_none:'' %}
     {% with plans=plan_grouped|default:'' %}
 
-    <!-- Meal type header -->
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;margin-top:{% if not forloop.first %}14px{% else %}0{% endif %}">
       <span style="font-size:18px">
         {% if mt == 'breakfast' %}🍳{% elif mt == 'lunch' %}🥗{% elif mt == 'snack' %}🍎{% else %}🍛{% endif %}
       </span>
-      <span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text)">{{ mt|title }}</span>
+      <span style="font-family:'Bebas Neue','Syne',sans-serif;font-size:16px;font-weight:400;color:#fff;letter-spacing:.04em">{{ mt|title }}</span>
     </div>
 
-    <!-- Plan items for this meal type -->
     {% for plan in meal_plans %}{% if plan.meal_type == mt %}
     <div class="plan-card {% if plan.is_logged %}logged{% endif %}">
       <div class="plan-card-body">
@@ -287,11 +266,10 @@
     </div>
     {% endif %}{% endfor %}
 
-    <!-- Add plan item for this meal type inline -->
     <button class="plan-toggle-btn" type="button" onclick="tog('plan-form-{{ mt }}')">
       ＋ Plan {{ mt|title }}
     </button>
-    <div id="plan-form-{{ mt }}" style="display:none;margin-top:10px;padding:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px">
+    <div id="plan-form-{{ mt }}" style="display:none;margin-top:10px;padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--rim);border-radius:12px">
       <form method="POST" action="/meals/plan/add/">
         {% csrf_token %}
         <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
@@ -309,7 +287,7 @@
           <div><label class="field-lbl">Carbs</label><input class="fi" type="number" name="carbs" placeholder="auto" min="0" style="font-size:13px;padding:9px 10px"></div>
           <div><label class="field-lbl">Fat</label><input class="fi" type="number" name="fat" placeholder="auto" min="0" style="font-size:13px;padding:9px 10px"></div>
         </div>
-        <button type="submit" class="btn-or" style="background:linear-gradient(135deg,#818cf8,#2dd4bf);box-shadow:none">📅 Add to Plan</button>
+        <button type="submit" class="btn-or" style="background:var(--violet)">📅 Add to Plan</button>
       </form>
     </div>
 
@@ -320,7 +298,7 @@
 </div>
 
 
-<!-- ══ SMART LOG MEAL ════════════════════════════════════════════════════════ -->
+<!-- SMART LOG MEAL -->
 <div class="gc a4">
   <div class="gcp">
     <div class="sec-lbl">🤖 Smart Meal Logger</div>
@@ -342,7 +320,7 @@
       </div>
 
       <div class="nutrition-preview" id="nutrition-preview">
-        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px" id="np-name"></div>
+        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px" id="np-name"></div>
         <div class="np-grid">
           <div class="np-box"><div class="np-val" id="np-kcal">0</div><div class="np-key">kcal</div></div>
           <div class="np-box"><div class="np-val" id="np-protein" style="color:var(--blue)">0g</div><div class="np-key">protein</div></div>
@@ -356,7 +334,7 @@
         </div>
       </div>
 
-      <div id="not-found-msg" style="display:none;margin-top:10px;padding:10px 12px;background:rgba(242,139,130,.08);border:1px solid rgba(242,139,130,.2);border-radius:12px;font-size:12px;color:var(--rose)">
+      <div id="not-found-msg" style="display:none;margin-top:10px;padding:10px 12px;background:rgba(232,25,44,.08);border:1px solid rgba(232,25,44,.2);border-radius:10px;font-size:12px;color:var(--red)">
         ❓ Couldn't estimate. Enter values manually below.
       </div>
     </div>
@@ -385,7 +363,7 @@
 </div>
 
 
-<!-- ══ MEALS TODAY ═══════════════════════════════════════════════════════════ -->
+<!-- MEALS TODAY -->
 <div class="gc a5">
   <div class="gcp">
     <div class="sec-lbl">📋 Today's Logged Meals</div>
@@ -420,7 +398,7 @@
 </div>
 
 
-<!-- ══ MY RECIPES ════════════════════════════════════════════════════════════ -->
+<!-- MY RECIPES -->
 <div class="gc a6">
   <div class="gcp">
     <div class="sec-lbl">📒 My Recipes</div>
@@ -479,7 +457,7 @@
 </div>
 
 
-<!-- ══ NUTRITION GOALS ═══════════════════════════════════════════════════════ -->
+<!-- NUTRITION GOALS -->
 <div class="gc a6">
   <div class="gcp">
     <button class="toggle-btn" type="button" onclick="tog('goals-form')">🎯 Set Nutrition Goals</button>

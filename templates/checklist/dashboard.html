@@ -5,94 +5,76 @@
 {% block extra_head %}
 <style>
   :root {
-    --vi:#818cf8; --pu:#a78bfa; --te:#2dd4bf; --ro:#fb7185;
-    --am:#fbbf24; --gr:#34d399; --bl:#38bdf8; --or:#f97316;
-    --surf:rgba(255,255,255,0.045); --rim:rgba(255,255,255,0.09);
-    --muted:#64748b; --soft:#94a3b8;
+    --red:#e8192c; --green:#34d399; --amber:#fbbf24; --violet:#818cf8;
+    --blue:#38bdf8; --rose:#fb7185; --or:#f97316;
+    --muted:#606060; --soft:#a0a0a0; --rim:rgba(255,255,255,0.08);
   }
 
   /* ── PAGE TABS ─────────────────────────────────── */
   .page-tabs { display:flex; gap:6px; margin-bottom:18px; background:rgba(255,255,255,.03);
-               border:1px solid var(--rim); border-radius:18px; padding:5px; }
-  .ptab { flex:1; padding:9px 4px; border-radius:13px; border:none; background:transparent;
-          color:var(--muted); font-family:'Syne',sans-serif; font-size:11px; font-weight:700;
-          letter-spacing:.04em; text-transform:uppercase; cursor:pointer; transition:all .2s;
+               border:1px solid var(--rim); border-radius:16px; padding:5px; }
+  .ptab { flex:1; padding:9px 4px; border-radius:12px; border:none; background:transparent;
+          color:var(--muted); font-size:11px; font-weight:700; letter-spacing:.04em;
+          text-transform:uppercase; cursor:pointer; transition:all .2s;
           display:flex; flex-direction:column; align-items:center; gap:2px; }
   .ptab-icon { font-size:16px; line-height:1; }
-  .ptab.on { background:rgba(255,255,255,.08); color:#f1f5f9;
-             box-shadow:0 2px 12px rgba(0,0,0,.3); }
-  .ptab-daily.on  { color:var(--vi); }
-  .ptab-work.on   { color:var(--bl); }
-  .ptab-week.on   { color:var(--am); }
-  .ptab-month.on  { color:var(--gr); }
+  .ptab.on { background:rgba(232,25,44,.12); color:var(--red); }
+  .ptab-daily.on,.ptab-work.on,.ptab-week.on,.ptab-month.on { color:var(--red); }
 
   /* ── PANELS ────────────────────────────────────── */
   .panel { display:none; }
   .panel.active { display:block; }
 
-  /* ── COMMON GLASS ──────────────────────────────── */
-  .gc { background:var(--surf); border:1px solid var(--rim); border-radius:20px;
-        backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); margin-bottom:16px; overflow:hidden; }
+  /* ── COMMON CARD ───────────────────────────────── */
+  .gc { background:rgba(255,255,255,.04); border:1px solid var(--rim); border-radius:16px;
+        margin-bottom:16px; overflow:hidden; }
   .gcp { padding:20px 22px; }
-  .sec-lbl { font-family:'Syne',sans-serif; font-size:11px; font-weight:700; color:var(--muted);
+  .sec-lbl { font-size:11px; font-weight:700; color:var(--muted);
              letter-spacing:.1em; text-transform:uppercase; margin-bottom:14px; }
   .hdr-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
 
   /* ── FORMS ─────────────────────────────────────── */
-  .fi { width:100%; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:13px;
-        padding:11px 14px; color:#fff; font-family:'DM Sans',sans-serif; font-size:14px;
-        outline:none; transition:border-color .2s; box-sizing:border-box; }
+  .fi { width:100%; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:12px;
+        padding:11px 14px; color:#fff; font-size:14px; outline:none;
+        transition:border-color .2s; box-sizing:border-box; }
   .fi::placeholder { color:var(--muted); }
-  .fi-sel { appearance:none; -webkit-appearance:none; background-color:#111118; }
-  .fi.focus-vi:focus  { border-color:rgba(129,140,248,.5); }
-  .fi.focus-bl:focus  { border-color:rgba(56,189,248,.5); }
-  .fi.focus-am:focus  { border-color:rgba(251,191,36,.5); }
-  .fi.focus-gr:focus  { border-color:rgba(52,211,153,.5); }
-  .fi.focus-or:focus  { border-color:rgba(249,115,22,.5); }
-  .field-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.06em;
-               text-transform:uppercase; display:block; margin-bottom:6px; }
+  .fi:focus { border-color:rgba(232,25,44,.5); }
+  .fi-sel { appearance:none; -webkit-appearance:none; background-color:#111; }
+  .fi.focus-vi:focus,.fi.focus-bl:focus,.fi.focus-am:focus,.fi.focus-gr:focus,.fi.focus-or:focus { border-color:rgba(232,25,44,.5); }
+  .field-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.06em; text-transform:uppercase; display:block; margin-bottom:6px; }
   .fg { margin-bottom:10px; }
   .form-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
   .form-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
 
-  .btn { width:100%; padding:13px; border:none; border-radius:14px;
-         font-family:'Syne',sans-serif; font-size:13px; font-weight:800; cursor:pointer; transition:all .2s; }
+  .btn { width:100%; padding:13px; border:none; border-radius:12px;
+         font-size:13px; font-weight:800; cursor:pointer; transition:all .2s; }
   .btn:hover { opacity:.9; transform:translateY(-1px); }
-  .btn-vi { background:linear-gradient(135deg,#818cf8,#a78bfa); color:#0a0a12; box-shadow:0 4px 18px rgba(129,140,248,.25); }
-  .btn-bl { background:linear-gradient(135deg,#38bdf8,#2dd4bf); color:#0a0a12; box-shadow:0 4px 18px rgba(56,189,248,.25); }
-  .btn-am { background:linear-gradient(135deg,#fbbf24,#f97316); color:#0a0a12; box-shadow:0 4px 18px rgba(251,191,36,.25); }
-  .btn-gr { background:linear-gradient(135deg,#34d399,#2dd4bf); color:#0a0a12; box-shadow:0 4px 18px rgba(52,211,153,.25); }
-  .btn-or { background:linear-gradient(135deg,#f97316,#fbbf24); color:#0a0a12; box-shadow:0 4px 18px rgba(249,115,22,.25); }
-  .btn-sm { padding:5px 12px; border-radius:9px; font-family:'Syne',sans-serif;
-            font-size:11px; font-weight:700; cursor:pointer; border:none; transition:all .2s; }
-  .btn-del  { background:rgba(251,113,133,.1); border:1px solid rgba(251,113,133,.2); color:var(--ro); }
-  .btn-done { background:rgba(52,211,153,.1);  border:1px solid rgba(52,211,153,.2);  color:var(--gr); }
-  .btn-prog { background:rgba(251,191,36,.1);  border:1px solid rgba(251,191,36,.2);  color:var(--am); }
+  .btn-vi,.btn-bl,.btn-am,.btn-gr,.btn-or { background:var(--red); color:#fff; }
+  .btn-sm { padding:5px 12px; border-radius:9px; font-size:11px; font-weight:700; cursor:pointer; border:none; transition:all .2s; }
+  .btn-del  { background:rgba(232,25,44,.1); border:1px solid rgba(232,25,44,.2); color:var(--red); }
+  .btn-done { background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.2); color:var(--green); }
+  .btn-prog { background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.2); color:var(--amber); }
   .btn-drop { background:rgba(148,163,184,.1); border:1px solid rgba(148,163,184,.2); color:var(--soft); }
-  .btn-rev  { background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.2); color:var(--vi); }
+  .btn-rev  { background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.2); color:var(--violet); }
   .btn-mute { background:rgba(100,116,139,.1); border:1px solid rgba(100,116,139,.2); color:var(--muted); }
 
   /* ── WEEK STRIP ────────────────────────────────── */
   .week-strip { display:flex; gap:6px; margin-bottom:14px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
   .week-strip::-webkit-scrollbar { display:none; }
   .wday { display:flex; flex-direction:column; align-items:center; gap:3px; min-width:44px;
-          padding:8px 4px; border-radius:14px; background:var(--surf); border:1px solid var(--rim);
+          padding:8px 4px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid var(--rim);
           text-decoration:none; transition:all .2s; }
-  .wday.on { border-color:rgba(129,140,248,.4); background:rgba(129,140,248,.1); }
-  .wday-l { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; color:var(--muted); }
-  .wday-n { font-family:'Syne',sans-serif; font-size:14px; font-weight:800; color:#e2e8f0; }
+  .wday.on { border-color:rgba(232,25,44,.4); background:rgba(232,25,44,.1); }
+  .wday-l { font-size:10px; font-weight:700; color:var(--muted); }
+  .wday-n { font-family:'Bebas Neue','Syne',sans-serif; font-size:16px; font-weight:400; color:#e2e8f0; }
   .wday-b { width:28px; height:4px; border-radius:4px; background:rgba(255,255,255,.08); overflow:hidden; }
-  .wday-f { height:100%; border-radius:4px; background:linear-gradient(90deg,#818cf8,#2dd4bf); }
+  .wday-f { height:100%; border-radius:4px; background:var(--red); }
 
   /* ── PROGRESS ──────────────────────────────────── */
   .prog-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-  .prog-bar { height:7px; background:rgba(255,255,255,.07); border-radius:7px; overflow:hidden; }
-  .prog-fill { height:100%; border-radius:7px; transition:width .7s ease; }
-  .pf-vi { background:linear-gradient(90deg,#818cf8,#a78bfa); box-shadow:0 0 10px rgba(129,140,248,.4); }
-  .pf-bl { background:linear-gradient(90deg,#38bdf8,#2dd4bf); box-shadow:0 0 10px rgba(56,189,248,.35); }
-  .pf-gr { background:linear-gradient(90deg,#34d399,#2dd4bf); box-shadow:0 0 10px rgba(52,211,153,.35); }
-  .pf-am { background:linear-gradient(90deg,#fbbf24,#f97316); box-shadow:0 0 10px rgba(251,191,36,.35); }
-  .pf-or { background:linear-gradient(90deg,#f97316,#fbbf24); box-shadow:0 0 10px rgba(249,115,22,.35); }
+  .prog-bar { height:6px; background:rgba(255,255,255,.07); border-radius:6px; overflow:hidden; }
+  .prog-fill { height:100%; border-radius:6px; transition:width .7s ease; }
+  .pf-vi,.pf-bl,.pf-gr,.pf-am,.pf-or { background:var(--red); }
 
   /* ── CHECKLIST ITEMS ───────────────────────────── */
   .item-row { display:flex; align-items:flex-start; gap:10px; padding:11px 0;
@@ -103,24 +85,20 @@
          display:flex; align-items:center; justify-content:center;
          transition:all .2s; border:none; -webkit-tap-highlight-color:transparent; margin-top:1px; }
   .chk-off { background:rgba(255,255,255,.06); border:2px solid rgba(255,255,255,.2); }
-  .chk-on  { background:linear-gradient(135deg,#818cf8,#2dd4bf); }
-  .chk-on-bl { background:linear-gradient(135deg,#38bdf8,#2dd4bf); }
-  .chk-on-or { background:linear-gradient(135deg,#f97316,#fbbf24); }
+  .chk-on,.chk-on-bl,.chk-on-or { background:var(--red); }
   .item-body { flex:1; min-width:0; }
   .item-title { font-size:14px; color:#e2e8f0; line-height:1.4; }
   .item-sub   { font-size:11px; color:var(--muted); margin-top:3px; }
   .item-chips { display:flex; gap:5px; flex-wrap:wrap; margin-top:4px; }
-  .chip { padding:2px 9px; border-radius:20px; font-size:10px; font-weight:700;
-          font-family:'Syne',sans-serif; }
-  .chip-vi   { background:rgba(129,140,248,.13); color:#818cf8; }
-  .chip-bl   { background:rgba(56,189,248,.13);  color:#38bdf8; }
-  .chip-gr   { background:rgba(52,211,153,.13);  color:#34d399; }
-  .chip-am   { background:rgba(251,191,36,.13);  color:#fbbf24; }
-  .chip-ro   { background:rgba(251,113,133,.13); color:#fb7185; }
-  .chip-or   { background:rgba(249,115,22,.13);  color:#f97316; }
+  .chip { padding:2px 9px; border-radius:20px; font-size:10px; font-weight:700; }
+  .chip-vi,.chip-bl { background:rgba(232,25,44,.1); color:var(--red); border:1px solid rgba(232,25,44,.18); }
+  .chip-gr   { background:rgba(52,211,153,.13);  color:var(--green); }
+  .chip-am   { background:rgba(251,191,36,.13);  color:var(--amber); }
+  .chip-ro   { background:rgba(232,25,44,.13);   color:var(--red); }
+  .chip-or   { background:rgba(249,115,22,.13);  color:var(--or); }
   .chip-soft { background:rgba(148,163,184,.13); color:#94a3b8; }
 
-  .pri-hi { color:var(--ro); } .pri-md { color:var(--am); } .pri-lo { color:var(--soft); }
+  .pri-hi { color:var(--red); } .pri-md { color:var(--amber); } .pri-lo { color:var(--soft); }
   .pri-dot { font-size:10px; }
 
   /* ── ROUTINE SPECIFIC ──────────────────────────── */
@@ -134,65 +112,57 @@
   .routine-title { font-size:14px; color:#e2e8f0; line-height:1.3; }
   .routine-meta  { display:flex; gap:5px; margin-top:4px; flex-wrap:wrap; align-items:center; }
 
-  /* time-of-day badge colours */
-  .tod-morning   { background:rgba(251,191,36,.13);  color:#fbbf24; }
-  .tod-afternoon { background:rgba(249,115,22,.13);  color:#f97316; }
-  .tod-evening   { background:rgba(129,140,248,.13); color:#818cf8; }
-  .tod-anytime   { background:rgba(52,211,153,.13);  color:#34d399; }
+  .tod-morning   { background:rgba(251,191,36,.13);  color:var(--amber); }
+  .tod-afternoon { background:rgba(249,115,22,.13);  color:var(--or); }
+  .tod-evening   { background:rgba(129,140,248,.13); color:var(--violet); }
+  .tod-anytime   { background:rgba(52,211,153,.13);  color:var(--green); }
 
-  /* manage routines list */
-  .manage-routine-row { display:flex; align-items:center; gap:8px; padding:9px 0;
-                        border-bottom:1px solid rgba(255,255,255,.04); }
+  .manage-routine-row { display:flex; align-items:center; gap:8px; padding:9px 0; border-bottom:1px solid rgba(255,255,255,.04); }
   .manage-routine-row:last-child { border-bottom:none; }
   .manage-routine-row.inactive { opacity:.45; }
   .mr-title { flex:1; font-size:13px; color:#e2e8f0; }
-  .mr-badge { font-size:10px; color:var(--muted); padding:2px 7px;
-              background:rgba(255,255,255,.05); border-radius:20px; white-space:nowrap; }
+  .mr-badge { font-size:10px; color:var(--muted); padding:2px 7px; background:rgba(255,255,255,.05); border-radius:20px; white-space:nowrap; }
 
   /* ── EMPTY ─────────────────────────────────────── */
   .empty { padding:24px; text-align:center; }
   .empty-ico { font-size:32px; margin-bottom:8px; }
-  .empty-ttl { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:#e2e8f0; margin-bottom:4px; }
+  .empty-ttl { font-size:14px; font-weight:700; color:#e2e8f0; margin-bottom:4px; }
   .empty-sub { font-size:12px; color:var(--muted); }
 
-  /* ── MONTH NAV ─────────────────────────────────── */
+  /* ── MONTH/WEEK NAV ────────────────────────────── */
   .nav-strip { display:flex; align-items:center; justify-content:space-between;
-               background:var(--surf); border:1px solid var(--rim); border-radius:16px;
-               padding:10px 16px; margin-bottom:14px; }
-  .nav-lbl { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:#e2e8f0; }
+               background:rgba(255,255,255,.04); border:1px solid var(--rim);
+               border-radius:14px; padding:10px 16px; margin-bottom:14px; }
+  .nav-lbl { font-family:'Bebas Neue','Syne',sans-serif; font-size:18px; font-weight:400; color:#fff; letter-spacing:.04em; }
   .nav-sub { font-size:11px; color:var(--muted); text-align:center; margin-top:1px; }
   .nav-btn { background:rgba(255,255,255,.06); border:1px solid var(--rim); border-radius:10px;
-             padding:6px 14px; color:var(--soft); font-family:'Syne',sans-serif;
-             font-size:13px; font-weight:700; cursor:pointer; text-decoration:none; transition:all .2s; }
-  .nav-btn:hover { background:rgba(255,255,255,.12); color:#fff; }
+             padding:6px 14px; color:var(--soft); font-size:13px; font-weight:700;
+             cursor:pointer; text-decoration:none; transition:all .2s; }
+  .nav-btn:hover { border-color:var(--red); color:var(--red); }
 
   /* ── MONTH GOAL CARD ───────────────────────────── */
-  .goal-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
-               border-radius:16px; padding:14px 16px; margin-bottom:10px; }
+  .goal-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:14px; padding:14px 16px; margin-bottom:10px; }
   .goal-card.done    { border-color:rgba(52,211,153,.2); background:rgba(52,211,153,.04); }
   .goal-card.dropped { border-color:rgba(148,163,184,.15); opacity:.6; }
-  .goal-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; color:#e2e8f0; margin-bottom:4px; }
+  .goal-title { font-size:15px; font-weight:700; color:#e2e8f0; margin-bottom:4px; }
   .goal-desc  { font-size:12px; color:var(--muted); margin-bottom:8px; line-height:1.5; }
   .goal-actions { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
-  .goal-linked { font-size:11px; color:var(--am); margin-top:6px; }
+  .goal-linked { font-size:11px; color:var(--amber); margin-top:6px; }
 
   /* ── WEEK BOARD ────────────────────────────────── */
   .week-board { display:flex; flex-direction:column; gap:10px; }
-  .day-col { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
-             border-radius:16px; overflow:hidden; }
-  .day-col-hdr { display:flex; align-items:center; justify-content:space-between;
-                 padding:10px 14px; background:rgba(255,255,255,.03);
-                 border-bottom:1px solid rgba(255,255,255,.06); }
-  .day-col-name { font-family:'Syne',sans-serif; font-size:12px; font-weight:800; color:#e2e8f0; }
+  .day-col { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:14px; overflow:hidden; }
+  .day-col-hdr { display:flex; align-items:center; justify-content:space-between; padding:10px 14px;
+                 background:rgba(255,255,255,.03); border-bottom:1px solid rgba(255,255,255,.06); }
+  .day-col-name { font-family:'Bebas Neue','Syne',sans-serif; font-size:14px; font-weight:400; color:#e2e8f0; letter-spacing:.04em; }
   .day-col-date { font-size:10px; color:var(--muted); }
   .day-col-body { padding:8px 12px; }
-  .week-task-item { display:flex; align-items:flex-start; gap:8px; padding:8px 0;
-                    border-bottom:1px solid rgba(255,255,255,.04); }
+  .week-task-item { display:flex; align-items:flex-start; gap:8px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.04); }
   .week-task-item:last-child { border-bottom:none; }
   .wt-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:5px; }
   .wt-todo       { background:var(--muted); }
-  .wt-inprogress { background:var(--am); }
-  .wt-done       { background:var(--gr); }
+  .wt-inprogress { background:var(--amber); }
+  .wt-done       { background:var(--green); }
   .wt-body { flex:1; }
   .wt-title { font-size:13px; color:#e2e8f0; line-height:1.4; }
   .wt-title.done-txt { text-decoration:line-through; color:var(--muted); }
@@ -202,42 +172,37 @@
   /* ── MOOD ──────────────────────────────────────── */
   .mood-row { display:flex; gap:8px; margin-bottom:12px; }
   .mood-btn { flex:1; padding:10px 4px; border-radius:12px; border:1px solid var(--rim);
-              background:rgba(255,255,255,.04); font-size:18px; cursor:pointer;
-              transition:all .2s; text-align:center; }
-  .mood-btn.sel { border-color:rgba(129,140,248,.5); background:rgba(129,140,248,.15); }
+              background:rgba(255,255,255,.04); font-size:18px; cursor:pointer; transition:all .2s; text-align:center; }
+  .mood-btn.sel { border-color:rgba(232,25,44,.5); background:rgba(232,25,44,.12); }
   .refl-ta { width:100%; background:rgba(255,255,255,.05); border:1px solid var(--rim);
-             border-radius:13px; padding:11px 14px; color:#fff; font-family:'DM Sans',sans-serif;
-             font-size:13px; outline:none; resize:vertical; box-sizing:border-box; transition:border-color .2s; }
-  .refl-ta:focus { border-color:rgba(129,140,248,.4); }
+             border-radius:12px; padding:11px 14px; color:#fff; font-size:13px;
+             outline:none; resize:vertical; box-sizing:border-box; transition:border-color .2s; }
+  .refl-ta:focus { border-color:rgba(232,25,44,.4); }
   .refl-ta::placeholder { color:var(--muted); }
 
   /* ── TOGGLE FORM ───────────────────────────────── */
   .toggle-add { display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
-                padding:12px; border-radius:16px; font-family:'Syne',sans-serif;
-                font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
-  .ta-vi { background:rgba(129,140,248,.07); border:1px dashed rgba(129,140,248,.3); color:var(--vi); }
-  .ta-bl { background:rgba(56,189,248,.07);  border:1px dashed rgba(56,189,248,.3);  color:var(--bl); }
-  .ta-am { background:rgba(251,191,36,.07);  border:1px dashed rgba(251,191,36,.3);  color:var(--am); }
-  .ta-gr { background:rgba(52,211,153,.07);  border:1px dashed rgba(52,211,153,.3);  color:var(--gr); }
-  .ta-or { background:rgba(249,115,22,.07);  border:1px dashed rgba(249,115,22,.3);  color:var(--or); }
-  .toggle-add:hover { filter:brightness(1.15); }
+                padding:12px; border-radius:14px; font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
+  .ta-vi,.ta-bl,.ta-am,.ta-gr,.ta-or { background:rgba(232,25,44,.07); border:1px dashed rgba(232,25,44,.3); color:var(--red); }
+  .toggle-add:hover { background:rgba(232,25,44,.13); }
 
   /* ── STATS ROW ─────────────────────────────────── */
   .stats-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
-  .stat-box { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
-              border-radius:14px; padding:12px 8px; text-align:center; }
-  .stat-val { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; line-height:1; }
-  .stat-key { font-size:10px; color:var(--muted); margin-top:4px; }
+  .stat-box { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:12px; padding:12px 8px; text-align:center; }
+  .stat-val { font-family:'Bebas Neue','Syne',sans-serif; font-size:24px; font-weight:400; line-height:1; letter-spacing:.03em; }
+  .stat-key { font-size:10px; color:var(--muted); margin-top:4px; text-transform:uppercase; letter-spacing:.04em; }
 
-  /* ── ANIMS ─────────────────────────────────────── */
+  /* ── PAGE HEADER ───────────────────────────────── */
+  .page-hdr-title { font-family:'Bebas Neue','Syne',sans-serif; font-size:34px; font-weight:400; line-height:1; color:#fff; letter-spacing:.04em; }
+
   @keyframes sup { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
   .a1{animation:sup .38s ease both .03s} .a2{animation:sup .38s ease both .09s}
   .a3{animation:sup .38s ease both .15s} .a4{animation:sup .38s ease both .21s}
   .a5{animation:sup .38s ease both .27s} .a6{animation:sup .38s ease both .33s}
 
-  .day-col.is-today { border-color:rgba(251,191,36,.3); }
-  .day-col.is-today .day-col-hdr { background:rgba(251,191,36,.06); }
-  .day-col.is-today .day-col-name { color:var(--am); }
+  .day-col.is-today { border-color:rgba(232,25,44,.3); }
+  .day-col.is-today .day-col-hdr { background:rgba(232,25,44,.06); }
+  .day-col.is-today .day-col-name { color:var(--red); }
 </style>
 {% endblock %}
 
@@ -249,11 +214,7 @@
   <p style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px">
     {{ today|date:"l, F j, Y" }}
   </p>
-  <h1 style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;line-height:1;
-             background:linear-gradient(115deg,#818cf8,#2dd4bf);-webkit-background-clip:text;
-             -webkit-text-fill-color:transparent;background-clip:text">
-    My Planner &#x1F4CB;
-  </h1>
+  <h1 class="page-hdr-title">My Planner &#x1F4CB;</h1>
 </div>
 
 <!-- ══ TOP-LEVEL TABS ═════════════════════════════════════════ -->
@@ -282,7 +243,6 @@
 <!-- ══════════════════════════════════════════════════════════ -->
 <div class="panel {% if active_tab == 'daily' %}active{% endif %}" id="tab-daily">
 
-  <!-- Week strip date nav -->
   <div class="week-strip a2">
     {% for d in week_data %}
     <a href="/checklist/?date={{ d.date|date:'Y-m-d' }}&tab=daily"
@@ -296,39 +256,34 @@
 
   <!-- ══ DAILY ROUTINE ══════════════════════════════════════ -->
   {% if routine_logs %}
-  <div class="gc a2" style="border-color:rgba(249,115,22,.2)">
+  <div class="gc a2" style="border-color:rgba(232,25,44,.2)">
     <div class="gcp">
-
-      <!-- Header + progress -->
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <div>
-          <div class="sec-lbl" style="margin-bottom:2px;color:var(--or)">&#x1F504; Daily Routine</div>
+          <div class="sec-lbl" style="margin-bottom:2px;color:var(--red)">&#x1F504; Daily Routine</div>
           <div style="font-size:11px;color:var(--muted)">{{ routine_done }}/{{ routine_total }} completed today</div>
         </div>
         {% if routine_pct == 100 and routine_total > 0 %}
         <span style="font-size:20px">&#x1F3C6;</span>
         {% else %}
-        <span style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--or)">{{ routine_pct }}%</span>
+        <span style="font-family:'Bebas Neue','Syne',sans-serif;font-size:20px;font-weight:400;color:var(--red)">{{ routine_pct }}%</span>
         {% endif %}
       </div>
 
-      <!-- Progress bar -->
       <div class="prog-bar" style="margin-bottom:14px">
         <div class="prog-fill pf-or" style="width:{{ routine_pct }}%"></div>
       </div>
 
       {% if routine_pct == 100 %}
-      <div style="text-align:center;padding:6px 0 10px;font-size:13px;color:var(--gr);font-weight:700">
+      <div style="text-align:center;padding:6px 0 10px;font-size:13px;color:var(--green);font-weight:700">
         &#x1F389; Routine complete! You crushed it today.
       </div>
       {% endif %}
 
-      <!-- Routine items grouped by time of day -->
       {% regroup routine_logs by routine_task.time_of_day as logs_by_time %}
 
       {% for time_group in logs_by_time %}
       <div style="margin-bottom:12px">
-        <!-- Time group label -->
         <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
                     color:var(--muted);margin-bottom:4px;padding-bottom:4px;
                     border-bottom:1px solid rgba(255,255,255,.05)">
@@ -340,26 +295,23 @@
 
         {% for log in time_group.list %}
         <div class="routine-item {% if log.completed %}done{% endif %}">
-          <!-- Toggle button -->
           <form method="POST" action="/checklist/routine/log/{{ log.id }}/" style="display:contents">
             {% csrf_token %}
             <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
             <button type="submit" class="chk {% if log.completed %}chk-on-or{% else %}chk-off{% endif %}">
               {% if log.completed %}
-              <span style="font-size:11px;color:#0a0a12">&#10003;</span>
+              <span style="font-size:11px;color:#fff">&#10003;</span>
               {% else %}
               <span style="font-size:9px;color:rgba(255,255,255,.25)">&#10003;</span>
               {% endif %}
             </button>
           </form>
-
-          <!-- Task info -->
           <div class="routine-body">
             <div class="routine-title">{{ log.routine_task.title }}</div>
             <div class="routine-meta">
               <span class="chip chip-or">{{ log.routine_task.get_category_display }}</span>
               {% if log.completed and log.completed_at %}
-              <span style="font-size:10px;color:var(--gr)">✓ {{ log.completed_at|localtime|time:"H:i" }}</span>
+              <span style="font-size:10px;color:var(--green)">✓ {{ log.completed_at|localtime|time:"H:i" }}</span>
               {% endif %}
             </div>
           </div>
@@ -368,12 +320,10 @@
       </div>
       {% endfor %}
 
-      <!-- Manage routines toggle -->
       <button class="toggle-add ta-or" type="button" onclick="tog('manage-routines')" style="margin-top:4px">
         &#x2699;&#xFE0F; Manage Routine Tasks
       </button>
 
-      <!-- Manage routines panel -->
       <div id="manage-routines" style="display:none;margin-top:14px">
         <div style="font-size:11px;color:var(--muted);margin-bottom:10px">
           These tasks appear every day. Deactivate to hide without deleting.
@@ -387,7 +337,6 @@
             {% if not rt.is_active %}</s>{% endif %}
           </div>
           <span class="mr-badge">{{ rt.get_time_of_day_display }}</span>
-          <!-- Deactivate / reactivate -->
           <form method="POST" action="/checklist/routine/toggle-active/{{ rt.id }}/" style="display:contents">
             {% csrf_token %}
             <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
@@ -395,7 +344,6 @@
               {% if rt.is_active %}Hide{% else %}Show{% endif %}
             </button>
           </form>
-          <!-- Delete permanently -->
           <form method="POST" action="/checklist/routine/delete/{{ rt.id }}/" style="display:contents">
             {% csrf_token %}
             <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
@@ -411,21 +359,18 @@
         </div>
         {% endfor %}
 
-        <!-- Add new routine task -->
         <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06)">
-          <div style="font-size:10px;color:var(--or);font-weight:700;letter-spacing:.08em;
-                      text-transform:uppercase;margin-bottom:10px">&#x2795; New Routine Task</div>
+          <div style="font-size:10px;color:var(--red);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">&#x2795; New Routine Task</div>
           <form method="POST" action="/checklist/routine/add/">
             {% csrf_token %}
             <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
             <div class="fg">
-              <input class="fi focus-or" type="text" name="title"
-                     placeholder="e.g. Morning prayer, Workout, Read 20 mins..." required>
+              <input class="fi" type="text" name="title" placeholder="e.g. Morning prayer, Workout, Read 20 mins..." required>
             </div>
             <div class="form-2">
               <div>
                 <label class="field-lbl">Category</label>
-                <select class="fi fi-sel focus-or" name="category">
+                <select class="fi fi-sel" name="category">
                   <option value="health">💪 Health</option>
                   <option value="spiritual">✝️ Spiritual</option>
                   <option value="personal" selected>👤 Personal</option>
@@ -436,7 +381,7 @@
               </div>
               <div>
                 <label class="field-lbl">Time of Day</label>
-                <select class="fi fi-sel focus-or" name="time_of_day">
+                <select class="fi fi-sel" name="time_of_day">
                   <option value="morning">🌅 Morning</option>
                   <option value="afternoon">☀️ Afternoon</option>
                   <option value="evening">🌙 Evening</option>
@@ -453,14 +398,11 @@
   </div>
 
   {% else %}
-  <!-- No routines yet — show a prominent add prompt -->
-  <div class="gc a2" style="border-color:rgba(249,115,22,.15);border-style:dashed">
+  <div class="gc a2" style="border-color:rgba(232,25,44,.15);border-style:dashed">
     <div class="gcp">
       <div style="text-align:center;padding:8px 0">
         <div style="font-size:28px;margin-bottom:8px">&#x1F504;</div>
-        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#e2e8f0;margin-bottom:4px">
-          Set Up Your Daily Routine
-        </div>
+        <div style="font-size:15px;font-weight:800;color:#e2e8f0;margin-bottom:4px">Set Up Your Daily Routine</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">
           Add tasks you want to complete <em>every day</em> — prayer, workouts,<br>journaling, reading — and tick them off each morning.
         </div>
@@ -473,13 +415,12 @@
           {% csrf_token %}
           <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
           <div class="fg">
-            <input class="fi focus-or" type="text" name="title"
-                   placeholder="e.g. Morning prayer, Workout, Read 20 mins..." required>
+            <input class="fi" type="text" name="title" placeholder="e.g. Morning prayer, Workout, Read 20 mins..." required>
           </div>
           <div class="form-2">
             <div>
               <label class="field-lbl">Category</label>
-              <select class="fi fi-sel focus-or" name="category">
+              <select class="fi fi-sel" name="category">
                 <option value="health">💪 Health</option>
                 <option value="spiritual">✝️ Spiritual</option>
                 <option value="personal" selected>👤 Personal</option>
@@ -490,7 +431,7 @@
             </div>
             <div>
               <label class="field-lbl">Time of Day</label>
-              <select class="fi fi-sel focus-or" name="time_of_day">
+              <select class="fi fi-sel" name="time_of_day">
                 <option value="morning">🌅 Morning</option>
                 <option value="afternoon">☀️ Afternoon</option>
                 <option value="evening">🌙 Evening</option>
@@ -505,7 +446,6 @@
   </div>
   {% endif %}
 
-  <!-- Progress (personal tasks) -->
   <div class="gc a3">
     <div class="gcp">
       <div class="prog-row">
@@ -516,14 +456,13 @@
         <div class="prog-fill pf-vi" style="width:{{ pct }}%"></div>
       </div>
       {% if pct == 100 and total > 0 %}
-      <div style="text-align:center;margin-top:8px;font-size:13px;color:var(--gr);font-weight:700">
+      <div style="text-align:center;margin-top:8px;font-size:13px;color:var(--green);font-weight:700">
         &#x1F389; All done! Great work today.
       </div>
       {% endif %}
     </div>
   </div>
 
-  <!-- Add task -->
   <div class="gc a4">
     <div class="gcp">
       <div class="sec-lbl">&#x2795; Add Task</div>
@@ -531,12 +470,12 @@
         {% csrf_token %}
         <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
         <div class="fg">
-          <input class="fi focus-vi" type="text" name="text" placeholder="What do you need to do?" required>
+          <input class="fi" type="text" name="text" placeholder="What do you need to do?" required>
         </div>
         <div class="form-2">
           <div>
             <label class="field-lbl">Category</label>
-            <select class="fi fi-sel focus-vi" name="category">
+            <select class="fi fi-sel" name="category">
               <option value="personal">&#x1F464; Personal</option>
               <option value="health">&#x1F3C3; Health</option>
               <option value="spiritual">&#x271D;&#xFE0F; Spiritual</option>
@@ -546,7 +485,7 @@
           </div>
           <div>
             <label class="field-lbl">Priority</label>
-            <select class="fi fi-sel focus-vi" name="priority">
+            <select class="fi fi-sel" name="priority">
               <option value="high">&#x1F525; High</option>
               <option value="medium" selected>&#x26A1; Medium</option>
               <option value="low">&#x1F4CD; Low</option>
@@ -558,7 +497,6 @@
     </div>
   </div>
 
-  <!-- Task list -->
   <div class="gc a5">
     <div class="gcp">
       <div class="sec-lbl">Tasks — {{ view_date|date:"M j" }}</div>
@@ -592,7 +530,7 @@
           <form method="POST" action="/checklist/toggle/{{ item.id }}/" style="display:contents">
             {% csrf_token %}
             <button type="submit" class="chk chk-on">
-              <span style="font-size:11px;color:#0a0a12">&#10003;</span>
+              <span style="font-size:11px;color:#fff">&#10003;</span>
             </button>
           </form>
           <div class="item-body">
@@ -614,7 +552,6 @@
     </div>
   </div>
 
-  <!-- Day Reflection -->
   <div class="gc a6">
     <div class="gcp">
       <div class="sec-lbl">&#x1F31F; Day Reflection</div>
@@ -663,11 +600,10 @@
   <div class="week-strip a2">
     {% for d in week_data %}
     <a href="/checklist/?date={{ d.date|date:'Y-m-d' }}&tab=work"
-       class="wday {% if d.date == view_date %}on{% endif %}"
-       style="{% if d.date == view_date %}border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.1){% endif %}">
+       class="wday {% if d.date == view_date %}on{% endif %}">
       <span class="wday-l">{{ d.label }}</span>
       <span class="wday-n">{{ d.date.day }}</span>
-      <div class="wday-b"><div style="height:100%;border-radius:4px;background:linear-gradient(90deg,#38bdf8,#2dd4bf);width:{{ d.pct }}%"></div></div>
+      <div class="wday-b"><div style="height:100%;border-radius:4px;background:var(--red);width:{{ d.pct }}%"></div></div>
     </a>
     {% endfor %}
   </div>
@@ -682,7 +618,7 @@
         <div class="prog-fill pf-bl" style="width:{{ work_pct }}%"></div>
       </div>
       {% if work_pct == 100 and work_total > 0 %}
-      <div style="text-align:center;margin-top:8px;font-size:13px;color:var(--gr);font-weight:700">
+      <div style="text-align:center;margin-top:8px;font-size:13px;color:var(--green);font-weight:700">
         &#x1F4AA; Productive day! All work tasks complete.
       </div>
       {% endif %}
@@ -696,12 +632,12 @@
         {% csrf_token %}
         <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
         <div class="fg">
-          <input class="fi focus-bl" type="text" name="title" placeholder="What work task needs doing?" required>
+          <input class="fi" type="text" name="title" placeholder="What work task needs doing?" required>
         </div>
         <div class="form-2">
           <div>
             <label class="field-lbl">Priority</label>
-            <select class="fi fi-sel focus-bl" name="priority">
+            <select class="fi fi-sel" name="priority">
               <option value="high">&#x1F525; High</option>
               <option value="medium" selected>&#x26A1; Medium</option>
               <option value="low">&#x1F4CD; Low</option>
@@ -709,7 +645,7 @@
           </div>
           <div>
             <label class="field-lbl">Link to Week Task (optional)</label>
-            <select class="fi fi-sel focus-bl" name="week_task_id">
+            <select class="fi fi-sel" name="week_task_id">
               <option value="">— standalone —</option>
               {% for wt in week_tasks %}
               <option value="{{ wt.id }}">{{ wt.title|truncatechars:30 }}</option>
@@ -719,7 +655,7 @@
         </div>
         <div class="fg">
           <label class="field-lbl">Notes (optional)</label>
-          <input class="fi focus-bl" type="text" name="notes" placeholder="Extra details...">
+          <input class="fi" type="text" name="notes" placeholder="Extra details...">
         </div>
         <button type="submit" class="btn btn-bl">&#x1F4BC; Add Work Task</button>
       </form>
@@ -763,7 +699,7 @@
         <form method="POST" action="/checklist/work/toggle/{{ item.id }}/" style="display:contents">
           {% csrf_token %}
           <button type="submit" class="chk chk-on-bl">
-            <span style="font-size:11px;color:#0a0a12">&#10003;</span>
+            <span style="font-size:11px;color:#fff">&#10003;</span>
           </button>
         </form>
         <div class="item-body">
@@ -795,23 +731,23 @@
       <div class="sec-lbl">&#x1F3C6; Accomplished Today</div>
       <div class="stats-3">
         <div class="stat-box">
-          <div class="stat-val" style="color:var(--gr)">{{ work_done }}</div>
+          <div class="stat-val" style="color:var(--green)">{{ work_done }}</div>
           <div class="stat-key">Completed</div>
         </div>
         <div class="stat-box">
-          <div class="stat-val" style="color:var(--am)">{{ work_total }}</div>
+          <div class="stat-val" style="color:var(--amber)">{{ work_total }}</div>
           <div class="stat-key">Total Tasks</div>
         </div>
         <div class="stat-box">
-          <div class="stat-val" style="color:var(--bl)">{{ work_pct }}%</div>
+          <div class="stat-val" style="color:var(--red)">{{ work_pct }}%</div>
           <div class="stat-key">Done</div>
         </div>
       </div>
       <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:12px">
-        <div style="font-size:11px;color:var(--gr);font-weight:700;margin-bottom:8px">&#x2714; COMPLETED</div>
+        <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:8px">&#x2714; COMPLETED</div>
         {% for item in work_items %}{% if item.completed %}
         <div style="font-size:13px;color:#94a3b8;padding:3px 0;display:flex;align-items:center;gap:8px">
-          <span style="color:var(--gr)">&#x2714;</span> {{ item.title }}
+          <span style="color:var(--green)">&#x2714;</span> {{ item.title }}
         </div>
         {% endif %}{% endfor %}
       </div>
@@ -838,15 +774,15 @@
 
   <div class="stats-3 a2">
     <div class="stat-box">
-      <div class="stat-val" style="color:var(--gr)">{{ week_tasks|length }}</div>
+      <div class="stat-val" style="color:var(--green)">{{ week_tasks|length }}</div>
       <div class="stat-key">Total Tasks</div>
     </div>
     <div class="stat-box">
-      <div class="stat-val" style="color:var(--am)">{{ week_num }}</div>
+      <div class="stat-val" style="color:var(--amber)">{{ week_num }}</div>
       <div class="stat-key">Week No.</div>
     </div>
     <div class="stat-box" style="border-color:rgba(52,211,153,.15);background:rgba(52,211,153,.04)">
-      <div class="stat-val" style="color:var(--gr)">
+      <div class="stat-val" style="color:var(--green)">
         {% with c=0 %}{% for t in week_tasks %}{% if t.status == 'done' %}{{ forloop.counter }}{% endif %}{% endfor %}{% endwith %}0
       </div>
       <div class="stat-key">Completed</div>
@@ -862,12 +798,12 @@
           <input type="hidden" name="week_number" value="{{ week_num }}">
           <input type="hidden" name="week_year"   value="{{ week_year }}">
           <div class="fg">
-            <input class="fi focus-am" type="text" name="title" placeholder="Task to accomplish this week..." required>
+            <input class="fi" type="text" name="title" placeholder="Task to accomplish this week..." required>
           </div>
           <div class="form-3">
             <div>
               <label class="field-lbl">Day</label>
-              <select class="fi fi-sel focus-am" name="planned_day">
+              <select class="fi fi-sel" name="planned_day">
                 <option value="">Any day</option>
                 <option value="0">Monday</option>
                 <option value="1">Tuesday</option>
@@ -880,7 +816,7 @@
             </div>
             <div>
               <label class="field-lbl">Priority</label>
-              <select class="fi fi-sel focus-am" name="priority">
+              <select class="fi fi-sel" name="priority">
                 <option value="high">&#x1F525; High</option>
                 <option value="medium" selected>&#x26A1; Medium</option>
                 <option value="low">&#x1F4CD; Low</option>
@@ -888,7 +824,7 @@
             </div>
             <div>
               <label class="field-lbl">Month Goal</label>
-              <select class="fi fi-sel focus-am" name="month_goal_id">
+              <select class="fi fi-sel" name="month_goal_id">
                 <option value="">— none —</option>
                 {% for g in all_month_goals %}
                 <option value="{{ g.id }}">{{ g.title|truncatechars:22 }}</option>
@@ -898,7 +834,7 @@
           </div>
           <div class="fg">
             <label class="field-lbl">Notes (optional)</label>
-            <input class="fi focus-am" type="text" name="notes" placeholder="Extra details...">
+            <input class="fi" type="text" name="notes" placeholder="Extra details...">
           </div>
           <button type="submit" class="btn btn-am">&#x1F5D3; Add to Week Plan</button>
         </form>
@@ -1041,11 +977,11 @@
 
   <div class="stats-3 a2">
     <div class="stat-box">
-      <div class="stat-val" style="color:var(--bl)">{{ month_goals_active.count }}</div>
+      <div class="stat-val" style="color:var(--blue)">{{ month_goals_active.count }}</div>
       <div class="stat-key">Active</div>
     </div>
     <div class="stat-box">
-      <div class="stat-val" style="color:var(--gr)">{{ month_goals_done.count }}</div>
+      <div class="stat-val" style="color:var(--green)">{{ month_goals_done.count }}</div>
       <div class="stat-key">Done &#x1F3C6;</div>
     </div>
     <div class="stat-box">
@@ -1063,7 +999,7 @@
           <input type="hidden" name="month" value="{{ cur_month }}">
           <input type="hidden" name="year"  value="{{ cur_m_year }}">
           <div class="fg">
-            <input class="fi focus-gr" type="text" name="title" placeholder="What do you want to achieve this month?" required>
+            <input class="fi" type="text" name="title" placeholder="What do you want to achieve this month?" required>
           </div>
           <div class="fg">
             <label class="field-lbl">Description / Why it matters</label>
@@ -1071,7 +1007,7 @@
           </div>
           <div class="fg" style="margin-bottom:14px">
             <label class="field-lbl">Priority</label>
-            <select class="fi fi-sel focus-gr" name="priority">
+            <select class="fi fi-sel" name="priority">
               <option value="high">&#x1F525; High</option>
               <option value="medium" selected>&#x26A1; Medium</option>
               <option value="low">&#x1F4CD; Low</option>
@@ -1130,7 +1066,7 @@
       {% for goal in month_goals_done %}
       <div class="goal-card done">
         <div style="display:flex;justify-content:space-between;align-items:center">
-          <div class="goal-title" style="color:var(--gr)">&#x2714; {{ goal.title }}</div>
+          <div class="goal-title" style="color:var(--green)">&#x2714; {{ goal.title }}</div>
           <div style="display:flex;gap:6px">
             <form method="POST" action="/checklist/month/status/{{ goal.id }}/" style="display:contents">
               {% csrf_token %}

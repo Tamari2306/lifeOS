@@ -4,191 +4,146 @@
 
 {% block extra_head %}
 <style>
-  .fp { --green:#34d399; --emerald:#10b981; --rose:#fb7185; --amber:#fbbf24; --violet:#818cf8;
-        --blue:#38bdf8; --surf:rgba(255,255,255,0.045); --rim:rgba(255,255,255,0.09);
-        --rim2:rgba(255,255,255,0.16); --muted:#64748b; --soft:#94a3b8; }
+  .fp { --red:#e8192c; --green:#34d399; --rose:#fb7185; --amber:#fbbf24; --violet:#818cf8;
+        --blue:#38bdf8; --muted:#606060; --soft:#a0a0a0; --rim:rgba(255,255,255,0.08); --rim2:rgba(255,255,255,0.14); }
 
-  /* HEADER */
   .hdr { display:flex; justify-content:space-between; align-items:flex-start; padding:8px 0 20px; }
   .hdr-date { font-size:11px; color:var(--muted); font-weight:600; letter-spacing:.08em; text-transform:uppercase; margin-bottom:5px; }
-  .hdr-title { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; line-height:1;
-               background:linear-gradient(115deg,#34d399,#38bdf8); -webkit-background-clip:text;
-               -webkit-text-fill-color:transparent; background-clip:text; }
+  .hdr-title { font-family:'Bebas Neue','Syne',sans-serif; font-size:34px; font-weight:400; line-height:1; color:#fff; letter-spacing:.04em; }
   .saved-pill { display:flex; flex-direction:column; align-items:center;
-                background:linear-gradient(135deg,rgba(52,211,153,.13),rgba(56,189,248,.13));
-                border:1px solid rgba(52,211,153,.28); border-radius:16px; padding:10px 14px; }
+                background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.25);
+                border-radius:16px; padding:10px 14px; }
   .sv-lbl { font-size:9px; color:var(--soft); font-weight:600; letter-spacing:.06em; text-transform:uppercase; }
-  .sv-num { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; color:var(--green); }
+  .sv-num { font-family:'Bebas Neue','Syne',sans-serif; font-size:18px; font-weight:400; color:var(--green); }
 
-  /* GLASS */
-  .gc { background:var(--surf); border:1px solid var(--rim); border-radius:22px;
-        backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); overflow:hidden; margin-bottom:16px; }
+  .gc { background:rgba(255,255,255,.04); border:1px solid var(--rim); border-radius:16px; overflow:hidden; margin-bottom:16px; }
   .gcp { padding:20px 22px; }
-  .sec-lbl { font-family:'Syne',sans-serif; font-size:11px; font-weight:700; color:var(--muted);
-             letter-spacing:.1em; text-transform:uppercase; margin-bottom:14px; }
+  .sec-lbl { font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; margin-bottom:14px; }
 
   /* BUDGET RING */
   .budget-section { display:flex; align-items:center; gap:20px; padding:20px; }
   .ring-wrap { position:relative; width:140px; height:140px; flex-shrink:0; }
   .ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-  .ring-spent { font-family:'Syne',sans-serif; font-size:13px; font-weight:800; color:#e2e8f0; line-height:1; }
+  .ring-spent { font-family:'Bebas Neue','Syne',sans-serif; font-size:14px; font-weight:400; color:#fff; line-height:1; letter-spacing:.04em; }
   .ring-of { font-size:10px; color:var(--muted); margin-top:3px; }
-  .ring-bal { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; margin-top:4px; }
-  .bal-safe { color:var(--green); }
-  .bal-warn { color:var(--amber); }
-  .bal-dang { color:var(--rose); }
+  .ring-bal { font-family:'Bebas Neue','Syne',sans-serif; font-size:18px; font-weight:400; margin-top:4px; letter-spacing:.03em; }
+  .bal-safe { color:var(--green); } .bal-warn { color:var(--amber); } .bal-dang { color:var(--rose); }
   .rtrk { stroke:rgba(255,255,255,.07); }
-  .rprg-safe { stroke:url(#fGrad); stroke-linecap:round;
-               transition:stroke-dashoffset .8s cubic-bezier(.34,1.56,.64,1);
-               transform:rotate(-90deg); transform-origin:50% 50%; }
-  .rprg-warn { stroke:#fbbf24; stroke-linecap:round;
-               transition:stroke-dashoffset .8s cubic-bezier(.34,1.56,.64,1);
-               transform:rotate(-90deg); transform-origin:50% 50%; }
-  .rprg-dang { stroke:#fb7185; stroke-linecap:round;
-               transition:stroke-dashoffset .8s cubic-bezier(.34,1.56,.64,1);
-               transform:rotate(-90deg); transform-origin:50% 50%; }
+  .rprg-safe { stroke:var(--green); stroke-linecap:round; transition:stroke-dashoffset .8s cubic-bezier(.34,1.56,.64,1); transform:rotate(-90deg); transform-origin:50% 50%; }
+  .rprg-warn { stroke:var(--amber); stroke-linecap:round; transition:stroke-dashoffset .8s cubic-bezier(.34,1.56,.64,1); transform:rotate(-90deg); transform-origin:50% 50%; }
+  .rprg-dang { stroke:var(--red); stroke-linecap:round; transition:stroke-dashoffset .8s cubic-bezier(.34,1.56,.64,1); transform:rotate(-90deg); transform-origin:50% 50%; }
   .budget-info { flex:1; }
   .bi-row { margin-bottom:10px; }
-  .bi-label { font-size:11px; color:var(--muted); font-weight:600; margin-bottom:3px; }
-  .bi-val { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; }
-  .mini-prog { height:5px; background:rgba(255,255,255,.07); border-radius:5px; overflow:hidden; margin-top:6px; }
-  .mini-fill-safe { height:100%; border-radius:5px; background:linear-gradient(90deg,#34d399,#38bdf8); }
-  .mini-fill-warn { height:100%; border-radius:5px; background:var(--amber); }
-  .mini-fill-dang { height:100%; border-radius:5px; background:var(--rose); }
-  .warn-banner { background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.25); border-radius:12px;
-                 padding:10px 14px; font-size:12px; color:var(--amber); font-weight:600; margin-top:12px; }
-  .dang-banner { background:rgba(251,113,133,.1); border:1px solid rgba(251,113,133,.25); border-radius:12px;
-                 padding:10px 14px; font-size:12px; color:var(--rose); font-weight:600; margin-top:12px; }
+  .bi-label { font-size:11px; color:var(--muted); font-weight:600; margin-bottom:3px; text-transform:uppercase; letter-spacing:.04em; }
+  .bi-val { font-family:'Bebas Neue','Syne',sans-serif; font-size:20px; font-weight:400; letter-spacing:.03em; }
+  .mini-prog { height:4px; background:rgba(255,255,255,.07); border-radius:4px; overflow:hidden; margin-top:6px; }
+  .mini-fill-safe { height:100%; border-radius:4px; background:var(--green); }
+  .mini-fill-warn { height:100%; border-radius:4px; background:var(--amber); }
+  .mini-fill-dang { height:100%; border-radius:4px; background:var(--red); }
+  .warn-banner { background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.25); border-radius:12px; padding:10px 14px; font-size:12px; color:var(--amber); font-weight:600; margin-top:12px; }
+  .dang-banner { background:rgba(232,25,44,.1); border:1px solid rgba(232,25,44,.25); border-radius:12px; padding:10px 14px; font-size:12px; color:var(--red); font-weight:600; margin-top:12px; }
 
   /* FORMS */
   .inline-form { display:flex; gap:10px; align-items:center; }
-  .fi { flex:1; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:14px;
-        padding:11px 14px; color:#fff; font-family:'DM Sans',sans-serif; font-size:14px; outline:none;
-        transition:border-color .2s; width:100%; box-sizing:border-box; }
-  .fi:focus { border-color:rgba(52,211,153,.5); }
+  .fi { flex:1; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:12px;
+        padding:11px 14px; color:#fff; font-size:14px; outline:none; transition:border-color .2s; width:100%; box-sizing:border-box; }
+  .fi:focus { border-color:rgba(232,25,44,.5); }
   .fi::placeholder { color:var(--muted); }
-  .fi-sel { appearance:none; -webkit-appearance:none; }
-  .btn-grn { padding:11px 18px; border:none; border-radius:14px;
-             background:linear-gradient(135deg,#34d399,#38bdf8); color:#0a0a12;
-             font-family:'Syne',sans-serif; font-size:13px; font-weight:800;
-             cursor:pointer; transition:all .2s; white-space:nowrap;
-             box-shadow:0 4px 16px rgba(52,211,153,.25); }
+  .fi-sel { appearance:none; -webkit-appearance:none; background-color:#111; }
+  .btn-grn { padding:11px 18px; border:none; border-radius:12px;
+             background:var(--red); color:#fff;
+             font-size:13px; font-weight:800; cursor:pointer; transition:all .2s; white-space:nowrap; }
   .btn-grn:hover { opacity:.9; transform:translateY(-1px); }
   .btn-rose { padding:8px 14px; border:none; border-radius:10px;
-              background:rgba(251,113,133,.12); color:var(--rose);
-              border:1px solid rgba(251,113,133,.22); font-family:'Syne',sans-serif;
-              font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; }
-  .btn-rose:hover { background:rgba(251,113,133,.22); }
-  .btn-out { display:block; width:100%; padding:12px; border:1px solid var(--rim2); border-radius:14px;
-             background:rgba(255,255,255,.04); color:var(--soft); font-family:'Syne',sans-serif;
-             font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; text-align:center; }
+              background:rgba(232,25,44,.12); color:var(--red);
+              border:1px solid rgba(232,25,44,.22); font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; }
+  .btn-rose:hover { background:rgba(232,25,44,.22); }
+  .btn-out { display:block; width:100%; padding:12px; border:1px solid var(--rim2); border-radius:12px;
+             background:rgba(255,255,255,.04); color:var(--soft); font-size:13px; font-weight:700;
+             cursor:pointer; transition:all .2s; text-align:center; }
   .btn-out:hover { background:rgba(255,255,255,.09); color:#fff; }
 
   /* EXPENSE FORM */
   .exp-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
-  .field-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.06em;
-               text-transform:uppercase; display:block; margin-bottom:6px; }
+  .field-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.06em; text-transform:uppercase; display:block; margin-bottom:6px; }
 
   /* CAT CHIPS */
-  .cat-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px;
-              font-size:11px; font-weight:700; font-family:'Syne',sans-serif; }
+  .cat-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; }
   .cat-food      { background:rgba(56,189,248,.13); color:#38bdf8; border:1px solid rgba(56,189,248,.22); }
   .cat-transport { background:rgba(129,140,248,.13); color:#818cf8; border:1px solid rgba(129,140,248,.22); }
-  .cat-bills     { background:rgba(251,113,133,.13); color:#fb7185; border:1px solid rgba(251,113,133,.22); }
+  .cat-bills     { background:rgba(232,25,44,.13); color:var(--red); border:1px solid rgba(232,25,44,.22); }
   .cat-shopping  { background:rgba(251,191,36,.13);  color:#fbbf24; border:1px solid rgba(251,191,36,.22); }
   .cat-health    { background:rgba(52,211,153,.13);  color:#34d399; border:1px solid rgba(52,211,153,.22); }
   .cat-misc      { background:rgba(148,163,184,.13); color:#94a3b8; border:1px solid rgba(148,163,184,.22); }
 
   /* EXPENSE LIST */
-  .exp-item { display:flex; justify-content:space-between; align-items:center;
-              padding:11px 0; border-bottom:1px solid rgba(255,255,255,.05); }
+  .exp-item { display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid rgba(255,255,255,.05); }
   .exp-item:last-child { border-bottom:none; }
   .exp-left { display:flex; align-items:center; gap:10px; min-width:0; flex:1; }
-  .exp-ico { width:36px; height:36px; border-radius:10px; display:flex; align-items:center;
-             justify-content:center; font-size:16px; background:rgba(255,255,255,.06); flex-shrink:0; }
-  .exp-name { font-size:14px; font-weight:600; color:#e2e8f0;
-              white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; }
+  .exp-ico { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; background:rgba(255,255,255,.06); flex-shrink:0; }
+  .exp-name { font-size:14px; font-weight:600; color:#e2e8f0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; }
   .exp-meta { font-size:11px; color:var(--muted); margin-top:2px; }
-  .exp-amt { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; color:var(--rose); flex-shrink:0; }
+  .exp-amt { font-family:'Bebas Neue','Syne',sans-serif; font-size:18px; font-weight:400; color:var(--red); flex-shrink:0; letter-spacing:.03em; }
 
-  /* CAT BREAKDOWN — FIXED: no truncation on category names */
-  .cat-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0;
-             border-bottom:1px solid rgba(255,255,255,.05); gap:8px; }
+  /* CAT BREAKDOWN */
+  .cat-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid rgba(255,255,255,.05); gap:8px; }
   .cat-row:last-child { border-bottom:none; }
   .cat-row-left { display:flex; align-items:center; gap:8px; flex:1; min-width:0; }
   .cat-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
   .cat-name-block { min-width:0; }
   .cat-name { font-size:13px; color:#e2e8f0; }
   .cat-sub  { font-size:11px; color:var(--muted); }
-  .cat-total { font-family:'Syne',sans-serif; font-size:13px; font-weight:800; flex-shrink:0; }
+  .cat-total { font-family:'Bebas Neue','Syne',sans-serif; font-size:14px; font-weight:400; flex-shrink:0; letter-spacing:.03em; }
 
   /* ANALYSIS */
   .analysis-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .an-box { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
-            border-radius:14px; padding:14px; text-align:center; }
-  .an-val { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; line-height:1; }
-  .an-key { font-size:10px; color:var(--muted); margin-top:5px; }
+  .an-box { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:12px; padding:14px; text-align:center; }
+  .an-val { font-family:'Bebas Neue','Syne',sans-serif; font-size:22px; font-weight:400; line-height:1; letter-spacing:.03em; }
+  .an-key { font-size:10px; color:var(--muted); margin-top:5px; text-transform:uppercase; letter-spacing:.04em; }
 
-  /* CHART */
   .chart-h { max-height:150px; }
   .chart-h-sm { max-height:130px; }
 
   /* SAVINGS GOALS */
-  .goal-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
-               border-radius:16px; padding:16px; margin-bottom:10px; }
+  .goal-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:14px; padding:16px; margin-bottom:10px; }
   .goal-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; gap:8px; }
   .goal-name-row { display:flex; align-items:center; gap:8px; margin-bottom:3px; }
   .goal-ico { font-size:18px; }
-  .goal-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; }
-  .goal-freq { font-size:10px; color:var(--muted); font-weight:600; }
-  .goal-amt { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; color:var(--green); }
+  .goal-name { font-size:15px; font-weight:700; color:#fff; }
+  .goal-freq { font-size:10px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.04em; }
+  .goal-amt { font-family:'Bebas Neue','Syne',sans-serif; font-size:22px; font-weight:400; color:var(--green); letter-spacing:.03em; }
   .goal-of { font-size:11px; color:var(--muted); }
-  .goal-prog-track { height:6px; background:rgba(255,255,255,.07); border-radius:6px; overflow:hidden; margin:10px 0 8px; }
-  .goal-prog-fill { height:100%; border-radius:6px; background:linear-gradient(90deg,#34d399,#38bdf8);
-                    box-shadow:0 0 10px rgba(52,211,153,.35); transition:width .8s ease; }
+  .goal-prog-track { height:5px; background:rgba(255,255,255,.07); border-radius:5px; overflow:hidden; margin:10px 0 8px; }
+  .goal-prog-fill { height:100%; border-radius:5px; background:var(--red); transition:width .8s ease; }
   .goal-pct-row { display:flex; justify-content:space-between; align-items:center; }
-  .goal-pct { font-size:11px; color:var(--green); font-weight:700; }
+  .goal-pct { font-size:11px; color:var(--red); font-weight:700; }
   .goal-remaining { font-size:11px; color:var(--muted); }
 
-  /* DEPOSIT ROW — stacks on mobile, row on wider screens */
   .deposit-row { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
   .dep-fi { width:100%; background:rgba(255,255,255,.05); border:1px solid var(--rim); border-radius:10px;
-            padding:10px 12px; color:#fff; font-family:'DM Sans',sans-serif; font-size:13px;
-            outline:none; box-sizing:border-box; }
-  .dep-fi:focus { border-color:rgba(52,211,153,.5); }
+            padding:10px 12px; color:#fff; font-size:13px; outline:none; box-sizing:border-box; }
+  .dep-fi:focus { border-color:rgba(232,25,44,.5); }
   .dep-fi::placeholder { color:var(--muted); }
   .dep-btn { width:100%; padding:12px 16px; border:none; border-radius:10px;
-            background:linear-gradient(135deg,#34d399,#10b981); color:#0a0a12;
-            font-family:'Syne',sans-serif; font-size:13px; font-weight:800;
-            cursor:pointer; box-sizing:border-box; }
+            background:var(--red); color:#fff;
+            font-size:13px; font-weight:800; cursor:pointer; box-sizing:border-box; }
 
-  /* GOAL ACTION BUTTONS */
   .goal-actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
-  .btn-edit-goal { background:rgba(129,140,248,.12); color:var(--violet);
-                   border:1px solid rgba(129,140,248,.25); border-radius:9px;
-                   padding:7px 14px; font-size:11px; font-weight:700;
-                   font-family:'Syne',sans-serif; cursor:pointer; transition:all .2s; }
-  .btn-del-goal  { background:rgba(251,113,133,.1); color:#fb7185;
-                   border:1px solid rgba(251,113,133,.22); border-radius:9px;
-                   padding:7px 14px; font-size:11px; font-weight:700;
-                   font-family:'Syne',sans-serif; cursor:pointer; transition:all .2s; }
+  .btn-edit-goal { background:rgba(129,140,248,.12); color:var(--violet); border:1px solid rgba(129,140,248,.25); border-radius:9px; padding:7px 14px; font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; }
+  .btn-del-goal  { background:rgba(232,25,44,.1); color:var(--red); border:1px solid rgba(232,25,44,.22); border-radius:9px; padding:7px 14px; font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; }
   .btn-edit-goal:hover { background:rgba(129,140,248,.22); }
-  .btn-del-goal:hover  { background:rgba(251,113,133,.2); }
+  .btn-del-goal:hover  { background:rgba(232,25,44,.2); }
 
-  /* INLINE EDIT FORM */
   .goal-edit-form { display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--rim); }
   .goal-edit-form.open { display:block; }
 
-  /* NEW GOAL FORM */
   .new-goal-form { display:none; }
   .new-goal-form.open { display:block; }
   .toggle-form-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
-                     padding:13px; background:rgba(52,211,153,.07); border:1px dashed rgba(52,211,153,.25);
-                     border-radius:16px; color:var(--green); font-family:'Syne',sans-serif;
-                     font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
-  .toggle-form-btn:hover { background:rgba(52,211,153,.13); }
+                     padding:13px; background:rgba(232,25,44,.07); border:1px dashed rgba(232,25,44,.25);
+                     border-radius:14px; color:var(--red); font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
+  .toggle-form-btn:hover { background:rgba(232,25,44,.13); }
 
-  /* ANIMS */
   @keyframes sup { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
   .a1{animation:sup .4s ease both .04s} .a2{animation:sup .4s ease both .10s}
   .a3{animation:sup .4s ease both .16s} .a4{animation:sup .4s ease both .22s}
@@ -219,12 +174,6 @@
     <div class="budget-section">
       <div class="ring-wrap">
         <svg width="140" height="140" viewBox="0 0 140 140">
-          <defs>
-            <linearGradient id="fGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#34d399"/>
-              <stop offset="100%" style="stop-color:#38bdf8"/>
-            </linearGradient>
-          </defs>
           <circle class="rtrk" cx="70" cy="70" r="60" fill="none" stroke-width="9"/>
           <circle class="rprg-{{ budget_status }}" cx="70" cy="70" r="60" fill="none" stroke-width="9"
                   stroke-dasharray="376.99" stroke-dashoffset="{{ ring_offset }}"/>
@@ -244,7 +193,7 @@
         </div>
         <div class="bi-row">
           <div class="bi-label">Spent</div>
-          <div class="bi-val" style="color:var(--rose)">{{ total_spent|floatformat:0 }} TZS</div>
+          <div class="bi-val" style="color:var(--red)">{{ total_spent|floatformat:0 }} TZS</div>
           <div class="mini-prog">
             <div class="mini-fill-{{ budget_status }}" style="width:{{ spent_pct }}%"></div>
           </div>
@@ -361,7 +310,7 @@
     </div>
   </div>
 
-  <!-- CATEGORY BREAKDOWN — FIXED: text no longer truncated -->
+  <!-- CATEGORY BREAKDOWN -->
   {% if by_cat %}
   <div class="gc a5">
     <div class="gcp">
@@ -375,7 +324,7 @@
               <div class="cat-dot" style="background:
                 {% if cat == 'food' %}#38bdf8
                 {% elif cat == 'transport' %}#818cf8
-                {% elif cat == 'bills' %}#fb7185
+                {% elif cat == 'bills' %}#e8192c
                 {% elif cat == 'shopping' %}#fbbf24
                 {% elif cat == 'health' %}#34d399
                 {% else %}#94a3b8{% endif %}
@@ -388,7 +337,7 @@
             <div class="cat-total" style="color:
               {% if cat == 'food' %}#38bdf8
               {% elif cat == 'transport' %}#818cf8
-              {% elif cat == 'bills' %}#fb7185
+              {% elif cat == 'bills' %}#e8192c
               {% elif cat == 'shopping' %}#fbbf24
               {% elif cat == 'health' %}#34d399
               {% else %}#94a3b8{% endif %}
@@ -421,7 +370,7 @@
           <div class="an-key">Daily Avg (TZS)</div>
         </div>
         <div class="an-box">
-          <div class="an-val" style="color:{% if projected_end > monthly_budget %}var(--rose){% else %}var(--green){% endif %}">
+          <div class="an-val" style="color:{% if projected_end > monthly_budget %}var(--red){% else %}var(--green){% endif %}">
             {{ projected_end|floatformat:0 }}
           </div>
           <div class="an-key">Projected Total</div>
@@ -441,8 +390,8 @@
       </div>
 
       {% if projected_end > monthly_budget and monthly_budget > 0 %}
-      <div style="margin-top:12px;background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.25);border-radius:12px;padding:12px 14px">
-        <div style="font-size:12px;color:var(--rose);font-weight:700">🚨 At this rate you'll overspend by {{ projected_end|floatformat:0 }} TZS</div>
+      <div style="margin-top:12px;background:rgba(232,25,44,.1);border:1px solid rgba(232,25,44,.25);border-radius:12px;padding:12px 14px">
+        <div style="font-size:12px;color:var(--red);font-weight:700">🚨 At this rate you'll overspend by {{ projected_end|floatformat:0 }} TZS</div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px">Try to keep daily spending under {{ safe_daily|floatformat:0 }} TZS for the next {{ days_left }} days.</div>
       </div>
       {% elif monthly_budget > 0 %}
@@ -486,7 +435,6 @@
           <span class="goal-remaining">{{ goal.remaining|floatformat:0 }} TZS left</span>
         </div>
 
-        <!-- Deposit form -->
         <form method="POST" action="/finance/deposit/{{ goal.id }}/" class="deposit-row">
           {% csrf_token %}
           <input class="dep-fi" type="number" name="amount" placeholder="Add amount (TZS)..." min="1" required>
@@ -494,18 +442,14 @@
           <button type="submit" class="dep-btn">+ Save</button>
         </form>
 
-        <!-- Goal actions: Edit + Delete -->
         <div class="goal-actions">
-          <button class="btn-edit-goal" type="button"
-                  onclick="toggleEditGoal({{ goal.id }})">✏ Edit</button>
+          <button class="btn-edit-goal" type="button" onclick="toggleEditGoal({{ goal.id }})">✏ Edit</button>
           <form method="POST" action="/finance/delete-goal/{{ goal.id }}/" style="margin:0">
             {% csrf_token %}
-            <button type="submit" class="btn-del-goal"
-                    onclick="return confirm('Delete this savings goal?')">🗑 Delete</button>
+            <button type="submit" class="btn-del-goal" onclick="return confirm('Delete this savings goal?')">🗑 Delete</button>
           </form>
         </div>
 
-        <!-- Inline edit form -->
         <div id="edit-goal-{{ goal.id }}" class="goal-edit-form">
           <form method="POST" action="/finance/edit-goal/{{ goal.id }}/">
             {% csrf_token %}
@@ -539,7 +483,6 @@
       </div>
       {% endfor %}
 
-      <!-- New Goal Form -->
       <button class="toggle-form-btn" type="button"
               onclick="document.getElementById('new-goal-form').classList.toggle('open')">
         ➕ New Savings Goal
@@ -603,7 +546,6 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
 
-    /* ── Doughnut: category breakdown ── */
     var dCanvas = document.getElementById('dChart');
     var catData  = {{ cat_chart_data|safe }};
     if (dCanvas && catData && catData.length > 0) {
@@ -619,16 +561,14 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: 'rgba(10,10,18,0.92)', borderColor: 'rgba(52,211,153,0.3)', borderWidth: 1,
-              titleColor: '#34d399', bodyColor: '#94a3b8',
-              titleFont: { family: 'Syne', weight: '700' }, bodyFont: { family: 'DM Sans' }, padding: 10
+              backgroundColor: 'rgba(0,0,0,0.92)', borderColor: 'rgba(232,25,44,0.3)', borderWidth: 1,
+              titleColor: '#e8192c', bodyColor: '#a0a0a0', padding: 10
             }
           }
         }
       });
     }
 
-    /* ── Bar: weekly spending ── */
     var wkCanvas = document.getElementById('wkChart');
     if (wkCanvas) {
       new Chart(wkCanvas, {
@@ -636,16 +576,8 @@
         data: {
           labels: {{ week_labels|safe }},
           datasets: [{
-            label: 'Spent',
-            data: {{ week_data|safe }},
-            backgroundColor: function(ctx) {
-              var chart = ctx.chart, area = chart.chartArea, c = chart.ctx;
-              if (!area) return 'rgba(251,113,133,0.5)';
-              var g = c.createLinearGradient(0, area.bottom, 0, area.top);
-              g.addColorStop(0, 'rgba(56,189,248,0.4)');
-              g.addColorStop(1, 'rgba(52,211,153,0.85)');
-              return g;
-            },
+            label: 'Spent', data: {{ week_data|safe }},
+            backgroundColor: 'rgba(232,25,44,0.7)',
             borderRadius: 8, borderSkipped: false
           }]
         },
@@ -654,21 +586,19 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: 'rgba(10,10,18,0.92)', borderColor: 'rgba(52,211,153,0.3)', borderWidth: 1,
-              titleColor: '#34d399', bodyColor: '#94a3b8',
-              titleFont: { family: 'Syne', weight: '700' }, bodyFont: { family: 'DM Sans' }, padding: 10,
+              backgroundColor: 'rgba(0,0,0,0.92)', borderColor: 'rgba(232,25,44,0.3)', borderWidth: 1,
+              titleColor: '#e8192c', bodyColor: '#a0a0a0', padding: 10,
               callbacks: { label(c) { return c.parsed.y.toLocaleString() + ' TZS'; } }
             }
           },
           scales: {
-            x: { grid: { display: false }, border: { display: false }, ticks: { color: '#64748b', font: { family: 'Syne', weight: '700', size: 11 } } },
-            y: { grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false }, ticks: { color: '#64748b', font: { family: 'DM Sans', size: 10 }, maxTicksLimit: 5 } }
+            x: { grid:{ display:false }, border:{ display:false }, ticks:{ color:'#606060', font:{ weight:'700', size:11 } } },
+            y: { grid:{ color:'rgba(255,255,255,0.05)' }, border:{ display:false }, ticks:{ color:'#606060', font:{ size:10 }, maxTicksLimit:5 } }
           }
         }
       });
     }
 
-    /* ── Line: 6-month trend ── */
     var tCanvas = document.getElementById('trendChart');
     if (tCanvas) {
       new Chart(tCanvas, {
@@ -676,19 +606,18 @@
         data: {
           labels: {{ trend_labels|safe }},
           datasets: [{
-            label: 'Spending',
-            data: {{ trend_data|safe }},
-            borderColor: '#34d399', borderWidth: 2,
+            label: 'Spending', data: {{ trend_data|safe }},
+            borderColor: '#e8192c', borderWidth: 2,
             backgroundColor: function(ctx) {
               var chart = ctx.chart, area = chart.chartArea, c = chart.ctx;
-              if (!area) return 'rgba(52,211,153,0.05)';
+              if (!area) return 'rgba(232,25,44,0.05)';
               var g = c.createLinearGradient(0, area.top, 0, area.bottom);
-              g.addColorStop(0, 'rgba(52,211,153,0.25)');
-              g.addColorStop(1, 'rgba(52,211,153,0)');
+              g.addColorStop(0, 'rgba(232,25,44,0.25)');
+              g.addColorStop(1, 'rgba(232,25,44,0)');
               return g;
             },
             fill: true, tension: 0.4,
-            pointBackgroundColor: '#34d399', pointRadius: 4, pointHoverRadius: 6
+            pointBackgroundColor: '#e8192c', pointRadius: 4, pointHoverRadius: 6
           }]
         },
         options: {
@@ -696,15 +625,14 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: 'rgba(10,10,18,0.92)', borderColor: 'rgba(52,211,153,0.3)', borderWidth: 1,
-              titleColor: '#34d399', bodyColor: '#94a3b8',
-              titleFont: { family: 'Syne', weight: '700' }, bodyFont: { family: 'DM Sans' }, padding: 10,
+              backgroundColor: 'rgba(0,0,0,0.92)', borderColor: 'rgba(232,25,44,0.3)', borderWidth: 1,
+              titleColor: '#e8192c', bodyColor: '#a0a0a0', padding: 10,
               callbacks: { label(c) { return c.parsed.y.toLocaleString() + ' TZS'; } }
             }
           },
           scales: {
-            x: { grid: { display: false }, border: { display: false }, ticks: { color: '#64748b', font: { family: 'Syne', weight: '700', size: 11 } } },
-            y: { grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false }, ticks: { color: '#64748b', font: { family: 'DM Sans', size: 10 }, maxTicksLimit: 5 } }
+            x: { grid:{ display:false }, border:{ display:false }, ticks:{ color:'#606060', font:{ weight:'700', size:11 } } },
+            y: { grid:{ color:'rgba(255,255,255,0.05)' }, border:{ display:false }, ticks:{ color:'#606060', font:{ size:10 }, maxTicksLimit:5 } }
           }
         }
       });
