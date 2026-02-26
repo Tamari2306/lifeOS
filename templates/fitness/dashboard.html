@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load fitness_tags %}
 {% block title %}Fitness — LifeOS{% endblock %}
 {% block nav_fitness %}active{% endblock %}
 
@@ -221,6 +222,64 @@
   .qa-btn:hover { background:rgba(232,25,44,.06); border-color:rgba(232,25,44,.3); color:var(--red,#e8192c); }
   .qa-area { margin-top:10px; }
 
+
+  /* === WORKOUT SCHEDULE === */
+  .ws-day-tabs { display:flex; gap:5px; overflow-x:auto; padding-bottom:4px;
+                 scrollbar-width:none; margin-bottom:16px; }
+  .ws-day-tabs::-webkit-scrollbar { display:none; }
+  .ws-tab { flex-shrink:0; padding:7px 14px; border-radius:20px;
+            border:1px solid rgba(255,255,255,.09); background:rgba(255,255,255,.04);
+            color:#606060; font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; }
+  .ws-tab.today { border-color:rgba(232,25,44,.5); color:var(--red,#e8192c);
+                  background:rgba(232,25,44,.12); }
+  .ws-tab.has-data::after { content:''; display:inline-block; width:5px; height:5px;
+                             border-radius:50%; background:var(--red,#e8192c);
+                             margin-left:5px; vertical-align:middle; }
+
+  .ws-panel { display:none; }
+  .ws-panel.active { display:block; }
+
+  .ws-empty { font-size:12px; color:#606060; font-style:italic; padding:8px 0 12px; }
+
+  .ws-exercise { display:flex; align-items:flex-start; gap:10px; padding:10px 12px;
+                 background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+                 border-radius:12px; margin-bottom:8px; }
+  .ws-exercise:last-of-type { margin-bottom:0; }
+  .ws-ex-ico  { font-size:20px; flex-shrink:0; margin-top:1px; }
+  .ws-ex-body { flex:1; min-width:0; }
+  .ws-ex-name { font-size:13px; font-weight:700; color:#fff; margin-bottom:3px; }
+  .ws-ex-detail { font-size:11px; color:#606060; }
+  .ws-ex-del  { background:rgba(232,25,44,.1); border:1px solid rgba(232,25,44,.18);
+                border-radius:8px; padding:4px 9px; font-size:11px; font-weight:700;
+                color:var(--red,#e8192c); cursor:pointer; flex-shrink:0; align-self:center; }
+
+  .ws-add-btn { display:flex; align-items:center; justify-content:center; gap:7px;
+                width:100%; padding:11px; background:rgba(232,25,44,.06);
+                border:1px dashed rgba(232,25,44,.25); border-radius:12px;
+                color:var(--red,#e8192c); font-size:12px; font-weight:700;
+                cursor:pointer; transition:all .2s; margin-top:10px; }
+  .ws-add-btn:hover { background:rgba(232,25,44,.12); }
+
+  .ws-add-form { display:none; margin-top:10px; padding:14px;
+                 background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08);
+                 border-radius:12px; }
+  .ws-fi { width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08);
+           border-radius:11px; padding:10px 13px; color:#fff; font-size:13px;
+           outline:none; transition:border-color .2s; box-sizing:border-box; }
+  .ws-fi:focus { border-color:rgba(232,25,44,.45); }
+  .ws-fi::placeholder { color:#606060; }
+  .ws-fi-sel { appearance:none; -webkit-appearance:none; background-color:#111; }
+  .ws-lbl { font-size:10px; color:#606060; font-weight:600; letter-spacing:.06em;
+            text-transform:uppercase; display:block; margin-bottom:5px; }
+  .ws-fg   { margin-bottom:10px; }
+  .ws-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+  .ws-btn-save { width:100%; padding:12px; border:none; border-radius:11px;
+                 background:var(--red,#e8192c); color:#fff;
+                 font-size:13px; font-weight:800; cursor:pointer; transition:opacity .2s; }
+  .ws-btn-save:hover { opacity:.88; }
+
+  /* today highlight ring on the tab */
+  .ws-tab.today.active { box-shadow:0 0 0 2px rgba(232,25,44,.4); }
   @keyframes sup { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
   .a1{animation:sup .4s ease both .04s} .a2{animation:sup .4s ease both .10s}
   .a3{animation:sup .4s ease both .16s} .a4{animation:sup .4s ease both .22s}
@@ -267,6 +326,111 @@
         <div class="sbox"><div class="sval" style="color:#818cf8">{{ total_sets }}</div><div class="skey">Sets</div></div>
         <div class="sbox"><div class="sval" style="color:var(--amber)">{{ workout_minutes }}m</div><div class="skey">Est. Time</div></div>
       </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- WORKOUT SCHEDULE                                   -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <div class="gc a2">
+    <div class="gcp">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span class="sec-lbl" style="margin-bottom:0">📅 Weekly Workout Guide</span>
+        <span style="font-size:11px;color:#606060" id="ws-today-badge"></span>
+      </div>
+
+      <!-- Day tabs -->
+      <div class="ws-day-tabs" id="ws-tabs">
+        <button class="ws-tab" data-day="mon" onclick="wsSwitch('mon',this)">Mon</button>
+        <button class="ws-tab" data-day="tue" onclick="wsSwitch('tue',this)">Tue</button>
+        <button class="ws-tab" data-day="wed" onclick="wsSwitch('wed',this)">Wed</button>
+        <button class="ws-tab" data-day="thu" onclick="wsSwitch('thu',this)">Thu</button>
+        <button class="ws-tab" data-day="fri" onclick="wsSwitch('fri',this)">Fri</button>
+        <button class="ws-tab" data-day="weekend" onclick="wsSwitch('weekend',this)">Weekend</button>
+        <button class="ws-tab" data-day="gym" onclick="wsSwitch('gym',this)">🏋️ Gym</button>
+      </div>
+
+      <!-- One panel per day — Django renders exercises for each -->
+      {% for day_key, day_label in ws_days %}
+      <div class="ws-panel" id="ws-panel-{{ day_key }}">
+
+        {% with day_exercises=ws_exercises|get_item:day_key %}
+        {% for ex in day_exercises %}
+        <div class="ws-exercise">
+          <div class="ws-ex-ico">{{ ex.icon|default:"💪" }}</div>
+          <div class="ws-ex-body">
+            <div class="ws-ex-name">{{ ex.name }}</div>
+            <div class="ws-ex-detail">
+              {% if ex.sets %}{{ ex.sets }} sets{% endif %}
+              {% if ex.reps %} × {{ ex.reps }} reps{% endif %}
+              {% if ex.duration %} · {{ ex.duration }}{% endif %}
+              {% if ex.notes %} · {{ ex.notes }}{% endif %}
+            </div>
+          </div>
+          <form method="POST" action="/fitness/schedule/delete/{{ ex.id }}/" style="display:contents"
+                onclick="event.stopPropagation()">
+            {% csrf_token %}
+            <button type="submit" class="ws-ex-del">✕</button>
+          </form>
+        </div>
+        {% empty %}
+        <p class="ws-empty">No exercises added for {{ day_label }} yet.</p>
+        {% endfor %}
+        {% endwith %}
+
+        <button class="ws-add-btn" type="button" onclick="wsToggleForm('{{ day_key }}')">
+          + Add Exercise
+        </button>
+        <div id="ws-form-{{ day_key }}" class="ws-add-form">
+          <form method="POST" action="/fitness/schedule/add/">
+            {% csrf_token %}
+            <input type="hidden" name="day" value="{{ day_key }}">
+            <div class="ws-fg">
+              <label class="ws-lbl">Exercise name</label>
+              <input class="ws-fi" type="text" name="name" placeholder="e.g. Squats, Plank, Running..." required>
+            </div>
+            <div class="ws-grid2">
+              <div>
+                <label class="ws-lbl">Sets</label>
+                <input class="ws-fi" type="number" name="sets" placeholder="e.g. 3" min="1">
+              </div>
+              <div>
+                <label class="ws-lbl">Reps</label>
+                <input class="ws-fi" type="number" name="reps" placeholder="e.g. 12" min="1">
+              </div>
+            </div>
+            <div class="ws-grid2">
+              <div>
+                <label class="ws-lbl">Duration (optional)</label>
+                <input class="ws-fi" type="text" name="duration" placeholder="e.g. 20 min">
+              </div>
+              <div>
+                <label class="ws-lbl">Category</label>
+                <select class="ws-fi ws-fi-sel" name="icon">
+                  <option value="💪">💪 Strength</option>
+                  <option value="🏃">🏃 Cardio</option>
+                  <option value="🧘">🧘 Stretch / Yoga</option>
+                  <option value="🔥">🔥 HIIT</option>
+                  <option value="🦵">🦵 Lower Body</option>
+                  <option value="🦾">🦾 Upper Body</option>
+                  <option value="🧠">🧠 Core</option>
+                  <option value="🚴">🚴 Cycling</option>
+                  <option value="🏊">🏊 Swimming</option>
+                </select>
+              </div>
+            </div>
+            <div class="ws-fg">
+              <label class="ws-lbl">Notes (optional)</label>
+              <input class="ws-fi" type="text" name="notes" placeholder="e.g. slow and controlled">
+            </div>
+            <button type="submit" class="ws-btn-save">Save Exercise</button>
+          </form>
+        </div>
+
+      </div>
+      {% endfor %}
+
     </div>
   </div>
 
@@ -775,5 +939,52 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+  // ── Workout Schedule ────────────────────────────────────────────────────
+  var WS_DATA = {
+    {% for day_key, day_label in ws_days %}
+    "{{ day_key }}": {{ ws_exercises|get_item:day_key|length }},
+    {% endfor %}
+  };
+
+  var DAY_MAP = {0:'sun',1:'mon',2:'tue',3:'wed',4:'thu',5:'fri',6:'sat'};
+  var todayKey = DAY_MAP[new Date().getDay()];
+  // map sat/sun → weekend
+  if (todayKey === 'sun' || todayKey === 'sat') todayKey = 'weekend';
+
+  function wsInit() {
+    // Mark today's tab
+    var tabs = document.querySelectorAll('.ws-tab');
+    tabs.forEach(function(t) {
+      if (t.dataset.day === todayKey) t.classList.add('today');
+      if (WS_DATA[t.dataset.day] > 0) t.classList.add('has-data');
+    });
+    // Update badge
+    var badge = document.getElementById('ws-today-badge');
+    if (badge) {
+      var labels = {mon:'Monday',tue:'Tuesday',wed:'Wednesday',thu:'Thursday',
+                    fri:'Friday',weekend:'Weekend',gym:'Gym Day'};
+      badge.textContent = 'Today: ' + (labels[todayKey] || '');
+    }
+    // Open today's panel
+    wsSwitch(todayKey, document.querySelector('.ws-tab[data-day="'+todayKey+'"]'));
+  }
+
+  function wsSwitch(day, el) {
+    document.querySelectorAll('.ws-panel').forEach(function(p){ p.classList.remove('active'); });
+    document.querySelectorAll('.ws-tab').forEach(function(t){ t.classList.remove('active'); });
+    var panel = document.getElementById('ws-panel-' + day);
+    if (panel) panel.classList.add('active');
+    if (el) el.classList.add('active');
+  }
+
+  function wsToggleForm(day) {
+    var f = document.getElementById('ws-form-' + day);
+    if (!f) return;
+    f.style.display = f.style.display === 'block' ? 'none' : 'block';
+  }
+
+  document.addEventListener('DOMContentLoaded', wsInit);
+
 </script>
 {% endblock %}

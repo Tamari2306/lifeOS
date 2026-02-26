@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
-from .models import Exercise, WorkoutLog
+from .models import Exercise, WorkoutLog, WorkoutSchedule
 
 
 QUOTES = [
@@ -51,7 +51,10 @@ def _weekly_chart(user):
     today = date.today()
     for i in range(6, -1, -1):
         d = today - timedelta(days=i)
-        reps = sum(l.reps_per_set * l.sets for l in WorkoutLog.objects.filter(user=user, date=d))
+        reps = sum(
+            l.reps_per_set * l.sets
+            for l in WorkoutLog.objects.filter(user=user, date=d)
+        )
         labels.append(d.strftime('%a'))
         data.append(reps)
     return labels, data
@@ -60,33 +63,52 @@ def _weekly_chart(user):
 def _calc_workout_duration(logs):
     if not logs:
         return 0
-    timestamps = [l.logged_at for l in logs if hasattr(l, 'logged_at') and l.logged_at]
+
+    timestamps = [
+        l.logged_at for l in logs
+        if hasattr(l, 'logged_at') and l.logged_at
+    ]
+
     if len(timestamps) >= 2:
         timestamps.sort()
         delta = timestamps[-1] - timestamps[0]
         total_seconds = delta.total_seconds() + 300
         return max(5, round(total_seconds / 60))
+
     total_sets = sum(l.sets for l in logs)
     return max(5, round(total_sets * 2.25 + 5))
 
 
 @login_required
 def dashboard(request):
-    today     = date.today()
+    today = date.today()
     exercises = Exercise.objects.all().order_by('category', 'name')
 
-    done_ids   = set(WorkoutLog.objects.filter(user=request.user, date=today).values_list('exercise_id', flat=True))
-    today_logs = list(WorkoutLog.objects.filter(user=request.user, date=today).select_related('exercise'))
+    done_ids = set(
+        WorkoutLog.objects
+        .filter(user=request.user, date=today)
+        .values_list('exercise_id', flat=True)
+    )
+
+    today_logs = list(
+        WorkoutLog.objects
+        .filter(user=request.user, date=today)
+        .select_related('exercise')
+    )
+
     total_reps = sum(l.reps_per_set * l.sets for l in today_logs)
     total_sets = sum(l.sets for l in today_logs)
-    streak     = _streak(request.user)
-    chart_labels, chart_data = _weekly_chart(request.user)
+    streak = _streak(request.user)
 
+    chart_labels, chart_data = _weekly_chart(request.user)
     workout_minutes = _calc_workout_duration(today_logs)
 
     workout_start_time = None
     if today_logs:
-        times = [l.logged_at for l in today_logs if hasattr(l, 'logged_at') and l.logged_at]
+        times = [
+            l.logged_at for l in today_logs
+            if hasattr(l, 'logged_at') and l.logged_at
+        ]
         if times:
             earliest = min(times)
             workout_start_time = timezone.localtime(earliest).strftime('%I:%M %p')
@@ -98,9 +120,9 @@ def dashboard(request):
 
     completed_count = len(done_ids)
     total_exercises = exercises.count()
-    progress_pct    = int(completed_count / total_exercises * 100) if total_exercises else 0
+    progress_pct = int(completed_count / total_exercises * 100) if total_exercises else 0
 
-    # ── Workout calendar dates — MUST be built before the context dict ──
+    # ── Workout calendar dates ──
     try:
         raw_dates = (
             WorkoutLog.objects
@@ -108,32 +130,54 @@ def dashboard(request):
             .values_list('logged_at__date', 'date')
             .distinct()
         )
+
         date_set = set()
         for logged_at_date, workout_date in raw_dates:
             d = logged_at_date or workout_date
             if d is not None:
                 date_set.add(d.strftime('%Y-%m-%d'))
+
         workout_dates_json = json.dumps(sorted(date_set))
+
     except Exception:
         workout_dates_json = json.dumps([])
-    # ───────────────────────────────────────────────────────────────────
 
+    # ── Workout Schedule Section (MOVED OUTSIDE ctx DICT) ──
+    WS_DAYS = [
+        ('mon', 'Monday'),
+        ('tue', 'Tuesday'),
+        ('wed', 'Wednesday'),
+        ('thu', 'Thursday'),
+        ('fri', 'Friday'),
+        ('weekend', 'Weekend'),
+        ('gym', 'Gym Day'),
+    ]
+
+    sched_qs = WorkoutSchedule.objects.filter(user=request.user)
+    ws_exercises = {
+        day: list(sched_qs.filter(day=day))
+        for day, _ in WS_DAYS
+    }
+
+    # ── Context dictionary (clean & correct now) ──
     ctx = {
-        'today':              today,
-        'exercises':          exercise_list,
-        'completed_count':    completed_count,
-        'total_exercises':    total_exercises,
-        'progress_pct':       progress_pct,
-        'total_reps':         total_reps,
-        'total_sets':         total_sets,
-        'workout_minutes':    workout_minutes,
+        'today': today,
+        'exercises': exercise_list,
+        'completed_count': completed_count,
+        'total_exercises': total_exercises,
+        'progress_pct': progress_pct,
+        'total_reps': total_reps,
+        'total_sets': total_sets,
+        'workout_minutes': workout_minutes,
         'workout_start_time': workout_start_time,
-        'streak':             streak,
-        'workout_name':       WORKOUT_NAMES.get(today.weekday(), 'Full Body'),
-        'quote':              random.choice(QUOTES),
-        'chart_labels':       json.dumps(chart_labels),
-        'chart_data':         json.dumps(chart_data),
-        'workout_dates':      workout_dates_json,
+        'streak': streak,
+        'workout_name': WORKOUT_NAMES.get(today.weekday(), 'Full Body'),
+        'quote': random.choice(QUOTES),
+        'chart_labels': json.dumps(chart_labels),
+        'chart_data': json.dumps(chart_data),
+        'workout_dates': workout_dates_json,
+        'ws_days': WS_DAYS,
+        'ws_exercises': ws_exercises,
     }
 
     return render(request, 'fitness/dashboard.html', ctx)
@@ -142,26 +186,33 @@ def dashboard(request):
 @login_required
 @require_POST
 def log_exercise(request):
-    exercise_id  = request.POST.get('exercise_id')
+    exercise_id = request.POST.get('exercise_id')
     reps_per_set = int(request.POST.get('reps', 10))
-    sets         = int(request.POST.get('sets', 3))
-    exercise     = get_object_or_404(Exercise, id=exercise_id)
+    sets = int(request.POST.get('sets', 3))
+    exercise = get_object_or_404(Exercise, id=exercise_id)
 
     log, created = WorkoutLog.objects.get_or_create(
-        user=request.user, exercise=exercise, date=date.today(),
+        user=request.user,
+        exercise=exercise,
+        date=date.today(),
         defaults={
             'reps_per_set': reps_per_set,
-            'sets':         sets,
-            'completed':    True,
-            'logged_at':    timezone.now(),
+            'sets': sets,
+            'completed': True,
+            'logged_at': timezone.now(),
         },
     )
+
     if not created:
         log.reps_per_set = reps_per_set
         log.sets = sets
         log.save()
 
-    return render(request, 'fitness/partials/exercise_logged.html', {'exercise': exercise, 'log': log})
+    return render(
+        request,
+        'fitness/partials/exercise_logged.html',
+        {'exercise': exercise, 'log': log}
+    )
 
 
 @login_required
@@ -172,11 +223,11 @@ def add_exercise_form(request):
 @login_required
 @require_POST
 def add_exercise(request):
-    name         = request.POST.get('name', '').strip()
-    category     = request.POST.get('category', 'Core')
+    name = request.POST.get('name', '').strip()
+    category = request.POST.get('category', 'Core')
     default_reps = int(request.POST.get('default_reps', 10))
-    sets         = int(request.POST.get('sets', 3))
-    description  = request.POST.get('description', '').strip()
+    sets = int(request.POST.get('sets', 3))
+    description = request.POST.get('description', '').strip()
 
     if name:
         Exercise.objects.create(
@@ -188,4 +239,40 @@ def add_exercise(request):
             created_by=request.user,
         )
 
-    return render(request, 'fitness/partials/add_exercise_success.html', {'name': name})
+    return render(
+        request,
+        'fitness/partials/add_exercise_success.html',
+        {'name': name}
+    )
+
+@login_required
+@require_POST
+def add_schedule_exercise(request):
+    """Add an exercise to the weekly workout schedule."""
+    day = request.POST.get('day', 'mon')
+    name = request.POST.get('name', '').strip()
+    if not name:
+        return redirect('/fitness/')
+
+    sets_val = request.POST.get('sets', '').strip()
+    reps_val = request.POST.get('reps', '').strip()
+
+    WorkoutSchedule.objects.create(
+        user     = request.user,
+        day      = day,
+        name     = name,
+        icon     = request.POST.get('icon', '💪'),
+        sets     = int(sets_val) if sets_val.isdigit() else None,
+        reps     = int(reps_val) if reps_val.isdigit() else None,
+        duration = request.POST.get('duration', '').strip(),
+        notes    = request.POST.get('notes', '').strip(),
+    )
+    return redirect('/fitness/')
+
+
+@login_required
+@require_POST
+def delete_schedule_exercise(request, pk):
+    """Remove an exercise from the weekly workout schedule."""
+    WorkoutSchedule.objects.filter(pk=pk, user=request.user).delete()
+    return redirect('/fitness/')

@@ -41,3 +41,31 @@ class WorkoutLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} — {self.exercise.name} ({self.date})"
+    
+class WorkoutSchedule(models.Model):
+    DAY_CHOICES = [
+        ('mon',     'Monday'),
+        ('tue',     'Tuesday'),
+        ('wed',     'Wednesday'),
+        ('thu',     'Thursday'),
+        ('fri',     'Friday'),
+        ('weekend', 'Weekend'),
+        ('gym',     'Gym Day'),
+    ]
+
+    user     = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                                 related_name='workout_schedule')
+    day      = models.CharField(max_length=10, choices=DAY_CHOICES)
+    name     = models.CharField(max_length=200)
+    icon     = models.CharField(max_length=10, default='💪')
+    sets     = models.PositiveSmallIntegerField(null=True, blank=True)
+    reps     = models.PositiveSmallIntegerField(null=True, blank=True)
+    duration = models.CharField(max_length=50, blank=True)
+    notes    = models.CharField(max_length=300, blank=True)
+    order    = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ['day', 'order', 'id']
+
+    def __str__(self):
+        return f"{self.get_day_display()} — {self.name}"
