@@ -87,3 +87,26 @@ class MealPlan(models.Model):
 
     def __str__(self):
         return f"{self.user.username} — {self.date} {self.meal_type}: {self.name}"
+
+class MealSuggestion(models.Model):
+    MEAL_TYPE_CHOICES = [
+        ('breakfast', 'Breakfast'),
+        ('snack',     'Snack'),
+        ('lunch',     'Lunch'),
+        ('dinner',    'Dinner'),
+    ]
+    user      = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='meal_suggestions')
+    meal_type = models.CharField(max_length=20, choices=MEAL_TYPE_CHOICES)
+    name      = models.CharField(max_length=200)
+    calories  = models.PositiveIntegerField(null=True, blank=True)
+    protein   = models.PositiveIntegerField(null=True, blank=True)
+    carbs     = models.PositiveIntegerField(null=True, blank=True)
+    fat       = models.PositiveIntegerField(null=True, blank=True)
+    notes     = models.CharField(max_length=300, blank=True)
+    order     = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ['meal_type', 'order', 'id']
+
+    def __str__(self):
+        return f"{self.get_meal_type_display()} — {self.name}"

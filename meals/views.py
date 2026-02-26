@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 
-from .models import MealEntry, MealPlan, NutritionGoal, RecipeIdea
+from .models import MealEntry, MealPlan, MealSuggestion, NutritionGoal, RecipeIdea
 
 MEAL_ORDER = ['breakfast', 'lunch', 'snack', 'dinner']
 
@@ -240,6 +240,8 @@ def dashboard(request):
         plan_grouped[mt] = [p for p in meal_plans if p.meal_type == mt]
     plan_total_cal = sum(p.calories for p in meal_plans)
 
+    suggestions_qs = MealSuggestion.objects.filter(user=request.user)
+
     return render(request, 'meals/dashboard.html', {
         'today':       today,
         'view_date':   view_date,
@@ -259,6 +261,13 @@ def dashboard(request):
         'meal_plans':       meal_plans,
         'plan_grouped':     plan_grouped,
         'plan_total_cal':   plan_total_cal,
+        'suggestions_qs': suggestions_qs,
+        'suggestions': {
+            'breakfast': list(suggestions_qs.filter(meal_type='breakfast')),
+            'snack':     list(suggestions_qs.filter(meal_type='snack')),
+            'lunch':     list(suggestions_qs.filter(meal_type='lunch')),
+            'dinner':    list(suggestions_qs.filter(meal_type='dinner')),
+        }
     })
 
 
@@ -461,3 +470,29 @@ def log_from_plan(request, plan_id):
     plan.save()
 
     return redirect(f'/meals/?date={plan.date}')
+
+@login_required
+@require_POST
+def add_suggestion(request):
+    """Save a new meal suggestion to the reference card."""
+    data = {
+        'user':      request.user,
+        'meal_type': request.POST.get('meal_type', 'breakfast'),
+        'name':      request.POST.get('name', '').strip(),
+        'notes':     request.POST.get('notes', '').strip(),
+    }
+    for field in ('calories', 'protein', 'carbs', 'fat'):
+        val = request.POST.get(field, '').strip()
+        data[field] = int(val) if val.isdigit() else None
+
+    if data['name']:
+        MealSuggestion.objects.create(**data)
+    return redirect('/meals/')
+
+
+@login_required
+@require_POST
+def delete_suggestion(request, pk):
+    """Remove a suggestion from the reference card."""
+    MealSuggestion.objects.filter(pk=pk, user=request.user).delete()
+    return redirect('/meals/')

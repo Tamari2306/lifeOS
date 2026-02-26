@@ -216,83 +216,264 @@
 </div>
 
 
-<!-- MEAL PLAN FOR TODAY -->
+<!-- ══ MEAL SUGGESTIONS REFERENCE ════════════════════════════════════════════ -->
+<style>
+  /* Suggestion card styles */
+  .sug-section { margin-bottom:20px; }
+  .sug-section:last-child { margin-bottom:0; }
+  .sug-meal-hdr { display:flex; align-items:center; justify-content:space-between;
+                  margin-bottom:10px; padding-bottom:8px;
+                  border-bottom:1px solid rgba(255,255,255,.06); }
+  .sug-meal-name { display:flex; align-items:center; gap:8px; }
+  .sug-meal-ico  { font-size:20px; }
+  .sug-meal-lbl  { font-family:'Bebas Neue','Syne',sans-serif; font-size:18px;
+                   font-weight:400; color:#fff; letter-spacing:.05em; }
+  .sug-add-btn   { background:rgba(232,25,44,.08); border:1px solid rgba(232,25,44,.2);
+                   border-radius:8px; padding:4px 10px; font-size:11px; font-weight:700;
+                   color:var(--red); cursor:pointer; transition:all .2s; }
+  .sug-add-btn:hover { background:rgba(232,25,44,.18); }
+
+  .sug-card { display:flex; align-items:center; gap:10px; padding:10px 12px;
+              background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+              border-radius:12px; margin-bottom:8px; }
+  .sug-card:last-of-type { margin-bottom:0; }
+  .sug-body  { flex:1; min-width:0; }
+  .sug-name  { font-size:13px; color:#fff; font-weight:600; line-height:1.3; }
+  .sug-meta  { font-size:11px; color:var(--muted); margin-top:3px; }
+  .sug-kcal  { font-family:'Bebas Neue','Syne',sans-serif; font-size:16px; font-weight:400;
+               color:var(--red); white-space:nowrap; flex-shrink:0; letter-spacing:.03em; }
+  .btn-sug-del { background:rgba(232,25,44,.1); border:1px solid rgba(232,25,44,.18);
+                 border-radius:8px; padding:4px 9px; font-size:11px; font-weight:700;
+                 color:var(--red); cursor:pointer; flex-shrink:0; }
+
+  .sug-add-form { display:none; margin-top:10px; padding:14px;
+                  background:rgba(255,255,255,.03); border:1px solid var(--rim);
+                  border-radius:12px; }
+  .sug-empty { font-size:12px; color:var(--muted); padding:6px 0 10px;
+               font-style:italic; }
+
+  /* Clickable suggestion card */
+  .sug-card { cursor:pointer; transition:border-color .18s, background .18s; }
+  .sug-card:hover { border-color:rgba(232,25,44,.4); background:rgba(232,25,44,.07); }
+  .sug-card:hover .sug-name { color:var(--red); }
+  .sug-tap-hint { font-size:10px; color:var(--muted); margin-top:3px; }
+
+  /* Suggestion dropdown in logger */
+  .sug-picker { position:relative; margin-bottom:12px; }
+  .sug-picker-label { font-size:10px; color:var(--muted); font-weight:600;
+                      letter-spacing:.06em; text-transform:uppercase;
+                      display:block; margin-bottom:6px; }
+  .sug-select { width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(232,25,44,.3);
+                border-radius:12px; padding:11px 14px; color:#fff;
+                font-size:13px; outline:none; appearance:none; -webkit-appearance:none;
+                cursor:pointer; }
+  .sug-select:focus { border-color:var(--red); }
+  .sug-select option { background:#111; color:#fff; }
+  .sug-select option[value=""] { color:#606060; }
+
+  /* Flash animation when logger is filled from suggestion */
+  @keyframes loggerFlash { 0%{box-shadow:0 0 0 0 rgba(232,25,44,.5)} 70%{box-shadow:0 0 0 12px rgba(232,25,44,0)} 100%{box-shadow:none} }
+  .logger-flash { animation:loggerFlash .6s ease; }
+</style>
+
 <div class="gc a3">
   <div class="gcp">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <span class="sec-lbl" style="margin-bottom:0">📅 Today's Meal Plan</span>
-      {% if plan_total_cal %}
-      <span style="font-family:'Bebas Neue','Syne',sans-serif;font-size:15px;font-weight:400;color:var(--violet);letter-spacing:.03em">{{ plan_total_cal }} kcal planned</span>
-      {% endif %}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <span class="sec-lbl" style="margin-bottom:0">🍽 My Meal Guide</span>
+      <span style="font-size:11px;color:var(--muted)">your daily reference</span>
     </div>
 
-    {% for mt in MEAL_ORDER %}
-    {% with group=plan_grouped|default_if_none:'' %}
-    {% with plans=plan_grouped|default:'' %}
-
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;margin-top:{% if not forloop.first %}14px{% else %}0{% endif %}">
-      <span style="font-size:18px">
-        {% if mt == 'breakfast' %}🍳{% elif mt == 'lunch' %}🥗{% elif mt == 'snack' %}🍎{% else %}🍛{% endif %}
-      </span>
-      <span style="font-family:'Bebas Neue','Syne',sans-serif;font-size:16px;font-weight:400;color:#fff;letter-spacing:.04em">{{ mt|title }}</span>
-    </div>
-
-    {% for plan in meal_plans %}{% if plan.meal_type == mt %}
-    <div class="plan-card {% if plan.is_logged %}logged{% endif %}">
-      <div class="plan-card-body">
-        <div class="plan-name">
-          {% if plan.is_logged %}<span style="color:var(--green)">✓</span> {% endif %}
-          {{ plan.name }}
+    <!-- BREAKFAST -->
+    <div class="sug-section">
+      <div class="sug-meal-hdr">
+        <div class="sug-meal-name">
+          <span class="sug-meal-ico">🍳</span>
+          <span class="sug-meal-lbl">Breakfast</span>
         </div>
-        <div class="plan-macros">
-          {% if plan.calories %}{{ plan.calories }} kcal{% endif %}
-          {% if plan.protein %} · {{ plan.protein }}g protein{% endif %}
-          {% if plan.carbs %} · {{ plan.carbs }}g carbs{% endif %}
-          {% if plan.notes %} · {{ plan.notes }}{% endif %}
-        </div>
+        <button class="sug-add-btn" type="button" onclick="tog('sug-form-breakfast')">+ Add</button>
       </div>
-      <div class="plan-actions">
-        {% if not plan.is_logged %}
-        <form method="POST" action="/meals/plan/log/{{ plan.id }}/" style="display:contents">
-          {% csrf_token %}
-          <button type="submit" class="btn-log-plan">✓ Ate it</button>
-        </form>
-        {% endif %}
-        <form method="POST" action="/meals/plan/delete/{{ plan.id }}/" style="display:contents">
-          {% csrf_token %}
-          <button type="submit" class="btn-del-plan">✕</button>
+      {% for s in suggestions.breakfast %}
+      <div class="sug-card" onclick="fillFromSuggestion('breakfast','{{ s.name|escapejs }}',{{ s.calories|default:0 }},{{ s.protein|default:0 }},{{ s.carbs|default:0 }},{{ s.fat|default:0 }})" title="Click to add to logger">
+        <div class="sug-body">
+          <div class="sug-name">{{ s.name }}</div>
+          <div class="sug-meta">
+            {% if s.protein %}{{ s.protein }}g protein{% endif %}
+            {% if s.carbs %} · {{ s.carbs }}g carbs{% endif %}
+            {% if s.fat %} · {{ s.fat }}g fat{% endif %}
+            {% if s.notes %} · {{ s.notes }}{% endif %}
+          </div>
+          <div class="sug-tap-hint">tap to add to logger</div>
+        </div>
+        {% if s.calories %}<div class="sug-kcal">{{ s.calories }}<span style="font-size:10px;font-family:sans-serif;letter-spacing:0"> kcal</span></div>{% endif %}
+        <form method="POST" action="/meals/suggestions/delete/{{ s.id }}/" style="display:contents" onclick="event.stopPropagation()">
+          {% csrf_token %}<button type="submit" class="btn-sug-del">✕</button>
         </form>
       </div>
-    </div>
-    {% endif %}{% endfor %}
-
-    <button class="plan-toggle-btn" type="button" onclick="tog('plan-form-{{ mt }}')">
-      ＋ Plan {{ mt|title }}
-    </button>
-    <div id="plan-form-{{ mt }}" style="display:none;margin-top:10px;padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--rim);border-radius:12px">
-      <form method="POST" action="/meals/plan/add/">
-        {% csrf_token %}
-        <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
-        <input type="hidden" name="meal_type" value="{{ mt }}">
-        <div class="fg">
-          <label class="field-lbl">What will you eat?</label>
-          <input class="fi" type="text" name="name"
-                 placeholder="e.g. 2 boiled eggs with toast..." required
-                 style="border-color:rgba(129,140,248,.3)">
-        </div>
-        <p style="font-size:11px;color:var(--muted);margin-bottom:8px">✨ Macros estimated automatically — or enter manually:</p>
-        <div class="form-4">
-          <div><label class="field-lbl">kcal</label><input class="fi" type="number" name="calories" placeholder="auto" min="0" style="font-size:13px;padding:9px 10px"></div>
-          <div><label class="field-lbl">Protein</label><input class="fi" type="number" name="protein" placeholder="auto" min="0" style="font-size:13px;padding:9px 10px"></div>
-          <div><label class="field-lbl">Carbs</label><input class="fi" type="number" name="carbs" placeholder="auto" min="0" style="font-size:13px;padding:9px 10px"></div>
-          <div><label class="field-lbl">Fat</label><input class="fi" type="number" name="fat" placeholder="auto" min="0" style="font-size:13px;padding:9px 10px"></div>
-        </div>
-        <button type="submit" class="btn-or" style="background:var(--violet)">📅 Add to Plan</button>
-      </form>
+      {% empty %}
+      <p class="sug-empty">No breakfast ideas yet — add some above.</p>
+      {% endfor %}
+      <div id="sug-form-breakfast" class="sug-add-form">
+        <form method="POST" action="/meals/suggestions/add/">
+          {% csrf_token %}
+          <input type="hidden" name="meal_type" value="breakfast">
+          <div class="fg"><label class="field-lbl">Meal name</label>
+            <input class="fi" type="text" name="name" placeholder="e.g. Oats with banana" required></div>
+          <div class="form-4">
+            <div><label class="field-lbl">kcal</label><input class="fi" type="number" name="calories" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+            <div><label class="field-lbl">Protein g</label><input class="fi" type="number" name="protein" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+            <div><label class="field-lbl">Carbs g</label><input class="fi" type="number" name="carbs" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+            <div><label class="field-lbl">Fat g</label><input class="fi" type="number" name="fat" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+          </div>
+          <div class="fg"><label class="field-lbl">Notes (optional)</label>
+            <input class="fi" type="text" name="notes" placeholder="e.g. with black coffee"></div>
+          <button type="submit" class="btn-or">Save Suggestion</button>
+        </form>
+      </div>
     </div>
 
-    {% endwith %}{% endwith %}
-    {% endfor %}
+    <!-- SNACK -->
+    <div class="sug-section">
+      <div class="sug-meal-hdr">
+        <div class="sug-meal-name">
+          <span class="sug-meal-ico">🍎</span>
+          <span class="sug-meal-lbl">Snack</span>
+        </div>
+        <button class="sug-add-btn" type="button" onclick="tog('sug-form-snack')">+ Add</button>
+      </div>
+      {% for s in suggestions.snack %}
+      <div class="sug-card" onclick="fillFromSuggestion('snack','{{ s.name|escapejs }}',{{ s.calories|default:0 }},{{ s.protein|default:0 }},{{ s.carbs|default:0 }},{{ s.fat|default:0 }})" title="Click to add to logger">
+        <div class="sug-body">
+          <div class="sug-name">{{ s.name }}</div>
+          <div class="sug-meta">
+            {% if s.protein %}{{ s.protein }}g protein{% endif %}
+            {% if s.carbs %} · {{ s.carbs }}g carbs{% endif %}
+            {% if s.fat %} · {{ s.fat }}g fat{% endif %}
+            {% if s.notes %} · {{ s.notes }}{% endif %}
+          </div>
+          <div class="sug-tap-hint">tap to add to logger</div>
+        </div>
+        {% if s.calories %}<div class="sug-kcal">{{ s.calories }}<span style="font-size:10px;font-family:sans-serif;letter-spacing:0"> kcal</span></div>{% endif %}
+        <form method="POST" action="/meals/suggestions/delete/{{ s.id }}/" style="display:contents" onclick="event.stopPropagation()">
+          {% csrf_token %}<button type="submit" class="btn-sug-del">✕</button>
+        </form>
+      </div>
+      {% empty %}
+      <p class="sug-empty">No snack ideas yet — add some above.</p>
+      {% endfor %}
+      <div id="sug-form-snack" class="sug-add-form">
+        <form method="POST" action="/meals/suggestions/add/">
+          {% csrf_token %}
+          <input type="hidden" name="meal_type" value="snack">
+          <div class="fg"><label class="field-lbl">Meal name</label>
+            <input class="fi" type="text" name="name" placeholder="e.g. Greek yogurt" required></div>
+          <div class="form-4">
+            <div><label class="field-lbl">kcal</label><input class="fi" type="number" name="calories" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+            <div><label class="field-lbl">Protein g</label><input class="fi" type="number" name="protein" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+            <div><label class="field-lbl">Carbs g</label><input class="fi" type="number" name="carbs" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+            <div><label class="field-lbl">Fat g</label><input class="fi" type="number" name="fat" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+          </div>
+          <div class="fg"><label class="field-lbl">Notes (optional)</label>
+            <input class="fi" type="text" name="notes" placeholder="e.g. with fruit"></div>
+          <button type="submit" class="btn-or">Save Suggestion</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- LUNCH -->
+    <div class="sug-section">
+      <div class="sug-meal-hdr">
+        <div class="sug-meal-name">
+          <span class="sug-meal-ico">🥗</span>
+          <span class="sug-meal-lbl">Lunch</span>
+        </div>
+        <button class="sug-add-btn" type="button" onclick="tog('sug-form-lunch')">+ Add</button>
+      </div>
+      {% for s in suggestions.lunch %}
+      <div class="sug-card" onclick="fillFromSuggestion('lunch','{{ s.name|escapejs }}',{{ s.calories|default:0 }},{{ s.protein|default:0 }},{{ s.carbs|default:0 }},{{ s.fat|default:0 }})" title="Click to add to logger">
+        <div class="sug-body">
+          <div class="sug-name">{{ s.name }}</div>
+          <div class="sug-meta">
+            {% if s.protein %}{{ s.protein }}g protein{% endif %}
+            {% if s.carbs %} · {{ s.carbs }}g carbs{% endif %}
+            {% if s.fat %} · {{ s.fat }}g fat{% endif %}
+            {% if s.notes %} · {{ s.notes }}{% endif %}
+          </div>
+          <div class="sug-tap-hint">tap to add to logger</div>
+        </div>
+        {% if s.calories %}<div class="sug-kcal">{{ s.calories }}<span style="font-size:10px;font-family:sans-serif;letter-spacing:0"> kcal</span></div>{% endif %}
+        <form method="POST" action="/meals/suggestions/delete/{{ s.id }}/" style="display:contents" onclick="event.stopPropagation()">
+          {% csrf_token %}<button type="submit" class="btn-sug-del">✕</button>
+        </form>
+      </div>
+      {% empty %}
+      <p class="sug-empty">No lunch ideas yet — add some above.</p>
+      {% endfor %}
+      <div id="sug-form-lunch" class="sug-add-form">
+        <form method="POST" action="/meals/suggestions/add/">
+          {% csrf_token %}
+          <input type="hidden" name="meal_type" value="lunch">
+          <div class="fg"><label class="field-lbl">Meal name</label>
+            <input class="fi" type="text" name="name" placeholder="e.g. Rice and chicken" required></div>
+          <div class="form-4">
+            <div><label class="field-lbl">kcal</label><input class="fi" type="number" name="calories" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+            <div><label class="field-lbl">Protein g</label><input class="fi" type="number" name="protein" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+            <div><label class="field-lbl">Carbs g</label><input class="fi" type="number" name="carbs" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+            <div><label class="field-lbl">Fat g</label><input class="fi" type="number" name="fat" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+          </div>
+          <div class="fg"><label class="field-lbl">Notes (optional)</label>
+            <input class="fi" type="text" name="notes" placeholder="e.g. light portion"></div>
+          <button type="submit" class="btn-or">Save Suggestion</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- DINNER -->
+    <div class="sug-section">
+      <div class="sug-meal-hdr">
+        <div class="sug-meal-name">
+          <span class="sug-meal-ico">🍛</span>
+          <span class="sug-meal-lbl">Dinner</span>
+        </div>
+        <button class="sug-add-btn" type="button" onclick="tog('sug-form-dinner')">+ Add</button>
+      </div>
+      {% for s in suggestions.dinner %}
+      <div class="sug-card" onclick="fillFromSuggestion('dinner','{{ s.name|escapejs }}',{{ s.calories|default:0 }},{{ s.protein|default:0 }},{{ s.carbs|default:0 }},{{ s.fat|default:0 }})" title="Click to add to logger">
+        <div class="sug-body">
+          <div class="sug-name">{{ s.name }}</div>
+          <div class="sug-meta">
+            {% if s.protein %}{{ s.protein }}g protein{% endif %}
+            {% if s.carbs %} · {{ s.carbs }}g carbs{% endif %}
+            {% if s.fat %} · {{ s.fat }}g fat{% endif %}
+            {% if s.notes %} · {{ s.notes }}{% endif %}
+          </div>
+          <div class="sug-tap-hint">tap to add to logger</div>
+        </div>
+        {% if s.calories %}<div class="sug-kcal">{{ s.calories }}<span style="font-size:10px;font-family:sans-serif;letter-spacing:0"> kcal</span></div>{% endif %}
+        <form method="POST" action="/meals/suggestions/delete/{{ s.id }}/" style="display:contents" onclick="event.stopPropagation()">
+          {% csrf_token %}<button type="submit" class="btn-sug-del">✕</button>
+        </form>
+      </div>
+      {% empty %}
+      <p class="sug-empty">No dinner ideas yet — add some above.</p>
+      {% endfor %}
+      <div id="sug-form-dinner" class="sug-add-form">
+        <form method="POST" action="/meals/suggestions/add/">
+          {% csrf_token %}
+          <input type="hidden" name="meal_type" value="dinner">
+          <div class="fg"><label class="field-lbl">Meal name</label>
+            <input class="fi" type="text" name="name" placeholder="e.g. Ugali and sukuma wiki" required></div>
+          <div class="form-4">
+            <div><label class="field-lbl">kcal</label><input class="fi" type="number" name="calories" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+            <div><label class="field-lbl">Protein g</label><input class="fi" type="number" name="protein" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+            <div><label class="field-lbl">Carbs g</label><input class="fi" type="number" name="carbs" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+            <div><label class="field-lbl">Fat g</label><input class="fi" type="number" name="fat" placeholder="0" min="0" style="font-size:13px;padding:9px 10px"></div>
+          </div>
+          <div class="fg"><label class="field-lbl">Notes (optional)</label>
+            <input class="fi" type="text" name="notes" placeholder="e.g. no oil"></div>
+          <button type="submit" class="btn-or">Save Suggestion</button>
+        </form>
+      </div>
+    </div>
 
   </div>
 </div>
@@ -308,6 +489,20 @@
       <button type="button" class="mtab" onclick="setMealType('lunch',this)">🥗 Lunch</button>
       <button type="button" class="mtab" onclick="setMealType('snack',this)">🍎 Snack</button>
       <button type="button" class="mtab" onclick="setMealType('dinner',this)">🍛 Dinner</button>
+    </div>
+
+    <!-- Suggestion quick-pick dropdown -->
+    <div class="sug-picker" id="sug-picker">
+      <label class="sug-picker-label">📋 Pick from my suggestions</label>
+      <select class="sug-select" id="sug-dropdown" onchange="fillFromDropdown(this)">
+        <option value="">— choose a saved meal —</option>
+      </select>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <div style="flex:1;height:1px;background:rgba(255,255,255,.07)"></div>
+      <span style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.06em">OR TYPE MANUALLY</span>
+      <div style="flex:1;height:1px;background:rgba(255,255,255,.07)"></div>
     </div>
 
     <div class="smart-box">
@@ -480,6 +675,14 @@
 
 {% block extra_scripts %}
 <script>
+  // All suggestions as JSON — injected from template
+  var allSuggestions = {
+    breakfast: [{% for s in suggestions.breakfast %}{"name":"{{ s.name|escapejs }}","cal":{{ s.calories|default:0 }},"protein":{{ s.protein|default:0 }},"carbs":{{ s.carbs|default:0 }},"fat":{{ s.fat|default:0 }},"type":"breakfast"}{% if not forloop.last %},{% endif %}{% endfor %}],
+    snack:     [{% for s in suggestions.snack %}{"name":"{{ s.name|escapejs }}","cal":{{ s.calories|default:0 }},"protein":{{ s.protein|default:0 }},"carbs":{{ s.carbs|default:0 }},"fat":{{ s.fat|default:0 }},"type":"snack"}{% if not forloop.last %},{% endif %}{% endfor %}],
+    lunch:     [{% for s in suggestions.lunch %}{"name":"{{ s.name|escapejs }}","cal":{{ s.calories|default:0 }},"protein":{{ s.protein|default:0 }},"carbs":{{ s.carbs|default:0 }},"fat":{{ s.fat|default:0 }},"type":"lunch"}{% if not forloop.last %},{% endif %}{% endfor %}],
+    dinner:    [{% for s in suggestions.dinner %}{"name":"{{ s.name|escapejs }}","cal":{{ s.calories|default:0 }},"protein":{{ s.protein|default:0 }},"carbs":{{ s.carbs|default:0 }},"fat":{{ s.fat|default:0 }},"type":"dinner"}{% if not forloop.last %},{% endif %}{% endfor %}]
+  };
+
   var currentEst = {};
 
   function setMealType(val, el) {
@@ -549,12 +752,6 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('meal-desc').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') { e.preventDefault(); estimateMeal(); }
-    });
-  });
-
   function logEstimated() {
     if (currentEst.kcal === undefined) return;
     document.getElementById('manual-fields').style.display = 'block';
@@ -570,5 +767,94 @@
     var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
     return v ? v[2] : null;
   }
+
+  // ── Fill logger from a clicked suggestion card ───────────────────────────
+  function fillFromSuggestion(mealType, name, cal, protein, carbs, fat) {
+    // Switch meal type tab
+    var tabMap = {'breakfast':'🍳 Breakfast','snack':'🍎 Snack','lunch':'🥗 Lunch','dinner':'🍛 Dinner'};
+    document.querySelectorAll('#meal-tabs .mtab').forEach(function(t) {
+      if (t.textContent.trim() === tabMap[mealType]) {
+        t.classList.add('on');
+        document.getElementById('meal-type-input').value = mealType;
+      } else {
+        t.classList.remove('on');
+      }
+    });
+
+    // Pre-fill manual form
+    document.getElementById('manual-fields').style.display = 'block';
+    document.getElementById('manual-toggle-btn').style.display = 'none';
+    document.getElementById('manual-name').value    = name;
+    document.getElementById('manual-cal').value     = cal || '';
+    document.getElementById('manual-protein').value = protein || '';
+    document.getElementById('manual-carbs').value   = carbs || '';
+    document.getElementById('manual-fat').value     = fat || '';
+
+    // Hide estimate panel, clear text input
+    document.getElementById('nutrition-preview').style.display = 'none';
+    document.getElementById('not-found-msg').style.display = 'none';
+    document.getElementById('meal-desc').value = name;
+
+    // Sync dropdown
+    syncDropdown(mealType, name);
+
+    // Flash logger and scroll to it
+    var logger = document.getElementById('log-form');
+    logger.classList.remove('logger-flash');
+    void logger.offsetWidth; // reflow
+    logger.classList.add('logger-flash');
+    document.querySelector('.gc.a4').scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  // ── Fill logger from the dropdown picker ────────────────────────────────
+  function fillFromDropdown(sel) {
+    var idx = parseInt(sel.value);
+    if (isNaN(idx)) return;
+    var currentType = document.getElementById('meal-type-input').value || 'breakfast';
+    var list = allSuggestions[currentType] || [];
+    var s = list[idx];
+    if (!s) return;
+    fillFromSuggestion(s.type, s.name, s.cal, s.protein, s.carbs, s.fat);
+  }
+
+  // ── Update dropdown options when meal type tab changes ──────────────────
+  var origSetMealType = setMealType;
+  setMealType = function(val, el) {
+    origSetMealType(val, el);
+    updateDropdown(val);
+  };
+
+  function updateDropdown(mealType) {
+    var sel = document.getElementById('sug-dropdown');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— choose a saved meal —</option>';
+    var list = allSuggestions[mealType] || [];
+    list.forEach(function(s, i) {
+      var opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = s.name + (s.cal ? '  ·  ' + s.cal + ' kcal' : '');
+      sel.appendChild(opt);
+    });
+    // Show/hide picker based on whether there are suggestions
+    document.getElementById('sug-picker').style.display = list.length ? 'block' : 'none';
+  }
+
+  function syncDropdown(mealType, name) {
+    var sel = document.getElementById('sug-dropdown');
+    if (!sel) return;
+    updateDropdown(mealType);
+    var list = allSuggestions[mealType] || [];
+    list.forEach(function(s, i) {
+      if (s.name === name) sel.value = i;
+    });
+  }
+
+  // Init dropdown on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    updateDropdown('breakfast');
+    document.getElementById('meal-desc').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); estimateMeal(); }
+    });
+  });
 </script>
 {% endblock %}
