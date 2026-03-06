@@ -776,31 +776,52 @@
    ═══════════════════════════════════════════════════════ */
 function playRinger() {
   try {
-    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var actx = new (window.AudioContext || window.webkitAudioContext)();
 
-    function beep(freq, start, duration, gain) {
-      var osc = ctx.createOscillator();
-      var vol = ctx.createGain();
-      osc.connect(vol);
-      vol.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      vol.gain.setValueAtTime(0, ctx.currentTime + start);
-      vol.gain.linearRampToValueAtTime(gain, ctx.currentTime + start + 0.02);
-      vol.gain.linearRampToValueAtTime(0, ctx.currentTime + start + duration - 0.02);
-      osc.start(ctx.currentTime + start);
-      osc.stop(ctx.currentTime + start + duration);
+    // One "ring" = a sharp high beep followed by a lower echo
+    function ring(startAt) {
+      function beep(freq, start, dur, gainVal, type) {
+        var osc = actx.createOscillator();
+        var vol = actx.createGain();
+        osc.connect(vol);
+        vol.connect(actx.destination);
+        osc.type = type || 'square';          // square = harsher, more audible
+        osc.frequency.value = freq;
+        vol.gain.setValueAtTime(0, actx.currentTime + start);
+        vol.gain.linearRampToValueAtTime(gainVal, actx.currentTime + start + 0.01);
+        vol.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + start + dur);
+        osc.start(actx.currentTime + start);
+        osc.stop(actx.currentTime + start + dur + 0.05);
+      }
+      // Each ring: strong hit + quick decay
+      beep(1046, startAt,        0.22, 1.0, 'square');   // C6 — loud attack
+      beep(1318, startAt + 0.05, 0.18, 0.8, 'sine');     // E6 — harmonic overtone
     }
 
-    // Three ascending beeps — like a gym timer
-    beep(880, 0.00, 0.18, 0.5);
-    beep(880, 0.22, 0.18, 0.5);
-    beep(1320, 0.44, 0.35, 0.6);
+    // Fire 3 rings, spaced 0.55s apart
+    ring(0.00);
+    ring(0.55);
+    ring(1.10);
 
-  } catch(e) {
-    // If audio API not available, fall back to toast only
-  }
+  } catch(e) { /* audio not available */ }
 }
+
+/* ═══════════════════════════════════════════════════════
+   SPEECH — announces e.g. "30 seconds done"
+   ═══════════════════════════════════════════════════════ */
+function speakRestDone(seconds) {
+  if (!window.speechSynthesis) return;
+  var label = seconds >= 60
+    ? (seconds / 60) + ' minute' + (seconds > 60 ? 's' : '')
+    : seconds + ' seconds';
+  var utt = new SpeechSynthesisUtterance(label + ' done. Let\'s get back to it!');
+  utt.rate   = 1.05;
+  utt.pitch  = 1.1;
+  utt.volume = 1.0;
+  window.speechSynthesis.cancel();   // clear any queued speech first
+  window.speechSynthesis.speak(utt);
+}
+
 
 
 /* ═══════════════════════════════════════════════════════
@@ -810,6 +831,7 @@ function wTimer() {
   return {
     secs: 0, isRunning: false, iv: null,
     rSecs: 0, restOn: false, restDone: false, rIv: null,
+    restTotal: 0,   // <-- track what duration was chosen
 
     get dispTime() {
       var m = String(Math.floor(this.secs / 60)).padStart(2,'0');
@@ -836,21 +858,26 @@ function wTimer() {
 
     doRest(s) {
       clearInterval(this.rIv);
-      this.rSecs = s; this.restOn = true; this.restDone = false;
+      this.rSecs = s;
+      this.restTotal = s;          // remember chosen duration
+      this.restOn = true;
+      this.restDone = false;
+
       this.rIv = setInterval(() => {
         if (this.rSecs <= 0) {
           clearInterval(this.rIv);
-          this.restOn = false;
+          this.restOn   = false;
           this.restDone = true;
-          this.rSecs = 0;
-          // 🔔 PLAY RINGER
+          this.rSecs    = 0;
+
+          // 🔔 Ring 3 times + speak
           playRinger();
-          showToast('Rest done! Back to it 💪');
-          // Reset done flag after 3s
-          setTimeout(() => { this.restDone = false; }, 3000);
+          speakRestDone(this.restTotal);
+          showToast('✅ ' + this.restTotal + 's rest done — Back to it! 💪');
+
+          setTimeout(() => { this.restDone = false; }, 4000);
         } else {
           this.rSecs--;
-          // Warn at 3 seconds remaining
           if (this.rSecs === 3) showToast('3 seconds left... 🔥');
         }
       }, 1000);
